@@ -1,0 +1,22 @@
+risk:
+  max_risk_per_trade: 0.02
+  stop_loss_pct: 0.015
+  take_profit_pct: 0.03
+
+portfolio:
+  target_sector_count: 5
+
+strategy:
+  mean_reversion:
+    lookback_days: 20
+    zscore_entry: 2.0
+    zscore_exit: 0.5
+  momentum:
+    rsi_period: 14
+    rsi_overbought: 70
+    rsi_oversold: 30
+    macd_fast: 12
+    macd_slow: 26
+    macd_signal: 9
+    sma_fast: 20
+    sma_slow: 50
