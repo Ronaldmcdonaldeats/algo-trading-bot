@@ -41,6 +41,18 @@ An intelligent Python-based algorithmic trading bot with real-time web dashboard
 - Multi-level profit taking
 - Time-based exits
 
+### ⚡ NASDAQ Large-Scale Trading
+- **Top 500 stocks** - Trade entire index segment
+- **Top 100 stocks** - Diversified mega-cap portfolio
+- **Optimized loading** - Fast symbol initialization
+- **Memory efficient** - Handles large universes
+
+**Quick example:**
+```bash
+python -m trading_bot paper --nasdaq-top-500 --period 6mo --interval 1h
+python -m trading_bot backtest --nasdaq-top-100 --period 1y
+```
+
 ---
 
 ## 🚀 Quick Start
@@ -57,6 +69,19 @@ All services start automatically:
 - Web dashboard on port 5000
 - PostgreSQL database on port 5432
 - Trading bot running in background
+
+### ⚡ Trading with Top 500 NASDAQ Stocks (Optimized for Speed)
+
+```bash
+# Backtest top 100 NASDAQ stocks (fast - ~2-5 min)
+docker-compose exec app python -m trading_bot backtest --nasdaq-top-100 --period 1y
+
+# Paper trade top 500 with symbol limit (optimized - ~10-20 min)
+docker-compose exec app python -m trading_bot paper --nasdaq-top-500 --max-symbols 100 --period 6mo
+
+# Full top 500 backtest (15-30 min)
+docker-compose exec app python -m trading_bot backtest --nasdaq-top-500 --period 1y --interval 1h
+```
 
 ### Option 2: Local Installation
 

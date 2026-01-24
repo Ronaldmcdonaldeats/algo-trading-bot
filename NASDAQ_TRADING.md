@@ -44,6 +44,85 @@ The top stocks in the list (by market cap) are:
 - ISRG, AEP, ABNB, MELI, SNPS, CHTR, PYPL, LRCX, KLAC, ASML
 - And 470-470 more stocks for the top 500/100 selection...
 
+## Performance Optimization
+
+### For Fast Backtesting
+
+**Use Top 100 instead of Top 500:**
+```bash
+# Faster (100 symbols - ~2-5 min)
+python -m trading_bot backtest --nasdaq-top-100 --period 1y
+
+# Slower (500 symbols - ~15-30 min)
+python -m trading_bot backtest --nasdaq-top-500 --period 1y
+```
+
+**Use hourly or daily interval (faster than minute data):**
+```bash
+# Fast - hourly data
+python -m trading_bot backtest --nasdaq-top-500 --period 3mo --interval 1h
+
+# Slow - minute data
+python -m trading_bot backtest --nasdaq-top-500 --period 3mo --interval 1m
+```
+
+**Limit symbols with --max-symbols:**
+```bash
+# Load 500 symbols but trade only top 50 (much faster)
+python -m trading_bot paper --nasdaq-top-500 --max-symbols 50 --period 6mo
+
+# Load 500 but trade top 100
+python -m trading_bot backtest --nasdaq-top-500 --max-symbols 100 --period 1y --interval 1h
+```
+
+**Enable memory mode for efficiency:**
+```bash
+# Faster memory footprint, slightly slower computation
+python -m trading_bot backtest --nasdaq-top-500 --period 1y --memory-mode
+```
+
+### Speed Comparison
+
+| Configuration | Symbols | Time | Memory |
+|--------------|---------|------|--------|
+| `--nasdaq-top-100` | 100 | ~2-5 min | ~500MB |
+| `--nasdaq-top-500 --max-symbols 50` | 50 | ~5-10 min | ~600MB |
+| `--nasdaq-top-500 --max-symbols 100` | 100 | ~8-15 min | ~800MB |
+| `--nasdaq-top-500` | 500 | ~20-40 min | ~2GB |
+| `--nasdaq-top-500 --memory-mode` | 500 | ~25-45 min | ~1.2GB |
+
+### Recommended Settings by Use Case
+
+**Quick Backtest (5-10 min):**
+```bash
+python -m trading_bot backtest --nasdaq-top-100 --period 6mo --interval 1h
+```
+
+**Medium Backtest (15-20 min):**
+```bash
+python -m trading_bot backtest --nasdaq-top-500 --max-symbols 100 --period 1y --interval 1h
+```
+
+**Full Backtest (30+ min):**
+```bash
+python -m trading_bot backtest --nasdaq-top-500 --period 1y --interval 1h
+```
+
+**Live Paper Trading (Real-time):**
+```bash
+# Trades efficiently even with 500 symbols - no wait time
+python -m trading_bot paper --nasdaq-top-500 --period 6mo --interval 1h
+```
+
+**Docker with Speed Optimization:**
+```bash
+# Fast backtest in Docker
+docker-compose exec app python -m trading_bot backtest --nasdaq-top-100 --period 1y
+
+# Optimized paper trading
+docker-compose exec app python -m trading_bot paper --nasdaq-top-500 --max-symbols 100
+```
+
 ## How It Works
 
 1. When you use `--nasdaq-top-500` or `--nasdaq-top-100`, the CLI automatically loads the corresponding symbols
