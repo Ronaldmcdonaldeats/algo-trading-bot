@@ -70,7 +70,26 @@ All services start automatically:
 - PostgreSQL database on port 5432
 - Trading bot running in background
 
-### ⚡ Trading with Top 500 NASDAQ Stocks (Optimized for Speed)
+### ⚡ Smart Automatic Stock Selection (FASTEST)
+
+Auto-scores all 500 NASDAQ stocks and trades only the best performers:
+
+```bash
+# Select top 50 best stocks (1-2 min backtest)
+docker-compose exec app python -m trading_bot backtest --auto-select --period 3mo --interval 1h
+
+# Score and trade all 500 stocks (2-5 min)
+docker-compose exec app python -m trading_bot paper --smart-rank --period 6mo --interval 1h
+
+# Use past winners - gets faster each run
+docker-compose exec app python -m trading_bot backtest --use-performance-history --select-top 50
+```
+
+**Features:** Parallel batch downloading • Intelligent scoring (4 metrics) • Auto-selection • Learning from past performance • 3-10x faster
+
+📖 Details: [SMART_SELECTION.md](SMART_SELECTION.md)
+
+### ⚡ Trading with Top 500 NASDAQ Stocks
 
 ```bash
 # Backtest top 100 NASDAQ stocks (fast - ~2-5 min)
