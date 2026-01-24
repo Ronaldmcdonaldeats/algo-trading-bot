@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 
 from rich.align import Align
 from rich.console import Group
@@ -12,6 +13,39 @@ from rich.text import Text
 from trading_bot.engine.paper import PaperEngineUpdate
 
 _SPARK_CHARS = "▁▂▃▄▅▆▇█"
+
+
+class ActivityLog:
+    """Track recent activity for dashboard display"""
+    def __init__(self, max_size: int = 20):
+        self.activities: list[dict] = []
+        self.max_size = max_size
+        self.current_action = "Initializing..."
+        self.current_symbol = ""
+        self.current_detail = ""
+
+    def add(self, action: str, symbol: str = "", detail: str = ""):
+        """Add activity to log"""
+        self.current_action = action
+        self.current_symbol = symbol
+        self.current_detail = detail
+        
+        self.activities.append({
+            "timestamp": datetime.now().isoformat(timespec='seconds'),
+            "action": action,
+            "symbol": symbol,
+            "detail": detail,
+        })
+        # Keep only recent activities
+        if len(self.activities) > self.max_size:
+            self.activities = self.activities[-self.max_size:]
+
+    def get_status_text(self) -> str:
+        """Get formatted status text"""
+        if self.current_symbol:
+            return f"📊 {self.current_action} | {self.current_symbol} | {self.current_detail}"
+        else:
+            return f"📊 {self.current_action} | {self.current_detail}"
 
 
 def _sparkline(values: list[float], *, width: int = 40) -> str:
@@ -36,10 +70,54 @@ def _sparkline(values: list[float], *, width: int = 40) -> str:
     return "".join(out)
 
 
+def _get_action_status(update: PaperEngineUpdate, state: DashboardState) -> str:
+    """Generate human-readable status of what's happening right now"""
+    pf = update.portfolio
+    
+    # Check what happened this iteration
+    if update.fills:
+        buy_count = sum(1 for f in update.fills if f.side == "BUY")
+        sell_count = sum(1 for f in update.fills if f.side == "SELL")
+        
+        if buy_count > 0 and sell_count == 0:
+            symbols = ", ".join([f.symbol for f in update.fills if f.side == "BUY"][:3])
+            return f"🟢 BUYING {buy_count} position(s): {symbols}"
+        elif sell_count > 0 and buy_count == 0:
+            symbols = ", ".join([f.symbol for f in update.fills if f.side == "SELL"][:3])
+            return f"🔴 SELLING {sell_count} position(s): {symbols}"
+        elif buy_count > 0 and sell_count > 0:
+            return f"🔄 REBALANCING | Bought {buy_count}, Sold {sell_count}"
+        else:
+            return f"✓ Executed {len(update.fills)} fills"
+    
+    if update.rejections:
+        reasons = ", ".join([r.reason for r in update.rejections[:2]])
+        return f"⚠️  {len(update.rejections)} order(s) rejected: {reasons[:50]}"
+    
+    # Check for any signals but no fills (holding/waiting)
+    if update.signals:
+        positive_signals = sum(1 for s in update.signals.values() if s == 1)
+        negative_signals = sum(1 for s in update.signals.values() if s == -1)
+        
+        if positive_signals > 0 and len(pf.positions) > 0:
+            return f"📊 ANALYZING {len(update.signals)} stocks | Holding {len(pf.positions)} positions"
+        elif positive_signals > 0:
+            return f"📊 ANALYZING {len(update.signals)} stocks | Found {positive_signals} buy signals"
+        else:
+            return f"📊 ANALYZING {len(update.signals)} stocks | Waiting for signals"
+    
+    return "🔄 Processing data..."
+
+
 @dataclass
 class DashboardState:
     equity_history: list[float]
     max_history: int = 1440  # Keep max 1440 points (prevents unbounded memory growth)
+    activity_log: ActivityLog = None
+    
+    def __post_init__(self):
+        if self.activity_log is None:
+            self.activity_log = ActivityLog()
 
 
 def render_paper_dashboard(update: PaperEngineUpdate, state: DashboardState) -> Layout:
@@ -55,9 +133,19 @@ def render_paper_dashboard(update: PaperEngineUpdate, state: DashboardState) -> 
     if len(state.equity_history) > state.max_history:
         state.equity_history = state.equity_history[-state.max_history:]
 
+    # Determine action status based on what happened this iteration
+    action_text = _get_action_status(update, state)
+    
     header = Text(
         f"Paper Trading  |  iter={update.iteration}  |  {update.ts.isoformat(timespec='seconds')}Z",
         style="bold",
+    )
+    
+    # Current action status panel
+    status_panel = Panel(
+        Text(action_text, style="cyan bold"),
+        title="Current Activity",
+        border_style="cyan",
     )
 
     summary = Table.grid(padding=(0, 1))
@@ -104,17 +192,25 @@ def render_paper_dashboard(update: PaperEngineUpdate, state: DashboardState) -> 
     fills.add_column("Qty", justify="right")
     fills.add_column("Price", justify="right")
     fills.add_column("Fee", justify="right")
-    fills.add_column("Note")
+    fills.add_column("Action", justify="left")
 
     if update.fills:
         for f in update.fills[-10:]:
+            # Determine action description based on side
+            if f.side == "BUY":
+                action = "🟢 BOUGHT"
+            elif f.side == "SELL":
+                action = "🔴 SOLD"
+            else:
+                action = f.side
+            
             fills.add_row(
                 f.symbol,
                 f.side,
                 str(f.qty),
                 f"{f.price:,.2f}",
                 f"{f.fee:,.2f}",
-                f.note,
+                f"{action} - {f.note}",
             )
     else:
         fills.add_row("-", "-", "-", "-", "-", "-")
@@ -144,6 +240,7 @@ def render_paper_dashboard(update: PaperEngineUpdate, state: DashboardState) -> 
     layout = Layout()
     layout.split_column(
         Layout(Panel(header), size=3),
+        Layout(status_panel, size=4),
         Layout(name="body"),
     )
 
