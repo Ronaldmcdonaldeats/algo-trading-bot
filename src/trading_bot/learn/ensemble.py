@@ -35,11 +35,14 @@ class ExponentialWeightsEnsemble:
     Safety/explainability:
     - weights are bounded and normalized
     - decisions include full vote breakdown + current weights
+    - eta decays over time for learning stability
     """
 
     weights: Dict[str, float]
     eta: float = 0.3
     min_weight: float = 1e-6
+    update_count: int = 0  # Track updates for decay
+    _normalized_cache: Dict[str, float] | None = None  # Cache normalized weights
 
     @classmethod
     def uniform(cls, names: list[str], *, eta: float = 0.3) -> "ExponentialWeightsEnsemble":
@@ -47,21 +50,35 @@ class ExponentialWeightsEnsemble:
         return cls(weights=w, eta=float(eta))
 
     def normalized(self) -> Dict[str, float]:
+        # Return cached result if available
+        if self._normalized_cache is not None:
+            return self._normalized_cache
+        
         total = sum(max(self.min_weight, float(v)) for v in self.weights.values())
         if total <= 0:
-            return {k: 1.0 / max(1, len(self.weights)) for k in self.weights}
-        return {k: max(self.min_weight, float(v)) / total for k, v in self.weights.items()}
+            result = {k: 1.0 / max(1, len(self.weights)) for k in self.weights}
+        else:
+            result = {k: max(self.min_weight, float(v)) / total for k, v in self.weights.items()}
+        
+        self._normalized_cache = result
+        return result
 
     def update(self, rewards_01: Mapping[str, float]) -> None:
-        # multiplicative weights update: w_i <- w_i * exp(eta * (r_i - 0.5))
+        # multiplicative weights update with learning rate decay
+        # eta decays: 0.3 → 0.05 over 1000 updates (smooth convergence)
+        decayed_eta = self.eta * (1.0 / (1.0 + (float(self.update_count) / 1000.0)))
+        
         for name, r in rewards_01.items():
             if name not in self.weights:
                 continue
             rr = _clip(float(r), 0.0, 1.0)
             self.weights[name] = max(
                 self.min_weight,
-                float(self.weights[name]) * math.exp(float(self.eta) * (rr - 0.5)),
+                float(self.weights[name]) * math.exp(decayed_eta * (rr - 0.5)),
             )
+        
+        self.update_count += 1
+        self._normalized_cache = None  # Invalidate cache
 
     def decide(self, outputs: Mapping[str, StrategyOutput]) -> StrategyDecision:
         w = self.normalized()

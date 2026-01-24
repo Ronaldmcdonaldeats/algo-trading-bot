@@ -26,10 +26,15 @@ from trading_bot.strategy.base import StrategyDecision
 
 @dataclass(frozen=True)
 class SqliteRepository:
-    db_path: Path = Path("trades.sqlite")
+    db_path: Path = Path("data/trades.sqlite")
 
     def _engine(self):
-        return create_engine(f"sqlite:///{self.db_path}")
+        # OPTIMIZATION: Connection pooling for repeated writes
+        return create_engine(
+            f"sqlite:///{self.db_path}",
+            poolclass=None,  # SQLite uses in-thread pooling
+            connect_args={"timeout": 10.0, "check_same_thread": False},
+        )
 
     def init_db(self) -> None:
         engine = self._engine()

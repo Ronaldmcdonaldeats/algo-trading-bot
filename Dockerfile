@@ -3,13 +3,14 @@ FROM python:${PYTHON_VERSION}-slim
 
 WORKDIR /app
 
-# System deps (kept minimal; add build-essential if you need compiled wheels)
+# System deps (curl for healthcheck, kept minimal)
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 RUN python -m pip install -U pip
 
 COPY pyproject.toml README.md /app/
 COPY src /app/src
 
-# Install runtime deps (editable install isn't needed in containers)
-RUN python -m pip install .
+# Install runtime deps + Flask for web dashboard
+RUN python -m pip install . flask flask-cors
 
 CMD ["python", "-m", "trading_bot", "--help"]

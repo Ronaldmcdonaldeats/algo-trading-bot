@@ -1,0 +1,429 @@
+"""Web dashboard for trading bot - Flask application."""
+
+from __future__ import annotations
+
+import json
+import threading
+from pathlib import Path
+
+from flask import Flask, jsonify, render_template_string
+from flask_cors import CORS
+
+from trading_bot.engine.paper import PaperEngineUpdate
+
+
+def create_web_app():
+    """Create and configure Flask application."""
+    app = Flask(__name__, template_folder=str(Path(__file__).parent))
+    CORS(app)
+
+    # Shared state for updates
+    app.state = {"current_update": None, "equity_history": []}
+
+    @app.route("/")
+    def index():
+        """Serve main dashboard HTML."""
+        html = """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Trading Bot Dashboard</title>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                    background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+                    color: #e0e0e0;
+                    min-height: 100vh;
+                    padding: 20px;
+                }
+                .container {
+                    max-width: 1400px;
+                    margin: 0 auto;
+                }
+                h1 {
+                    text-align: center;
+                    margin-bottom: 30px;
+                    font-size: 2.5em;
+                    background: linear-gradient(135deg, #00d4ff, #0099ff);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                }
+                .status-section {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                    gap: 20px;
+                    margin-bottom: 30px;
+                }
+                .metric-card {
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(0, 212, 255, 0.3);
+                    border-radius: 12px;
+                    padding: 20px;
+                    backdrop-filter: blur(10px);
+                    transition: all 0.3s ease;
+                }
+                .metric-card:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                    border-color: rgba(0, 212, 255, 0.8);
+                    transform: translateY(-2px);
+                }
+                .metric-label {
+                    font-size: 0.9em;
+                    color: #9090b0;
+                    margin-bottom: 8px;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+                .metric-value {
+                    font-size: 1.8em;
+                    font-weight: bold;
+                    color: #00d4ff;
+                }
+                .metric-value.positive {
+                    color: #00ff88;
+                }
+                .metric-value.negative {
+                    color: #ff3366;
+                }
+                .charts-section {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+                    gap: 20px;
+                    margin-bottom: 30px;
+                }
+                .chart-card {
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(0, 212, 255, 0.3);
+                    border-radius: 12px;
+                    padding: 20px;
+                    backdrop-filter: blur(10px);
+                }
+                .chart-title {
+                    margin-bottom: 15px;
+                    color: #00d4ff;
+                    font-weight: bold;
+                }
+                canvas {
+                    width: 100% !important;
+                    height: 300px !important;
+                }
+                .positions-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    background: rgba(255, 255, 255, 0.02);
+                    border-radius: 12px;
+                    overflow: hidden;
+                }
+                .positions-table th {
+                    background: rgba(0, 212, 255, 0.1);
+                    padding: 12px;
+                    text-align: left;
+                    color: #00d4ff;
+                    font-weight: bold;
+                    border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+                }
+                .positions-table td {
+                    padding: 12px;
+                    border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+                }
+                .positions-table tr:hover {
+                    background: rgba(0, 212, 255, 0.05);
+                }
+                .status-loading {
+                    text-align: center;
+                    padding: 40px;
+                    color: #9090b0;
+                }
+                .spinner {
+                    display: inline-block;
+                    width: 40px;
+                    height: 40px;
+                    border: 4px solid rgba(0, 212, 255, 0.3);
+                    border-radius: 50%;
+                    border-top-color: #00d4ff;
+                    animation: spin 1s linear infinite;
+                }
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+                .status-badge {
+                    display: inline-block;
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    font-size: 0.85em;
+                    font-weight: bold;
+                    margin-left: 10px;
+                }
+                .status-active {
+                    background: rgba(0, 255, 136, 0.2);
+                    color: #00ff88;
+                }
+                .status-inactive {
+                    background: rgba(255, 51, 102, 0.2);
+                    color: #ff3366;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>📈 Trading Bot Dashboard</h1>
+                
+                <div id="status" class="status-loading">
+                    <div class="spinner"></div>
+                    <p>Loading data...</p>
+                </div>
+
+                <div id="content" style="display: none;">
+                    <div class="status-section">
+                        <div class="metric-card">
+                            <div class="metric-label">Current Equity</div>
+                            <div class="metric-value" id="equity">$0.00</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Current P&L</div>
+                            <div class="metric-value" id="pnl">$0.00</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Sharpe Ratio</div>
+                            <div class="metric-value" id="sharpe">0.00</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Max Drawdown</div>
+                            <div class="metric-value" id="drawdown">0.00%</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Win Rate</div>
+                            <div class="metric-value" id="winrate">0.00%</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Total Trades</div>
+                            <div class="metric-value" id="trades">0</div>
+                        </div>
+                    </div>
+
+                    <div class="charts-section">
+                        <div class="chart-card">
+                            <div class="chart-title">Equity Curve</div>
+                            <canvas id="equityChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-title">Holdings</div>
+                            <canvas id="holdingsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-title">Open Positions</div>
+                        <table class="positions-table" id="positionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Qty</th>
+                                    <th>Entry Price</th>
+                                    <th>Current Price</th>
+                                    <th>P&L</th>
+                                    <th>Return %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="positionsBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                let equityChart, holdingsChart;
+
+                async function fetchData() {
+                    try {
+                        const response = await fetch('/api/data');
+                        const data = await response.json();
+                        
+                        document.getElementById('status').style.display = 'none';
+                        document.getElementById('content').style.display = 'block';
+                        
+                        updateMetrics(data);
+                        updateCharts(data);
+                        updatePositions(data);
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                        document.getElementById('status').innerHTML = '<p style="color: #ff3366;">Error loading data</p>';
+                    }
+                }
+
+                function updateMetrics(data) {
+                    const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+                    const fmt2 = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    
+                    const equity = data.portfolio?.equity || 0;
+                    const cash = data.portfolio?.cash || 0;
+                    const pnl = (equity + cash) - 100000;
+                    
+                    document.getElementById('equity').textContent = fmt.format(equity + cash);
+                    
+                    const pnlEl = document.getElementById('pnl');
+                    pnlEl.textContent = fmt.format(pnl);
+                    pnlEl.className = 'metric-value ' + (pnl >= 0 ? 'positive' : 'negative');
+                    
+                    document.getElementById('sharpe').textContent = fmt2.format(data.sharpe_ratio || 0);
+                    document.getElementById('drawdown').textContent = fmt2.format((data.max_drawdown_pct || 0) * 100) + '%';
+                    document.getElementById('winrate').textContent = fmt2.format((data.win_rate || 0) * 100) + '%';
+                    document.getElementById('trades').textContent = (data.num_trades || 0).toString();
+                }
+
+                function updateCharts(data) {
+                    const equity = data.equity_history || [];
+                    const labels = equity.map((_, i) => i);
+
+                    if (equityChart) equityChart.destroy();
+                    if (holdingsChart) holdingsChart.destroy();
+
+                    const ctx1 = document.getElementById('equityChart').getContext('2d');
+                    equityChart = new Chart(ctx1, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Equity',
+                                data: equity,
+                                borderColor: '#00d4ff',
+                                backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 0,
+                                pointHoverRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { 
+                                    grid: { color: 'rgba(0, 212, 255, 0.1)' },
+                                    ticks: { color: '#9090b0' }
+                                },
+                                x: { display: false }
+                            }
+                        }
+                    });
+
+                    const holdings = data.portfolio?.holdings || {};
+                    const ctx2 = document.getElementById('holdingsChart').getContext('2d');
+                    holdingsChart = new Chart(ctx2, {
+                        type: 'doughnut',
+                        data: {
+                            labels: Object.keys(holdings),
+                            datasets: [{
+                                data: Object.values(holdings).map(h => h.quantity),
+                                backgroundColor: ['#00d4ff', '#00ff88', '#ffa500', '#ff3366', '#9d4edd', '#3a86ff']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { labels: { color: '#9090b0' } } }
+                        }
+                    });
+                }
+
+                function updatePositions(data) {
+                    const holdings = data.portfolio?.holdings || {};
+                    const tbody = document.getElementById('positionsBody');
+                    tbody.innerHTML = '';
+                    
+                    const prices = data.prices || {};
+                    const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+                    
+                    for (const [symbol, holding] of Object.entries(holdings)) {
+                        const qty = holding.quantity || 0;
+                        if (qty === 0) continue;
+                        
+                        const price = prices[symbol] || holding.cost_basis / qty;
+                        const current_value = qty * price;
+                        const cost = (holding.cost_basis || 0);
+                        const pnl = current_value - cost;
+                        const ret = cost > 0 ? (pnl / cost) * 100 : 0;
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><strong>${symbol}</strong></td>
+                            <td>${qty.toFixed(2)}</td>
+                            <td>${fmt.format((cost / qty) || 0)}</td>
+                            <td>${fmt.format(price)}</td>
+                            <td style="color: ${pnl >= 0 ? '#00ff88' : '#ff3366'}">${fmt.format(pnl)}</td>
+                            <td style="color: ${ret >= 0 ? '#00ff88' : '#ff3366'}">${ret.toFixed(2)}%</td>
+                        `;
+                        tbody.appendChild(row);
+                    }
+                }
+
+                // Fetch data immediately and every 2 seconds
+                fetchData();
+                setInterval(fetchData, 2000);
+            </script>
+        </body>
+        </html>
+        """
+        return render_template_string(html)
+
+    @app.route("/api/data")
+    def get_data():
+        """API endpoint to return current trading data."""
+        update = app.state.get("current_update")
+        if not update:
+            return jsonify({
+                "portfolio": {"equity": 0, "cash": 100000, "holdings": {}},
+                "prices": {},
+                "sharpe_ratio": 0,
+                "max_drawdown_pct": 0,
+                "win_rate": 0,
+                "num_trades": 0,
+                "equity_history": []
+            })
+
+        holdings = {}
+        if hasattr(update.portfolio, 'holdings') and update.portfolio.holdings:
+            for symbol, holding in update.portfolio.holdings.items():
+                holdings[symbol] = {
+                    "quantity": holding.quantity,
+                    "cost_basis": holding.cost_basis,
+                    "avg_cost": holding.avg_cost
+                }
+
+        return jsonify({
+            "portfolio": {
+                "equity": float(update.portfolio.equity(update.prices)) if hasattr(update.portfolio, 'equity') else 0,
+                "cash": float(update.portfolio.cash) if hasattr(update.portfolio, 'cash') else 100000,
+                "holdings": holdings
+            },
+            "prices": {k: float(v) for k, v in update.prices.items()} if update.prices else {},
+            "sharpe_ratio": float(update.sharpe_ratio) if update.sharpe_ratio else 0,
+            "max_drawdown_pct": float(update.max_drawdown_pct) if update.max_drawdown_pct else 0,
+            "win_rate": float(update.win_rate) if update.win_rate else 0,
+            "num_trades": int(update.num_trades) if update.num_trades else 0,
+            "equity_history": [float(x) for x in app.state.get("equity_history", [])]
+        })
+
+    return app
+
+
+def run_web_server(host: str = "0.0.0.0", port: int = 5000, debug: bool = False):
+    """Run the web server."""
+    app = create_web_app()
+    app.run(host=host, port=port, debug=debug, threaded=True)
+
+
+if __name__ == "__main__":
+    run_web_server()

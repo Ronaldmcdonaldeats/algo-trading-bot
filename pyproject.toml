@@ -7,13 +7,15 @@ name = "algo-trading-bot"
 version = "0.1.0"
 description = "Algorithmic trading bot scaffold with backtesting and paper trading."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [{name = "Your Name"}]
 dependencies = [
   "pandas>=1.5",
   "numpy>=1.21",
-  "yfinance>=0.2",
+  "yfinance>=0.2; python_version>='3.9'",
+  "yfinance<0.2; python_version<'3.9'",
+  "multitasking<0.0.10; python_version<'3.9'",
   "ta>=0.11",
   "backtrader>=1.9.78.123",
   "python-dotenv>=1.0",

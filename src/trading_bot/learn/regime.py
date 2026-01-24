@@ -108,7 +108,7 @@ def detect_regime(df: pd.DataFrame) -> RegimeState:
     Returns:
         RegimeState with regime, confidence, and metrics
     """
-    if df.empty or len(df) < 14:
+    if df.empty or len(df) < 5:
         return RegimeState(
             regime=Regime.INSUFFICIENT_DATA,
             confidence=0.0,
@@ -117,11 +117,16 @@ def detect_regime(df: pd.DataFrame) -> RegimeState:
             explanation={"reason": "insufficient_data", "rows": len(df)},
         )
     
-    close = df["Close"].astype(float)
-    high = df["High"].astype(float)
-    low = df["Low"].astype(float)
+    # OPTIMIZATION: Use tail only (most recent data matters most)
+    # Typical lookback is 30-40 bars for SMA; grab 50 to be safe
+    lookback = max(50, len(df) // 2) if len(df) > 50 else len(df)
+    df_work = df.iloc[-lookback:] if len(df) > lookback else df
     
-    # Calculate metrics
+    close = df_work["Close"].astype(float)
+    high = df_work["High"].astype(float)
+    low = df_work["Low"].astype(float)
+    
+    # Calculate metrics (on recent window)
     volatility = _atr_volatility(high, low, close, period=14)
     trend_strength, trend_direction = _sma_crossover_trend(close, fast=10, slow=30)
     support, resistance = _support_resistance(high, low, lookback=20)

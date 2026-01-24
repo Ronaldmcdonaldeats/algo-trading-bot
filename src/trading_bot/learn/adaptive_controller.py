@@ -57,6 +57,9 @@ class AdaptiveLearningController:
         self.min_trades_for_analysis = min_trades_for_analysis
         self.regime_history: list[tuple[datetime, Regime, float]] = []
         self.max_regime_history = regime_history_size
+        # OPTIMIZATION: Cache trade analysis to avoid recomputation
+        self._last_trades_hash: int | None = None
+        self._last_analysis_cache: dict | None = None
     
     def step(
         self,
@@ -109,24 +112,35 @@ class AdaptiveLearningController:
         
         # Update regime history
         self.regime_history.append((now, primary_regime.regime, primary_regime.confidence))
-        if len(self.regime_history) > self.max_regime_history:
-            self.regime_history.pop(0)
+        # Prevent unbounded growth - trim if 50% over limit
+        if len(self.regime_history) > self.max_regime_history * 1.5:
+            self.regime_history = self.regime_history[-self.max_regime_history:]
         
-        # 2. Analyze recent trades
+        # 2. Analyze recent trades (with caching to skip if data unchanged)
         anomalies = []
         strategy_analysis = {}
         param_recommendations = {}
         
         if trades and len(trades) >= self.min_trades_for_analysis:
-            strategy_analysis = analyze_recent_trades(trades, lookback_count=30)
+            # OPTIMIZATION: Only recompute if trades list changed
+            trades_hash = hash(tuple((t.get("entry_price"), t.get("exit_price")) for t in trades[-30:]))
             
-            # Detect patterns
-            patterns = detect_win_loss_patterns(trades, lookback=20)
-            for pattern in patterns:
-                anomalies.append(pattern.description)
-            
-            # Recommend parameter changes
-            param_recommendations = recommend_parameter_changes(strategy_analysis, current_params)
+            if trades_hash != self._last_trades_hash:
+                strategy_analysis = analyze_recent_trades(trades, lookback_count=30)
+                # Detect patterns
+                patterns = detect_win_loss_patterns(trades, lookback=20)
+                for pattern in patterns:
+                    anomalies.append(pattern.description)
+                # Recommend parameter changes
+                param_recommendations = recommend_parameter_changes(strategy_analysis, current_params)
+                
+                # Cache result
+                self._last_trades_hash = trades_hash
+                self._last_analysis_cache = (strategy_analysis, anomalies, param_recommendations)
+            else:
+                # Use cached result
+                if self._last_analysis_cache:
+                    strategy_analysis, anomalies, param_recommendations = self._last_analysis_cache
         
         # 3. Calculate performance metrics
         performance = None

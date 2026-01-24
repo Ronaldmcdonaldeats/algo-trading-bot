@@ -7,13 +7,27 @@ This module provides:
 - Risk management and safety controls
 """
 
+from __future__ import annotations
+
+import gc
+import logging
 import os
+import time
+import hashlib
+import json
+import traceback
+from pathlib import Path
 from dataclasses import dataclass
-from datetime import datetime, timezone
+import concurrent.futures
+from datetime import datetime, timezone, timedelta
 from typing import Optional
+
+import pandas as pd
 
 from trading_bot.core.models import Fill, Order, OrderType, Portfolio, Side
 from trading_bot.broker.base import Broker, OrderRejection
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -81,6 +95,8 @@ class AlpacaProvider:
             from alpaca.data.historical import StockHistoricalDataClient
             from alpaca.data.requests import StockBarsRequest
             from alpaca.data.timeframe import TimeFrame
+            from alpaca.data.timeframe import TimeFrameUnit
+            from alpaca.data.enums import DataFeed
         except ImportError:
             raise ImportError(
                 "alpaca-py not installed. Install with: pip install alpaca-py"
@@ -92,25 +108,219 @@ class AlpacaProvider:
         ))
         object.__setattr__(self, "_StockBarsRequest", StockBarsRequest)
         object.__setattr__(self, "_TimeFrame", TimeFrame)
+        object.__setattr__(self, "_TimeFrameUnit", TimeFrameUnit)
+        object.__setattr__(self, "_DataFeed", DataFeed)
     
     def download_bars(
         self,
         *,
         symbols: list[str],
-        period: str,
-        interval: str
-    ) -> dict[str, dict]:
-        """Download bars for multiple symbols.
+        period: str = "7d",
+        interval: str = "1d",
+        use_cache: bool = True,
+        cache_ttl_minutes: int = 60
+    ) -> pd.DataFrame:
+        """Download bars for multiple symbols - optimized for speed.
         
         Args:
             symbols: List of tickers (e.g., ["AAPL", "MSFT"])
-            period: Time period (e.g., "30m", "1h", "1d")
+            period: Time period (e.g., "5d", "7d", "1d") - shorter = faster
             interval: Bar interval (e.g., "1m", "15m", "1h", "1d")
+            use_cache: Whether to use cached data (default True)
+            cache_ttl_minutes: Cache time-to-live in minutes (default 60 for stable historical data)
             
         Returns:
-            Dictionary mapping symbol -> OHLCV data
+            DataFrame with tuple columns (Price, Symbol)
         """
-        raise NotImplementedError("AlpacaProvider.download_bars() not yet implemented")
+        TimeFrame = self._TimeFrame
+        TimeFrameUnit = self._TimeFrameUnit
+        DataFeed = self._DataFeed
+        
+        # 1. Check Cache (JSON)
+        cache_dir = Path(".cache")
+        cache_dir.mkdir(exist_ok=True)
+        
+        # Create unique cache key based on request parameters
+        sym_key = ",".join(sorted(symbols))
+        req_hash = hashlib.md5(f"{sym_key}_{period}_{interval}".encode()).hexdigest()
+        cache_file = cache_dir / f"alpaca_bars_{req_hash}.json"
+        
+        if use_cache and cache_file.exists():
+            mtime = datetime.fromtimestamp(cache_file.stat().st_mtime, tz=timezone.utc)
+            # Cache valid for specified TTL
+            if (datetime.now(timezone.utc) - mtime) < timedelta(minutes=cache_ttl_minutes):
+                print(f"[CACHE] Using cached data from {cache_file}")
+                logger.info(f"Loading cached data from {cache_file}")
+                try:
+                    df = pd.read_json(cache_file, orient="split")
+                    df.index = pd.to_datetime(df.index)
+                    # Handle MultiIndex columns restoration if needed
+                    if not df.empty and isinstance(df.columns[0], list):
+                        df.columns = pd.MultiIndex.from_tuples([tuple(c) for c in df.columns])
+                    return df
+                except Exception as e:
+                    logger.warning(f"Failed to load cache: {e}")
+            else:
+                print(f"[CACHE] Cache expired, re-downloading data")
+
+        print(f"[CACHE] No valid cache, downloading data from Alpaca")
+        # Map interval to TimeFrame
+        if interval == "1m":
+            tf = TimeFrame.Minute
+        elif interval == "5m":
+            tf = TimeFrame(5, TimeFrameUnit.Minute)
+        elif interval == "15m":
+            tf = TimeFrame(15, TimeFrameUnit.Minute)
+        elif interval == "1h":
+            tf = TimeFrame.Hour
+        elif interval == "1d":
+            tf = TimeFrame.Day
+        else:
+            tf = TimeFrame.Day
+            
+        # Map period to start date
+        now = datetime.now(timezone.utc)
+        start = now - timedelta(days=30)
+        if period.endswith("d"):
+            start = now - timedelta(days=int(period[:-1]))
+        elif period.endswith("y"):
+            start = now - timedelta(days=int(period[:-1]) * 365)
+        # Chunk symbols to avoid URI Too Long errors - use larger chunks for better performance
+        chunk_size = 100  # Increased from 50 - Alpaca can handle it
+        chunks = [symbols[i:i + chunk_size] for i in range(0, len(symbols), chunk_size)]
+        print(f"[DOWNLOAD] Fetching {len(symbols)} symbols in {len(chunks)} chunk(s) (timeout: 10s per chunk)")
+        all_dfs = []
+        
+        def fetch_chunk(chunk_syms):
+            try:
+                req = self._StockBarsRequest(
+                    symbol_or_symbols=chunk_syms,
+                    timeframe=tf,
+                    start=start,
+                    end=now,
+                    adjustment="all",
+                    feed=DataFeed.IEX,
+                )
+                df = self._client.get_stock_bars(req).df
+                df = df.reset_index()
+                # Normalize columns
+                # Check for various timestamp column names
+                if "timestamp" in df.columns:
+                    pass
+                elif "index" in df.columns:
+                    df = df.rename(columns={"index": "timestamp"})
+                if "symbol" not in df.columns and len(chunk_syms) == 1:
+                    df["symbol"] = chunk_syms[0]
+                return df
+            except Exception as e:
+                logger.warning(f"Batch download failed (first: {chunk_syms[0]}): {e}. Retrying individually...")
+                # Fallback: Try individually to salvage valid symbols
+                dfs = []
+                for sym in chunk_syms:
+                    try:
+                        logger.info(f"Retrying fetch for {sym}...")
+                        req_single = self._StockBarsRequest(
+                            symbol_or_symbols=[sym],
+                            timeframe=tf,
+                            start=start,
+                            end=now,
+                            adjustment="all",
+                            feed=DataFeed.IEX,
+                        )
+                        res = self._client.get_stock_bars(req_single).df
+                        if not res.empty:
+                            res = res.reset_index()
+                            if "timestamp" in res.columns:
+                                pass
+                            elif "index" in res.columns:
+                                res = res.rename(columns={"index": "timestamp"})
+                            # Force symbol to be correct for individual requests
+                            res["symbol"] = sym
+                            dfs.append(res)
+                        time.sleep(0.01)  # Minimal pause - Alpaca rate limits are generous
+                    except Exception as inner_e:
+                        logger.error(f"Failed to download {sym}: {inner_e}")
+                        logger.error(traceback.format_exc())
+                
+                if dfs:
+                    try:
+                        return pd.concat(dfs)
+                    except Exception as e:
+                        logger.error(f"Failed to concat retried chunk: {e}")
+                        return None
+                return None
+
+        # Use threads to fetch chunks in parallel - increased workers for faster downloads
+        max_workers = min(100, len(chunks) * 5)  # Aggressive parallelization
+        print(f"[DOWNLOAD] Using {max_workers} parallel workers")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(fetch_chunk, chunk): chunk for chunk in chunks}
+            completed = 0
+            for future in concurrent.futures.as_completed(futures, timeout=15):
+                chunk_start = futures[future][0]
+                completed += 1
+                try:
+                    res = future.result(timeout=10)
+                    if res is not None and not res.empty:
+                        all_dfs.append(res)
+                except concurrent.futures.TimeoutError:
+                    logger.error(f"Timeout downloading chunk starting with {chunk_start}")
+                except Exception as e:
+                    logger.error(f"Unexpected error in download thread for chunk {chunk_start}: {e}")
+                finally:
+                    # Clean up future to free memory immediately
+                    del futures[future]
+                # Show progress every 10 chunks
+                if completed % 10 == 0:
+                    print(f"[DOWNLOAD] Progress: {completed}/{len(chunks)} chunks completed")
+        
+        if not all_dfs:
+            return pd.DataFrame()
+            
+        try:
+            df = pd.concat(all_dfs)
+            logger.info(f"After concat: df shape {df.shape}, columns: {list(df.columns)}, sample data:\n{df.head()}")
+            
+            # Rename columns to match yfinance (Capitalized)
+            df = df.rename(columns={
+                "open": "Open",
+                "high": "High",
+                "low": "Low",
+                "close": "Close",
+                "volume": "Volume"
+            })
+            logger.info(f"After rename: columns {list(df.columns)}")
+            
+            # Pivot table to get MultiIndex columns
+            pivot_df = df.pivot(
+                index="timestamp", 
+                columns="symbol", 
+                values=["Open", "High", "Low", "Close", "Volume"]
+            )
+            logger.info(f"After pivot: shape {pivot_df.shape}, columns: {pivot_df.columns.tolist()}")
+            
+            # Flatten if single symbol to match yfinance behavior
+            if len(symbols) == 1 and not pivot_df.empty:
+                pivot_df.columns = pivot_df.columns.droplevel(1)
+                logger.info(f"After flatten: columns {list(pivot_df.columns)}")
+            
+            # Save to cache
+            if not pivot_df.empty:
+                try:
+                    pivot_df.to_json(cache_file, orient="split", date_format="iso")
+                    logger.info(f"Saved data to cache: {cache_file}")
+                except Exception as e:
+                    logger.warning(f"Failed to save cache: {e}")
+
+            # Clean up temporary dataframes after download completes
+            del all_dfs, df, chunks, futures
+            gc.collect()  # Force garbage collection after large data processing
+            
+            return pivot_df
+            
+        except Exception as e:
+            logger.error(f"Failed to process/merge data: {e}")
+            return pd.DataFrame()
     
     def history(
         self,
@@ -169,7 +379,7 @@ class AlpacaBroker(Broker):
         self._client = TradingClient(
             api_key=config.api_key,
             secret_key=config.api_secret,
-            base_url=config.base_url
+            paper=config.paper_mode
         )
     
     def set_price(self, symbol: str, price: float) -> None:
@@ -180,6 +390,10 @@ class AlpacaBroker(Broker):
             price: Current market price
         """
         self._prices[symbol] = price
+    
+    def prices(self) -> dict[str, float]:
+        """Get current mark-to-market prices."""
+        return self._prices
     
     def submit_order(self, order: Order) -> Fill | OrderRejection:
         """Submit order to Alpaca.
@@ -269,10 +483,7 @@ class AlpacaBroker(Broker):
             # Build portfolio
             portfolio = Portfolio(
                 cash=float(account.cash),
-                buying_power=float(account.buying_power),
                 positions=pos_dict,
-                equity=float(account.portfolio_value),
-                timestamp=datetime.now(timezone.utc),
             )
             
             self._portfolio = portfolio
@@ -303,7 +514,6 @@ class AlpacaBroker(Broker):
                 "transfers_blocked": account.transfers_blocked,
                 "account_blocked": account.account_blocked,
                 "created_at": account.created_at,
-                "updated_at": account.updated_at,
                 "status": account.status,
             }
         except Exception as e:

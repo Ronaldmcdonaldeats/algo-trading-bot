@@ -1,14 +1,38 @@
 services:
-  app:
-    build: .
+  web:
+    image: algo-trading-bot:latest
+    container_name: trading-bot-web
     env_file:
       - .env
     volumes:
       - .:/app
-    command: ["python", "-m", "trading_bot", "--help"]
+      - ./data:/app/data
+    ports:
+      - "5000:5000"
+    command: ["python", "-m", "trading_bot.ui.web"]
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=trading_bot.ui.web
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  app:
+    image: algo-trading-bot:latest
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    command: ["python", "-m", "trading_bot", "paper", "--symbols", "AAPL,GOOGL,MSFT", "--period", "6mo"]
 
   postgres:
     image: postgres:16
+    container_name: trading-bot-postgres
     environment:
       POSTGRES_USER: trading
       POSTGRES_PASSWORD: trading
@@ -17,6 +41,11 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trading"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:

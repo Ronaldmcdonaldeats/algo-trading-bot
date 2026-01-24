@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
@@ -16,6 +17,8 @@ from trading_bot.schedule.us_equities import (
     to_eastern,
 )
 from trading_bot.ui.dashboard import DashboardState, render_paper_dashboard
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -56,7 +59,8 @@ def run_paper_tui(*, engine: PaperEngine, schedule: MarketSchedule) -> int:
         def __init__(self) -> None:
             super().__init__()
             self.state = PaperTuiState()
-            self._force = False
+            self._force = True
+            self._last_rendered = None  # Track last render to avoid unnecessary updates
 
         def compose(self) -> ComposeResult:
             yield Header()
@@ -64,7 +68,7 @@ def run_paper_tui(*, engine: PaperEngine, schedule: MarketSchedule) -> int:
             yield Footer()
 
         async def on_mount(self) -> None:
-            self.set_interval(1.0, self._tick)
+            self.set_interval(3.0, self._tick)  # Refresh every 3 seconds instead of 1 (less flicker)
             self._render(status="Starting…")
 
         def action_toggle_pause(self) -> None:
@@ -76,12 +80,18 @@ def run_paper_tui(*, engine: PaperEngine, schedule: MarketSchedule) -> int:
         def _render(self, *, status: str) -> None:
             body = self.query_one("#body", Static)
 
+            # Only update if something actually changed
+            render_key = (status, self.state.last_update, self.state.paused, self.state.busy)
+            if render_key == self._last_rendered:
+                return  # Skip redundant renders
+            self._last_rendered = render_key
+
             status_text = Text(status)
             if self.state.paused:
                 status_text.stylize("bold yellow")
             elif self.state.busy:
                 status_text.stylize("bold cyan")
-            elif "CLOSED" in status:
+            elif "CLOSED" in status or "ERROR" in status:
                 status_text.stylize("bold red")
             else:
                 status_text.stylize("bold green")
@@ -132,14 +142,46 @@ def run_paper_tui(*, engine: PaperEngine, schedule: MarketSchedule) -> int:
             self._render(status="RUNNING: stepping engine")
 
             try:
-                update = await asyncio.to_thread(engine.step)
+                loop = asyncio.get_running_loop()
+                update = await loop.run_in_executor(None, engine.step)
                 self.state.last_update = update
                 schedule.mark_ran(now)
                 self._force = False
+            except Exception as e:
+                logger.exception("Error during engine step")
+                self._render(status=f"ERROR: {str(e)[:100]}")
+                await asyncio.sleep(5.0)  # Pause longer to let you read the error
+                return
             finally:
                 self.state.busy = False
 
-            self._render(status=f"OK: last step iter={self.state.last_update.iteration}")
+            if self.state.last_update is None:
+                self._render(status="WAITING: Engine initializing...")
+                return
+
+            cnt = len(self.state.last_update.prices)
+            if cnt == 0:
+                import sys
+                if sys.version_info < (3, 9):
+                    self._render(status="ERR: Py3.8/yfinance broken. Try 'python -m trading_bot live paper'")
+                else:
+                    self._render(status="ERROR: No data received. Check internet or try --interval 1d")
+            else:
+                # Format benchmark string
+                bench_str = ""
+                if self.state.last_update.benchmarks:
+                    my_ret = self.state.last_update.benchmarks.get("Portfolio", 0.0)
+                    parts = [f"Return: {my_ret:+.2%}"]
+                    for k, v in self.state.last_update.benchmarks.items():
+                        if k != "Portfolio":
+                            parts.append(f"{k}: {v:+.2%}")
+                    bench_str = " | ".join(parts)
+                
+                sig_buy = sum(1 for s in self.state.last_update.signals.values() if s == 1)
+                status_msg = f"OK: iter={self.state.last_update.iteration} sym={cnt} sig_buy={sig_buy} trades={len(engine.trade_history)}"
+                if bench_str:
+                    status_msg += f" | {bench_str}"
+                self._render(status=status_msg)
 
     _PaperApp().run()
     return 0

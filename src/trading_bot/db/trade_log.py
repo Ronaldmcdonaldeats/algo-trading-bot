@@ -26,7 +26,7 @@ class Trade(Base):
 
 @dataclass(frozen=True)
 class SqliteTradeLogger:
-    db_path: Path = Path("trades.sqlite")
+    db_path: Path = Path("data/trades.sqlite")
 
     def _engine(self):
         return create_engine(f"sqlite:///{self.db_path}")

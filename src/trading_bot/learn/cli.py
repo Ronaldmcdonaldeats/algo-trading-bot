@@ -15,13 +15,16 @@ from trading_bot.db.models import (
 
 
 def _get_session(db_path: str) -> Session:
-    """Create SQLAlchemy session from SQLite DB path."""
+    """Create SQLAlchemy session from SQLite DB path.
+    
+    WARNING: Caller MUST close session with session.close() to prevent connection leaks!
+    """
     db_url = f"sqlite:///{Path(db_path).absolute()}"
-    engine = create_engine(db_url)
+    engine = create_engine(db_url, pool_pre_ping=True, pool_recycle=3600)
     return Session(engine)
 
 
-def learn_inspect_cmd(db_path: str = "trades.sqlite", limit: int = 10) -> int:
+def learn_inspect_cmd(db_path: str = "data/trades.sqlite", limit: int = 10) -> int:
     """Show current regime, weights, and recent decisions."""
     print("=" * 80)
     print("LEARNING STATE INSPECTOR")
@@ -151,7 +154,7 @@ def learn_inspect_cmd(db_path: str = "trades.sqlite", limit: int = 10) -> int:
         return 1
 
 
-def learn_history_cmd(db_path: str = "trades.sqlite", limit: int = 20) -> int:
+def learn_history_cmd(db_path: str = "data/trades.sqlite", limit: int = 20) -> int:
     """Show regime history."""
     print("=" * 80)
     print("REGIME HISTORY")
@@ -187,7 +190,7 @@ def learn_history_cmd(db_path: str = "trades.sqlite", limit: int = 20) -> int:
         return 1
 
 
-def learn_decisions_cmd(db_path: str = "trades.sqlite", limit: int = 10) -> int:
+def learn_decisions_cmd(db_path: str = "data/trades.sqlite", limit: int = 10) -> int:
     """Show recent adaptive decisions."""
     print("=" * 80)
     print("ADAPTIVE DECISIONS")
@@ -241,7 +244,7 @@ def learn_decisions_cmd(db_path: str = "trades.sqlite", limit: int = 10) -> int:
         return 1
 
 
-def learn_metrics_cmd(db_path: str = "trades.sqlite", limit: int = 5) -> int:
+def learn_metrics_cmd(db_path: str = "data/trades.sqlite", limit: int = 5) -> int:
     """Show performance metrics over time."""
     print("=" * 80)
     print("PERFORMANCE METRICS")

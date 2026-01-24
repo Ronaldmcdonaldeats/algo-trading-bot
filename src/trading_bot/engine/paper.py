@@ -9,13 +9,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+import numpy as np
 import pandas as pd
 
 from trading_bot.broker.base import OrderRejection
 from trading_bot.broker.paper import PaperBroker, PaperBrokerConfig
 from trading_bot.config import load_config
 from trading_bot.core.models import Fill, Order, Portfolio
-from trading_bot.data.providers import MarketDataProvider, YFinanceProvider
+from trading_bot.data.providers import MarketDataProvider, MockDataProvider
 from trading_bot.db.repository import SqliteRepository
 from trading_bot.learn.adaptive_controller import AdaptiveLearningController
 from trading_bot.learn.ensemble import ExponentialWeightsEnsemble, reward_to_unit_interval
@@ -46,6 +47,8 @@ class PaperEngineConfig:
     enable_learning: bool = True  # Enable adaptive learning by default
     tune_weekly: bool = True  # Enable weekly tuning by default
     learning_eta: float = 0.3
+    ignore_market_hours: bool = False  # For testing outside market hours
+    memory_mode: bool = False  # Aggressive memory optimizations (smaller batches, fewer indicators)
 
 
 @dataclass(frozen=True)
@@ -59,6 +62,13 @@ class PaperEngineUpdate:
     fills: list[Fill]
     rejections: list[OrderRejection]
     portfolio: Portfolio
+    
+    # Real-time performance metrics
+    sharpe_ratio: float = 0.0
+    max_drawdown_pct: float = 0.0
+    win_rate: float = 0.0
+    num_trades: int = 0
+    current_pnl: float = 0.0
 
 
 
@@ -80,6 +90,13 @@ def _normalize_ohlcv(df: pd.DataFrame, symbol: str) -> pd.DataFrame:
     out = out.dropna(subset=["Close"])
     if out.empty:
         raise ValueError(f"All Close values are NaN for {symbol}")
+
+    # Convert to float32 to reduce memory (50% savings on OHLC data)
+    for col in ['Open', 'High', 'Low', 'Close']:
+        if col in out.columns and out[col].dtype != np.float32:
+            out[col] = out[col].astype(np.float32)
+    if 'Volume' in out.columns and out['Volume'].dtype not in [np.uint32, np.uint64]:
+        out['Volume'] = out['Volume'].astype(np.uint32)
 
     return out
 
@@ -107,7 +124,7 @@ class PaperEngine:
             ),
         )
 
-        self.data = provider or YFinanceProvider()
+        self.data = provider or MockDataProvider()
         self.iteration = 0
 
         # Learning / strategy state
@@ -162,6 +179,13 @@ class PaperEngine:
         # For learning updates
         self._prev_prices: Optional[Dict[str, float]] = None
         self._prev_signals_by_symbol: Dict[str, Dict[str, int]] = {}
+        
+        # Signal confirmation: track consecutive bars with same signal (for 2-bar confirmation)
+        self._signal_confirmation: Dict[str, int] = {}  # symbol -> count of consecutive bars with signal=1
+        
+        # Multi-level profit taking: track entry price and bars held for time-based exits
+        self._position_entry_bars: Dict[str, int] = {}  # symbol -> entry iteration
+        self._position_entry_prices: Dict[str, float] = {}  # symbol -> entry price
 
     def _build_strategies(self, params: Dict[str, Dict[str, Any]]) -> Dict[str, StrategyOutput | Any]:
         """Build strategy instances from parameters."""
@@ -195,25 +219,69 @@ class PaperEngine:
 
         return strategies
 
+    def _calculate_metrics(self) -> tuple[float, float, float, int, float]:
+        """Calculate real-time performance metrics.
+        
+        Returns: (sharpe_ratio, max_drawdown_pct, win_rate, num_trades, current_pnl)
+        """
+        # Calculate Sharpe ratio
+        if len(self.equity_history) < 2:
+            sharpe = 0.0
+        else:
+            returns = np.diff(self.equity_history) / np.array(self.equity_history[:-1])
+            excess_returns = returns - (0.02 / 252)  # Daily risk-free rate
+            sharpe = float(np.sqrt(252) * np.mean(excess_returns) / (np.std(excess_returns) + 1e-8))
+        
+        # Calculate max drawdown
+        if len(self.equity_history) < 2:
+            max_dd = 0.0
+        else:
+            cummax = np.maximum.accumulate(self.equity_history)
+            drawdown = (np.array(self.equity_history) - cummax) / cummax
+            max_dd = float(np.min(drawdown))
+        
+        # Calculate win rate
+        if len(self.trade_history) == 0:
+            win_rate = 0.0
+            num_trades = 0
+        else:
+            winning = len([t for t in self.trade_history if t.get("pnl", 0) > 0])
+            num_trades = len(self.trade_history)
+            win_rate = winning / num_trades if num_trades > 0 else 0.0
+        
+        # Current P&L
+        start_cash = float(self.cfg.start_cash)
+        current_equity = self.equity_history[-1] if self.equity_history else start_cash
+        current_pnl = current_equity - start_cash
+        
+        return sharpe, max_dd, win_rate, num_trades, current_pnl
+
     def step(self, *, now: datetime | None = None) -> PaperEngineUpdate:
         self.iteration += 1
         ts = now or datetime.utcnow()
 
+        print(f"[{self.iteration}] Fetching data for {len(self.cfg.symbols)} symbols...", end="", flush=True)
         bars = self.data.download_bars(
             symbols=self.cfg.symbols,
             period=self.cfg.period,
             interval=self.cfg.interval,
         )
+        print(" ✓", flush=True)
 
-        # Normalize bars per symbol first.
+        # Normalize bars per symbol first (process in batches to reduce memory spikes).
         ohlcv_by_symbol: Dict[str, pd.DataFrame] = {}
         prices: Dict[str, float] = {}
-        for sym in self.cfg.symbols:
-            ohlcv = _normalize_ohlcv(bars, sym)
-            ohlcv_by_symbol[sym] = ohlcv
-            px = float(ohlcv["Close"].iloc[-1])
-            prices[sym] = px
-            self.broker.set_price(sym, px)
+        batch_size = 10 if self.cfg.memory_mode else 20  # Smaller batches in memory_mode
+        for i in range(0, len(self.cfg.symbols), batch_size):
+            batch = self.cfg.symbols[i:i + batch_size]
+            for sym in batch:
+                ohlcv = _normalize_ohlcv(bars, sym)
+                ohlcv_by_symbol[sym] = ohlcv
+                px = float(ohlcv["Close"].iloc[-1])
+                prices[sym] = px
+                self.broker.set_price(sym, px)
+        
+        print(f"[{self.iteration}] Processing {len(ohlcv_by_symbol)} symbols...", end="", flush=True)
 
         # 1) Learning update from previous step (based on previous strategy signals).
         if self.enable_learning and self._prev_prices is not None and self._prev_signals_by_symbol:
@@ -314,7 +382,59 @@ class PaperEngine:
             }
             current_signals_by_symbol[sym] = {name: int(out.signal) for name, out in outputs.items()}
 
-            # Risk exits first.
+            # Multi-level profit-taking and time-based exits
+            pos = self.broker.portfolio().get_position(sym)
+            if pos.qty > 0 and sym in self._position_entry_prices:
+                entry_price = self._position_entry_prices[sym]
+                bars_held = self.iteration - self._position_entry_bars[sym]
+                profit_pct = (px - entry_price) / entry_price if entry_price > 0 else 0
+                
+                # Multi-level take profit: exit 50% at +1.5% profit, 25% at +3%, close 25% at +5%
+                take_profits = [
+                    (0.50, 0.015),  # 50% position at 1.5% profit
+                    (0.25, 0.030),  # 25% position at 3% profit (of remaining)
+                    (0.25, 0.050),  # 25% position at 5% profit (of remaining)
+                ]
+                
+                for qty_pct, profit_threshold in take_profits:
+                    if profit_pct >= profit_threshold and pos.qty > 0:
+                        shares_to_exit = max(1, int(pos.qty * qty_pct))
+                        order = Order(
+                            id=uuid.uuid4().hex,
+                            ts=ts,
+                            symbol=sym,
+                            side="SELL",
+                            qty=shares_to_exit,
+                            type="MARKET",
+                            tag=f"partial_tp:{profit_pct:.1%}",
+                        )
+                        res = self.broker.submit_order(order)
+                        if not isinstance(res, OrderRejection):
+                            fills.append(res)
+                            self.repo.log_order_filled(order)
+                            self.repo.log_fill(res)
+                            pos = self.broker.portfolio().get_position(sym)  # Refresh
+                
+                # Time-based exit: close after 20 bars if no strong profit
+                if bars_held > 20 and profit_pct < 0.01 and pos.qty > 0:
+                    order = Order(
+                        id=uuid.uuid4().hex,
+                        ts=ts,
+                        symbol=sym,
+                        side="SELL",
+                        qty=int(pos.qty),
+                        type="MARKET",
+                        tag="time_exit:20bars",
+                    )
+                    res = self.broker.submit_order(order)
+                    if not isinstance(res, OrderRejection):
+                        fills.append(res)
+                        self.repo.log_order_filled(order)
+                        self.repo.log_fill(res)
+                        del self._position_entry_bars[sym]
+                        del self._position_entry_prices[sym]
+
+            # Risk exits (stop-loss and take-profit)
             pos = self.broker.portfolio().get_position(sym)
             if pos.qty > 0:
                 if pos.stop_loss is not None and px <= float(pos.stop_loss):
@@ -411,10 +531,28 @@ class PaperEngine:
             signals[sym] = int(dec.signal)
             self.repo.log_strategy_decision(ts=ts, symbol=sym, mode=mode, decision=dec)
 
+            # Signal confirmation: require 2 consecutive bars with signal=1 before entering (reduces false signals)
+            if dec.signal == 1:
+                self._signal_confirmation[sym] = self._signal_confirmation.get(sym, 0) + 1
+            else:
+                self._signal_confirmation[sym] = 0  # Reset on signal loss
+            
+            confirmed_signal = dec.signal == 1 and self._signal_confirmation[sym] >= 2
+
             # Execute to target position (long/flat).
-            if dec.signal == 1 and pos.qty == 0:
-                sl = stop_loss_price(px, self.app_cfg.risk.stop_loss_pct)
-                tp = take_profit_price(px, self.app_cfg.risk.take_profit_pct)
+            if confirmed_signal and pos.qty == 0:
+                # Volatility-based stops: higher volatility = wider stops (give winning trades more room)
+                ohlcv = ohlcv_by_symbol[sym]
+                returns = ohlcv['Close'].pct_change().dropna()
+                volatility = float(returns.std()) if len(returns) > 0 else 0.02
+                
+                # Adjust stop-loss based on volatility (scale 0.5x to 2.0x)
+                vol_adjusted_sl_pct = self.app_cfg.risk.stop_loss_pct * (0.5 + volatility / 0.03)
+                vol_adjusted_tp_pct = self.app_cfg.risk.take_profit_pct * (0.5 + volatility / 0.03)
+                
+                sl = px * (1.0 - vol_adjusted_sl_pct)
+                tp = px * (1.0 + vol_adjusted_tp_pct)
+                
                 eq = self.broker.portfolio().equity(self.broker.prices())
                 shares = position_size_shares(
                     equity=float(eq),
@@ -422,6 +560,18 @@ class PaperEngine:
                     stop_loss_price_=float(sl),
                     max_risk=float(self.app_cfg.risk.max_risk_per_trade),
                 )
+                
+                # Regime-aware position sizing: adjust for market conditions
+                regime = regime_by_symbol.get(sym, {}).get("regime", "unknown")
+                regime_multiplier = 1.0
+                if regime in ["trending_up", "trending_down"]:
+                    regime_multiplier = 1.2  # 20% larger in trending markets
+                elif regime == "ranging":
+                    regime_multiplier = 0.8  # 20% smaller in ranging (chop)
+                elif regime == "volatile":
+                    regime_multiplier = 0.7  # 30% smaller in volatile (protect capital)
+                
+                shares = int(shares * regime_multiplier)
                 shares = min(shares, int(self.broker.portfolio().cash // px))
 
                 if shares > 0:
@@ -441,10 +591,14 @@ class PaperEngine:
                     else:
                         fills.append(res)
 
-                        # Attach SL/TP to the position.
+                        # Attach SL/TP to the position and track entry for multi-level exits
                         p = self.broker.portfolio().get_position(sym)
                         p.stop_loss = float(sl)
                         p.take_profit = float(tp)
+                        
+                        # Track entry for time-based and multi-level exits
+                        self._position_entry_bars[sym] = self.iteration
+                        self._position_entry_prices[sym] = float(px)
 
                         self.repo.log_order_filled(order)
                         self.repo.log_fill(res)
@@ -493,6 +647,11 @@ class PaperEngine:
         # Store for next learning update.
         self._prev_prices = dict(prices)
         self._prev_signals_by_symbol = current_signals_by_symbol
+        
+        print(f" ✓ ({len(fills)} fills)", flush=True)
+
+        # Calculate real-time metrics
+        sharpe, max_dd, win_rate, num_trades, pnl = self._calculate_metrics()
 
         return PaperEngineUpdate(
             ts=ts,
@@ -504,6 +663,11 @@ class PaperEngine:
             fills=fills,
             rejections=rejections,
             portfolio=self.broker.portfolio(),
+            sharpe_ratio=sharpe,
+            max_drawdown_pct=max_dd,
+            win_rate=win_rate,
+            num_trades=num_trades,
+            current_pnl=pnl,
         )
 
 

@@ -39,6 +39,7 @@ def _sparkline(values: list[float], *, width: int = 40) -> str:
 @dataclass
 class DashboardState:
     equity_history: list[float]
+    max_history: int = 1440  # Keep max 1440 points (prevents unbounded memory growth)
 
 
 def render_paper_dashboard(update: PaperEngineUpdate, state: DashboardState) -> Layout:
@@ -50,6 +51,9 @@ def render_paper_dashboard(update: PaperEngineUpdate, state: DashboardState) -> 
     realized = pf.realized_pnl()
 
     state.equity_history.append(float(equity))
+    # Prevent unbounded memory growth - keep only recent history
+    if len(state.equity_history) > state.max_history:
+        state.equity_history = state.equity_history[-state.max_history:]
 
     header = Text(
         f"Paper Trading  |  iter={update.iteration}  |  {update.ts.isoformat(timespec='seconds')}Z",

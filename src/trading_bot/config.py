@@ -46,7 +46,7 @@ def load_config(path: str | Path) -> AppConfig:
     portfolio = raw.get("portfolio", {}) or {}
     strategy = raw.get("strategy", {}) or {}
 
-    return AppConfig(
+    cfg = AppConfig(
         risk=RiskConfig(
             max_risk_per_trade=float(risk.get("max_risk_per_trade", 0.02)),
             stop_loss_pct=float(risk.get("stop_loss_pct", 0.015)),
@@ -55,3 +55,33 @@ def load_config(path: str | Path) -> AppConfig:
         portfolio=PortfolioConfig(target_sector_count=int(portfolio.get("target_sector_count", 5))),
         strategy=StrategyConfig(raw=strategy),
     )
+    
+    # Validate config on load
+    _validate_config(cfg)
+    return cfg
+
+
+def _validate_config(cfg: AppConfig) -> None:
+    """Validate configuration values to catch errors early."""
+    errors = []
+    
+    # Risk validation
+    if cfg.risk.max_risk_per_trade <= 0 or cfg.risk.max_risk_per_trade > 1.0:
+        errors.append(f"risk.max_risk_per_trade must be 0 < x <= 1.0, got {cfg.risk.max_risk_per_trade}")
+    
+    if cfg.risk.stop_loss_pct <= 0 or cfg.risk.stop_loss_pct > 0.5:
+        errors.append(f"risk.stop_loss_pct must be 0 < x <= 0.5 (50%), got {cfg.risk.stop_loss_pct}")
+    
+    if cfg.risk.take_profit_pct <= 0 or cfg.risk.take_profit_pct > 1.0:
+        errors.append(f"risk.take_profit_pct must be 0 < x <= 1.0 (100%), got {cfg.risk.take_profit_pct}")
+    
+    if cfg.risk.take_profit_pct <= cfg.risk.stop_loss_pct:
+        errors.append(f"risk.take_profit_pct ({cfg.risk.take_profit_pct}) must be > stop_loss_pct ({cfg.risk.stop_loss_pct})")
+    
+    # Portfolio validation
+    if cfg.portfolio.target_sector_count < 1:
+        errors.append(f"portfolio.target_sector_count must be >= 1, got {cfg.portfolio.target_sector_count}")
+    
+    if errors:
+        error_msg = "[CONFIG ERROR] Configuration validation failed:\n" + "\n".join(f"  • {e}" for e in errors)
+        raise ValueError(error_msg)
