@@ -415,6 +415,78 @@ def create_web_app():
             "num_trades": int(update.num_trades) if update.num_trades else 0,
             "equity_history": [float(x) for x in app.state.get("equity_history", [])]
         })
+    
+    @app.route("/api/smart-selection")
+    def get_smart_selection():
+        """API endpoint for smart selection metrics and predictions."""
+        try:
+            from trading_bot.data.smart_selector import StockScorer
+            from trading_bot.data.performance_tracker import PerformanceTracker
+            from trading_bot.data.ml_predictor import MLPredictor
+            from trading_bot.data.portfolio_optimizer import PortfolioOptimizer
+            from trading_bot.data.risk_manager import RiskManager
+            
+            # Load latest scores
+            scorer = StockScorer()
+            scores = scorer.load_scores("latest")
+            
+            # Load performance history
+            tracker = PerformanceTracker()
+            top_performers = tracker.get_top_performers(top_n=10)
+            
+            # Get ML predictions
+            predictor = MLPredictor()
+            predictor.load_model()
+            perf_dict = {p.symbol: p for p in top_performers}
+            predictions = predictor.predict(perf_dict)
+            
+            # Get risk metrics
+            update = app.state.get("current_update")
+            equity = float(update.portfolio.equity(update.prices)) if update else 100000
+            manager = RiskManager()
+            risk_metrics = manager.get_metrics(equity, num_positions=len(scores or {}))
+            
+            # Format response
+            score_list = []
+            for sym, score in sorted((scores or {}).items(), key=lambda x: x[1].overall_score, reverse=True)[:20]:
+                pred = predictions.get(sym)
+                score_list.append({
+                    "symbol": sym,
+                    "score": round(score.overall_score, 1),
+                    "trend": round(score.trend_score, 1),
+                    "volatility": round(score.volatility_score, 1),
+                    "volume": round(score.volume_score, 1),
+                    "liquidity": round(score.liquidity_score, 1),
+                    "win_probability": round(pred.win_probability * 100, 1) if pred else 0,
+                    "expected_return": round(pred.expected_return_pct, 2) if pred else 0,
+                })
+            
+            return jsonify({
+                "top_scores": score_list,
+                "top_performers": [
+                    {
+                        "symbol": p.symbol,
+                        "wins": p.wins,
+                        "losses": p.losses,
+                        "win_rate": round(p.win_rate * 100, 1),
+                        "profit_factor": round(p.profit_factor, 2),
+                    }
+                    for p in top_performers[:10]
+                ],
+                "risk_metrics": {
+                    "daily_loss_pct": round(risk_metrics.daily_loss_pct, 2),
+                    "max_daily_loss_pct": risk_metrics.max_daily_loss,
+                    "current_drawdown": round(risk_metrics.current_drawdown, 2),
+                    "max_drawdown_pct": risk_metrics.max_drawdown,
+                    "at_risk": risk_metrics.at_risk,
+                },
+                "timestamp": str(app.state.get("last_update", "N/A")),
+            })
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
 
     return app
 
