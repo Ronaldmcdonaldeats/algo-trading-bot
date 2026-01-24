@@ -44,3 +44,90 @@ def position_size_shares(
     per_share_risk = entry_price - stop_loss_price_
     shares = int(risk_budget // per_share_risk)
     return max(shares, 0)
+
+def kelly_criterion_position_size(
+    *,
+    win_rate: float,
+    avg_win: float,
+    avg_loss: float,
+    equity: float,
+    kelly_fraction: float = 0.25
+) -> float:
+    """Kelly Criterion optimal position sizing
+    
+    Kelly % = (bp - q) / b
+    where:
+    - b = avg_win / avg_loss (odds)
+    - p = win_rate
+    - q = 1 - win_rate
+    
+    Uses fractional Kelly (typically 0.25) for risk management
+    
+    Args:
+        win_rate: Fraction of winning trades (0-1)
+        avg_win: Average profit per winning trade
+        avg_loss: Average loss per losing trade (positive number)
+        equity: Current portfolio equity
+        kelly_fraction: Fraction of Kelly to use (0.25 = quarter Kelly)
+    
+    Returns:
+        Position size as fraction of equity (0-1)
+    """
+    
+    if not (0 <= win_rate <= 1):
+        raise ValueError("win_rate must be between 0 and 1")
+    
+    if avg_win <= 0 or avg_loss <= 0:
+        raise ValueError("avg_win and avg_loss must be positive")
+    
+    if kelly_fraction <= 0 or kelly_fraction > 1:
+        raise ValueError("kelly_fraction must be between 0 and 1")
+    
+    # Calculate odds
+    b = avg_win / avg_loss
+    p = win_rate
+    q = 1.0 - win_rate
+    
+    # Kelly formula
+    kelly_pct = (b * p - q) / b if b > 0 else 0
+    
+    # Apply fractional Kelly for safety
+    position_fraction = kelly_pct * kelly_fraction
+    
+    # Ensure position size is reasonable (0 to 1)
+    position_fraction = max(0.0, min(1.0, position_fraction))
+    
+    return position_fraction
+
+
+def kelly_position_shares(
+    *,
+    win_rate: float,
+    avg_win: float,
+    avg_loss: float,
+    equity: float,
+    entry_price: float,
+    kelly_fraction: float = 0.25
+) -> int:
+    """Calculate shares to buy using Kelly Criterion
+    
+    Args:
+        All Kelly parameters plus:
+        entry_price: Current price to buy at
+    
+    Returns:
+        Number of shares to buy
+    """
+    
+    position_fraction = kelly_criterion_position_size(
+        win_rate=win_rate,
+        avg_win=avg_win,
+        avg_loss=avg_loss,
+        equity=equity,
+        kelly_fraction=kelly_fraction
+    )
+    
+    position_value = equity * position_fraction
+    shares = int(position_value / entry_price) if entry_price > 0 else 0
+    
+    return max(shares, 0)
