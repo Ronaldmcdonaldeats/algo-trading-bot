@@ -50,10 +50,21 @@ def _get_smart_selected_symbols(
         print(f"[INFO] Batch downloading data for {len(symbols)} symbols (cached results reused)...")
         data = downloader.download_batch(symbols, period="3mo", interval="1d")
         
+        # Filter out None values
+        data = {sym: df for sym, df in data.items() if df is not None and len(df) > 0}
+        
+        if not data:
+            print("[WARNING] No data available, falling back to top NASDAQ stocks")
+            return get_nasdaq_symbols(top_n=select_top)
+        
         # Score stocks
         scorer = StockScorer()
         print(f"[INFO] Scoring {len(data)} stocks by trend, volatility, volume, liquidity...")
         scores = scorer.score_stocks(data)
+        
+        if not scores:
+            print("[WARNING] No scores available, falling back to top NASDAQ stocks")
+            return get_nasdaq_symbols(top_n=select_top)
         
         # Select top
         selected = scorer.select_top_stocks(scores, top_n=select_top, min_score=min_score)
@@ -65,7 +76,9 @@ def _get_smart_selected_symbols(
         return selected if selected else get_nasdaq_symbols(top_n=select_top)
         
     except Exception as e:
+        import traceback
         print(f"[ERROR] Smart selection failed: {e}")
+        traceback.print_exc()
         print("[INFO] Falling back to top NASDAQ stocks")
         return get_nasdaq_symbols(top_n=select_top)
 
