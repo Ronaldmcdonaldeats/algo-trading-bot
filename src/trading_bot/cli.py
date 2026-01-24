@@ -137,6 +137,20 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="trading-bot")
     sub = p.add_subparsers(dest="cmd", required=True)
 
+    # Auto-start with learning and smart selection
+    auto = sub.add_parser("auto", help="Auto-start with smart stock selection and strategy learning")
+    auto.add_argument("--config", default="configs/default.yaml")
+    auto.add_argument("--start-cash", type=float, default=100_000.0, help="Initial portfolio cash")
+    auto.add_argument("--iterations", type=int, default=0, help="Number of iterations (0 = infinite)")
+    auto.add_argument("--no-ui", action="store_true", help="Disable terminal UI")
+    auto.add_argument("--no-learn", action="store_true", help="Disable automatic strategy learning")
+    auto.add_argument("--symbols", help="Manual symbols (comma-separated) - overrides auto-selection")
+    auto.add_argument("--period", default="60d", help="Historical data period")
+    auto.add_argument("--interval", default="1d", help="Trading interval")
+    auto.add_argument("--db", default="data/trades.sqlite")
+    auto.add_argument("--alpaca-key", help="Alpaca API Key ID")
+    auto.add_argument("--alpaca-secret", help="Alpaca Secret Key")
+
     bt = sub.add_parser("backtest", help="Run historical backtest")
     bt.add_argument("--config", default="configs/default.yaml")
     bt.add_argument(
@@ -672,6 +686,28 @@ def main(argv: list[str] | None = None) -> int:
             args.live_cmd = "paper"
             return _run_live(args)
         return _run_paper(args)
+
+    if args.cmd == "auto":
+        from trading_bot.auto_start import auto_start_paper_trading
+        
+        symbols = None
+        if hasattr(args, 'symbols') and args.symbols:
+            symbols = _parse_symbols(args.symbols)
+        
+        return auto_start_paper_trading(
+            symbols=symbols,
+            iterations=int(args.iterations),
+            auto_select=symbols is None,  # Auto-select if no manual symbols
+            auto_learn=not args.no_learn,
+            config_path=args.config,
+            start_cash=float(args.start_cash),
+            db_path=args.db,
+            period=args.period,
+            interval=args.interval,
+            ui=not args.no_ui,
+            alpaca_key=args.alpaca_key,
+            alpaca_secret=args.alpaca_secret,
+        )
 
     if args.cmd == "learn":
         return _run_learn(args)

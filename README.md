@@ -135,6 +135,48 @@ python -m trading_bot.ui.web
 
 ## 📋 Common Commands
 
+### ⚡ AUTO-START: Smart Trading with Learning (RECOMMENDED)
+
+Start automatic paper trading with intelligent stock selection and strategy learning:
+
+```bash
+# One command does it all:
+# - Scores all 500 NASDAQ stocks
+# - Selects top 50 performers
+# - Starts paper trading
+# - Learns from results automatically
+# - Shows real-time dashboard
+
+python -m trading_bot auto
+```
+
+That's it! The system will:
+1. **Select stocks** - Smart-scores NASDAQ for best performers
+2. **Trade** - Executes trades automatically
+3. **Learn** - Improves strategies from results
+4. **Monitor** - Shows real-time dashboard
+
+**Optional auto-start arguments:**
+```bash
+# Customize iterations (0 = infinite loop)
+python -m trading_bot auto --iterations 100
+
+# Disable learning if you prefer
+python -m trading_bot auto --no-learn
+
+# Use specific stocks instead of auto-selection
+python -m trading_bot auto --symbols AAPL,MSFT,GOOGL
+
+# Change how long between trading iterations
+python -m trading_bot auto --period 60d --interval 1h
+
+# Disable dashboard (headless mode)
+python -m trading_bot auto --no-ui
+
+# Custom starting capital
+python -m trading_bot auto --start-cash 50000
+```
+
 ### Paper Trading (No Real Money)
 ```bash
 python -m trading_bot paper \
