@@ -1,51 +1,89 @@
+version: '3.8'
+
 services:
-  web:
+  # Main trading bot service - runs auto-trading with learning
+  trading-bot:
     image: algo-trading-bot:latest
-    container_name: trading-bot-web
+    container_name: algo-trading-bot
+    build: .
     env_file:
       - .env
     volumes:
       - .:/app
       - ./data:/app/data
+      - ./.cache:/app/.cache
+      - ./logs:/app/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=production
+    command: ["python", "-m", "trading_bot", "auto"]
+    depends_on:
+      - postgres
+    networks:
+      - trading-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "from trading_bot.learn.strategy_learner import StrategyLearner; StrategyLearner()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # Web dashboard service - shows real-time trading data
+  dashboard:
+    image: algo-trading-bot:latest
+    container_name: trading-bot-dashboard
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      - ./.cache:/app/.cache
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=production
+      - FLASK_APP=trading_bot.ui.web
     ports:
       - "5000:5000"
     command: ["python", "-m", "trading_bot.ui.web"]
-    environment:
-      - FLASK_ENV=production
-      - FLASK_APP=trading_bot.ui.web
     depends_on:
       - postgres
+    networks:
+      - trading-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
+    restart: unless-stopped
 
-  app:
-    image: algo-trading-bot:latest
-    env_file:
-      - .env
-    volumes:
-      - .:/app
-      - ./data:/app/data
-    command: ["python", "-m", "trading_bot", "paper", "--symbols", "AAPL,GOOGL,MSFT", "--period", "6mo"]
-
+  # PostgreSQL database - stores trade history and metrics
   postgres:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: trading-bot-postgres
     environment:
-      POSTGRES_USER: trading
-      POSTGRES_PASSWORD: trading
-      POSTGRES_DB: trading
+      POSTGRES_USER: ${DB_USER:-trading}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-trading}
+      POSTGRES_DB: ${DB_NAME:-trading}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - trading-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U trading"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-trading}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+networks:
+  trading-network:
+    driver: bridge
 
 volumes:
+  pgdata:
+    driver: local
   pgdata:
