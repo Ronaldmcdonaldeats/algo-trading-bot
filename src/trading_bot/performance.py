@@ -1,6 +1,6 @@
-"""Performance optimization and monitoring.
+"""Performance optimizations for data processing and indicators.
 
-Provides optimized versions of common operations:
+This module provides optimized versions of common operations:
 - Batch indicator calculation with numpy vectorization
 - Async data processing for multiple symbols
 - Lazy evaluation patterns
@@ -15,8 +15,6 @@ from typing import Callable, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-
-from .latency_optimizer import LatencyOptimizer, LatencyMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -228,14 +226,3 @@ class IndicatorBatcher:
             results[symbol] = df_copy
         
         return results
-
-
-__all__ = [
-    "LatencyOptimizer",
-    "LatencyMetrics",
-    "PerformanceMetrics",
-    "VectorizedIndicators",
-    "BatchDataProcessor",
-    "StreamingDataProcessor",
-    "IndicatorBatcher",
-]
