@@ -1,0 +1,47 @@
+site_name: Algo Trading Bot
+site_description: Intelligent Python trading bot with real-time web dashboard and learning system
+site_author: Ronald McDonald
+repo_url: https://github.com/Ronaldmcdonaldeats/algo-trading-bot
+repo_name: algo-trading-bot
+site_url: https://ronaldmcdonaldeats.github.io/algo-trading-bot/
+
+theme:
+  name: material
+  palette:
+    - scheme: dark
+      primary: blue
+      accent: cyan
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quick Start: QUICK_START.md
+    - Docker Setup: DOCKER_COMPOSE_GUIDE.md
+    - Installation: INSTALLATION.md
+  - Features:
+    - Overview: README.md
+    - Web Dashboard: WEB_DASHBOARD.md
+    - Optimization: OPTIMIZATION_SUMMARY.md
+  - Guides:
+    - Project Structure: FOLDER_STRUCTURE.md
+    - Learning System: LEARNING_AND_TRADING_OPTIMIZATIONS.md
+  - Documentation:
+    - Memory Optimization: MEMORY_OPTIMIZATION_GUIDE.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.emoji
+  - toc:
+      permalink: true
+
+plugins:
+  - search
