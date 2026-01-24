@@ -30,6 +30,46 @@ def _get_nasdaq_symbols(top_n: int = 500) -> list[str]:
         raise SystemExit(f"NASDAQ symbol loading failed: {e}")
 
 
+def _get_smart_selected_symbols(
+    top_n: int = 500,
+    select_top: int = 50,
+    min_score: float = 60,
+    use_cached: bool = True,
+) -> list[str]:
+    """Get top performers using smart scoring."""
+    try:
+        from trading_bot.data.batch_downloader import BatchDownloader
+        from trading_bot.data.smart_selector import StockScorer
+        from trading_bot.data.nasdaq_symbols import get_nasdaq_symbols
+        
+        print(f"[INFO] Smart selection: Loading {top_n} NASDAQ stocks...")
+        symbols = get_nasdaq_symbols(top_n=top_n)
+        
+        # Download data in batches
+        downloader = BatchDownloader(max_workers=8)
+        print(f"[INFO] Batch downloading data for {len(symbols)} symbols (cached results reused)...")
+        data = downloader.download_batch(symbols, period="3mo", interval="1d")
+        
+        # Score stocks
+        scorer = StockScorer()
+        print(f"[INFO] Scoring {len(data)} stocks by trend, volatility, volume, liquidity...")
+        scores = scorer.score_stocks(data)
+        
+        # Select top
+        selected = scorer.select_top_stocks(scores, top_n=select_top, min_score=min_score)
+        
+        # Save scores for future reference
+        scorer.save_scores(scores, "latest")
+        
+        print(f"[INFO] Selected {len(selected)} best stocks for trading")
+        return selected if selected else get_nasdaq_symbols(top_n=select_top)
+        
+    except Exception as e:
+        print(f"[ERROR] Smart selection failed: {e}")
+        print("[INFO] Falling back to top NASDAQ stocks")
+        return get_nasdaq_symbols(top_n=select_top)
+
+
 def _save_keys_to_env(key: str, secret: str) -> None:
     """Save Alpaca keys to .env file."""
     env_path = ".env"
@@ -51,6 +91,11 @@ def _add_paper_run_args(p: argparse.ArgumentParser) -> None:
     )
     p.add_argument("--nasdaq-top-500", action="store_true", help="Trade top 500 NASDAQ stocks instead of --symbols")
     p.add_argument("--nasdaq-top-100", action="store_true", help="Trade top 100 NASDAQ stocks instead of --symbols")
+    p.add_argument("--auto-select", action="store_true", help="Automatically select best stocks from top 500 using ML scoring")
+    p.add_argument("--smart-rank", action="store_true", help="Score and rank all stocks before trading (slower startup, faster execution)")
+    p.add_argument("--select-top", type=int, default=50, help="Number of top stocks to select with --auto-select (default 50)")
+    p.add_argument("--min-score", type=float, default=60.0, help="Minimum score threshold for auto-select (0-100, default 60)")
+    p.add_argument("--use-performance-history", action="store_true", help="Use past performance to select winning stocks")
     # For intraday (15m) data, yfinance commonly works best with shorter periods.
     p.add_argument("--period", default="6mo", help="Data period (e.g. 5d, 60d, 1y, 3mo, 6mo)")
     p.add_argument("--interval", default="1d", help="Bar interval (e.g. 5m, 15m, 1h, 1d)")
@@ -236,11 +281,30 @@ def _run_paper(args: argparse.Namespace) -> int:
 
     from trading_bot.paper.runner import run_paper_trading
 
-    # Handle NASDAQ flags
-    if getattr(args, 'nasdaq_top_500', False):
+    # Handle symbol selection (priority: auto-select > smart-rank > nasdaq flags > manual)
+    if getattr(args, 'auto_select', False):
+        symbols = _get_smart_selected_symbols(
+            top_n=500,
+            select_top=args.select_top,
+            min_score=args.min_score,
+        )
+    elif getattr(args, 'smart_rank', False):
+        symbols = _get_smart_selected_symbols(
+            top_n=500,
+            select_top=500,  # Keep all, just score them
+            min_score=0,
+        )
+    elif getattr(args, 'nasdaq_top_500', False):
         symbols = _get_nasdaq_symbols(top_n=500)
     elif getattr(args, 'nasdaq_top_100', False):
         symbols = _get_nasdaq_symbols(top_n=100)
+    elif getattr(args, 'use_performance_history', False):
+        # Use past winners
+        from trading_bot.data.performance_tracker import PerformanceTracker
+        tracker = PerformanceTracker()
+        top_performers = tracker.get_top_performers(min_trades=3, top_n=args.select_top)
+        symbols = top_performers if top_performers else _parse_symbols(args.symbols)
+        print(f"[INFO] Using {len(symbols)} top performing stocks from history")
     else:
         symbols = _parse_symbols(args.symbols)
     
@@ -278,11 +342,29 @@ def _run_backtest(args: argparse.Namespace) -> int:
 
     console.print("[bold cyan]Historical Backtest[/bold cyan]")
     
-    # Handle NASDAQ flags
-    if getattr(args, 'nasdaq_top_500', False):
+    # Handle symbol selection (priority: auto-select > smart-rank > nasdaq flags > manual)
+    if getattr(args, 'auto_select', False):
+        symbols = _get_smart_selected_symbols(
+            top_n=500,
+            select_top=args.select_top,
+            min_score=args.min_score,
+        )
+    elif getattr(args, 'smart_rank', False):
+        symbols = _get_smart_selected_symbols(
+            top_n=500,
+            select_top=500,
+            min_score=0,
+        )
+    elif getattr(args, 'nasdaq_top_500', False):
         symbols = _get_nasdaq_symbols(top_n=500)
     elif getattr(args, 'nasdaq_top_100', False):
         symbols = _get_nasdaq_symbols(top_n=100)
+    elif getattr(args, 'use_performance_history', False):
+        from trading_bot.data.performance_tracker import PerformanceTracker
+        tracker = PerformanceTracker()
+        top_performers = tracker.get_top_performers(min_trades=3, top_n=args.select_top)
+        symbols = top_performers if top_performers else _parse_symbols(args.symbols)
+        console.print(f"[yellow]Using {len(symbols)} top performing stocks from history[/yellow]")
     else:
         symbols = _parse_symbols(args.symbols)
     
@@ -366,11 +448,29 @@ def _run_live(args: argparse.Namespace) -> int:
     if live_cmd == "paper":
         from trading_bot.live.runner import run_live_paper_trading
         
-        # Handle NASDAQ flags
-        if getattr(args, 'nasdaq_top_500', False):
+        # Handle symbol selection (priority: auto-select > smart-rank > nasdaq flags > manual)
+        if getattr(args, 'auto_select', False):
+            symbols = _get_smart_selected_symbols(
+                top_n=500,
+                select_top=args.select_top,
+                min_score=args.min_score,
+            )
+        elif getattr(args, 'smart_rank', False):
+            symbols = _get_smart_selected_symbols(
+                top_n=500,
+                select_top=500,
+                min_score=0,
+            )
+        elif getattr(args, 'nasdaq_top_500', False):
             symbols = _get_nasdaq_symbols(top_n=500)
         elif getattr(args, 'nasdaq_top_100', False):
             symbols = _get_nasdaq_symbols(top_n=100)
+        elif getattr(args, 'use_performance_history', False):
+            from trading_bot.data.performance_tracker import PerformanceTracker
+            tracker = PerformanceTracker()
+            top_performers = tracker.get_top_performers(min_trades=3, top_n=args.select_top)
+            symbols = top_performers if top_performers else _parse_symbols(args.symbols)
+            print(f"[INFO] Using {len(symbols)} top performing stocks from history")
         else:
             symbols = _parse_symbols(args.symbols)
         
@@ -391,11 +491,29 @@ def _run_live(args: argparse.Namespace) -> int:
     if live_cmd == "trading":
         from trading_bot.live.runner import run_live_real_trading
         
-        # Handle NASDAQ flags
-        if getattr(args, 'nasdaq_top_500', False):
+        # Handle symbol selection (priority: auto-select > smart-rank > nasdaq flags > manual)
+        if getattr(args, 'auto_select', False):
+            symbols = _get_smart_selected_symbols(
+                top_n=500,
+                select_top=args.select_top,
+                min_score=args.min_score,
+            )
+        elif getattr(args, 'smart_rank', False):
+            symbols = _get_smart_selected_symbols(
+                top_n=500,
+                select_top=500,
+                min_score=0,
+            )
+        elif getattr(args, 'nasdaq_top_500', False):
             symbols = _get_nasdaq_symbols(top_n=500)
         elif getattr(args, 'nasdaq_top_100', False):
             symbols = _get_nasdaq_symbols(top_n=100)
+        elif getattr(args, 'use_performance_history', False):
+            from trading_bot.data.performance_tracker import PerformanceTracker
+            tracker = PerformanceTracker()
+            top_performers = tracker.get_top_performers(min_trades=3, top_n=args.select_top)
+            symbols = top_performers if top_performers else _parse_symbols(args.symbols)
+            print(f"[INFO] Using {len(symbols)} top performing stocks from history")
         else:
             symbols = _parse_symbols(args.symbols)
         
