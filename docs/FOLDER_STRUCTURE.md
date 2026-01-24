@@ -1,83 +1,98 @@
-# 📁 Folder Structure Overview
+# Folder Structure Overview
 
-## 📂 Root Level (Clean!)
+## Root Directory
+Clean, minimal structure with only essential files and directories visible:
 
 ```
 algo-trading-bot/
-├── 📄 README.md                  # Project overview (START HERE)
-├── 📄 DOCUMENTATION.md           # Complete reference (ALL INFO)
-├── 📄 AGENTS.md                  # Agent guidance
-├── 📄 pyproject.toml             # Package configuration
-├── 📄 docker-compose.yml         # Docker setup
-├── 📄 Dockerfile                 # Container definition
-│
-├── 📁 src/                       # Main source code
-│   └── trading_bot/              # Bot package (core implementation)
-│
-├── 📁 tests/                     # Unit tests
-├── 📁 configs/                   # Configuration files (default.yaml)
-├── 📁 scripts/                   # Setup scripts (bootstrap.ps1)
-├── 📁 notebooks/                 # Research notebooks
-│
-├── 📁 tools/                     # ⭐ Verification & demo scripts
-│   ├── verify_improvements.py    # Verify all 3 improvements
-│   ├── verify_learning.py        # Verify learning systems
-│   ├── demo_learning_monitoring.ps1
-│   └── test_learning_cli.ps1
-│
-├── 📁 data/                      # ⭐ Runtime data
-│   └── trades.sqlite             # Trading database
-│
-├── 📁 logs/                      # ⭐ Runtime logs
-│   └── bot_debug.log             # Debug log
-│
-├── 📁 .cache/                    # Cache (hidden)
-├── 📁 .venv/                     # Virtual environment (hidden)
-├── 📁 .git/                      # Git repo (hidden)
-└── 📁 .pytest_cache/             # Pytest cache (hidden)
+├── configs/              # Configuration files (default.yaml)
+├── data/                 # Runtime data (NEW - databases, logs)
+├── docs/                 # Documentation (NEW - optimizations, guides)
+├── notebooks/            # Jupyter notebooks for analysis
+├── scripts/              # Utility scripts (bootstrap.ps1)
+├── src/                  # Source code
+├── tests/                # Unit tests
+├── .env                  # Environment variables
+├── docker-compose.yml    # Docker Compose configuration
+├── Dockerfile            # Docker image definition
+├── pyproject.toml        # Python project configuration
+└── README.md             # Project overview
 ```
 
-## 🎯 Where To Find Things
+## Key Directories
 
-| Need | Location | Command |
-|------|----------|---------|
-| Start trading | `README.md` | `python -m trading_bot start --period 60d` |
-| Learn everything | `DOCUMENTATION.md` | Open in editor |
-| Source code | `src/trading_bot/` | Edit strategies, engine, etc. |
-| Run tests | `tests/` | `pytest` |
-| Verify bot works | `tools/verify_improvements.py` | `python tools/verify_improvements.py` |
-| Monitor learning | `tools/test_learning_cli.ps1` | `.\tools\test_learning_cli.ps1` |
-| Trading data | `data/trades.sqlite` | Query with `sqlite3 data/trades.sqlite` |
-| Debug logs | `logs/bot_debug.log` | Check if errors |
-| Configuration | `configs/default.yaml` | Edit trading parameters |
+### `/configs/`
+Configuration YAML files for trading strategies and parameters:
+- `default.yaml` - Default trading configuration
 
-## ✅ Clean Organization
+### `/data/` (NEW)
+Runtime files including databases and logs:
+- `trades.sqlite` - Trade history database (moved from root)
+- `test.db` - Test database
+- `bot_debug.log` - Debug logs
 
-✅ **Source code** - Organized by feature (engine, strategies, learning, etc.)
-✅ **Tools** - All verification/demo scripts in one place
-✅ **Data** - Separate from code (easy to backup/delete)
-✅ **Logs** - Separate from code (easy to clean)
-✅ **Config** - YAML files separate from code
-✅ **Hidden** - Cache/venv/git kept out of sight
+### `/docs/` (NEW)
+Documentation files for reference:
+- `OPTIMIZATION_SUMMARY.md` - All optimizations applied
+- `MEMORY_OPTIMIZATION_GUIDE.md` - Memory optimization details
+- `QUICK_START.md` - Getting started guide
+- `FOLDER_STRUCTURE.md` - This file structure reference
+- Additional guides and agent notes
 
-## 🧹 Cleanup Commands
+### `/src/trading_bot/`
+Main application code:
 
-Keep it clean:
+**Core Modules:**
+- `__init__.py` - Package initialization
+- `__main__.py` - Entry point
+- `cli.py` - Command-line interface (11 subcommands)
+- `config.py` - Configuration loading & validation
+- `indicators.py` - Technical indicators (RSI, MACD, ATR, etc.)
+- `risk.py` - Risk management calculations
 
-```powershell
-# Clear cache (safe to delete anytime)
-rm -r .cache, .pytest_cache, .ruff_cache
+**Subpackages:**
+- `analytics/` - DuckDB analytics pipeline
+- `backtest/` - Backtesting engine
+- `broker/` - Broker integrations (Alpaca, Paper)
+- `core/` - Core data models
+- `data/` - Data providers (Alpaca, Mock)
+- `db/` - Database models and repository
+- `engine/` - Paper trading engine
+- `learn/` - Ensemble learning and tuning
+- `paper/` - Paper trading runner
+- `schedule/` - Market schedule (US equities)
+- `strategy/` - Trading strategies (RSI, MACD, ATR)
+- `tui/` - Terminal UI (Rich)
+- `ui/` - Dashboard UI
 
-# Archive old logs
-mv logs/bot_debug.log logs/bot_debug.log.bak
+### `/tests/`
+Unit tests:
+- `test_config.py` - Config validation tests
+- `test_duckdb_analytics.py` - Analytics tests
+- `test_paper_broker.py` - Paper broker tests
+- `test_risk.py` - Risk management tests
+- `test_schedule.py` - Market schedule tests
 
-# Backup database before cleanup
-cp data/trades.sqlite data/trades.sqlite.bak
+## Default Paths
+All database operations now use `data/trades.sqlite`:
+- CLI: All 11 subcommands default to `data/trades.sqlite`
+- Python APIs: All runners and libraries default to `data/trades.sqlite`
+- This keeps runtime data organized separately from code
 
-# Clean old trading data (keep last 7 days)
-python -m trading_bot maintenance cleanup --days-keep 7
-```
+## Cleanup Summary
+**Before:** Root directory had 28+ files (10+ markdown docs, 3 databases scattered)
+**After:** Root directory has only 7 dirs + 7 essential files
 
----
+**Moved to `/docs/`:**
+- OPTIMIZATION_SUMMARY.md
+- MEMORY_OPTIMIZATION_GUIDE.md
+- QUICK_START.md
+- AGENTS.md
+- DOCUMENTATION.md
+- FOLDER_STRUCTURE.md
+- And 5+ other optimization documents
 
-**Last Updated:** January 23, 2026
+**Moved to `/data/`:**
+- trades.sqlite (trade history)
+- test.db (test database)
+- bot_debug.log (debug logs)

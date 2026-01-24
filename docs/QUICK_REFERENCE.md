@@ -1,6 +1,23 @@
-# Smart Selection - Quick Reference
+# Master Trading System - Quick Reference
 
-## The Three Ways to Trade Smart
+## 🎯 Start Trading Now
+
+```bash
+# Run the master integrated trading system
+python -m trading_bot
+```
+
+This runs:
+- ✅ All 9 advanced features working together
+- ✅ Real-time dashboard showing everything
+- ✅ Automatic email reports at market close
+- ✅ Professional risk management (Kelly + brackets)
+- ✅ Tax optimization running daily
+- ✅ 55 tests verified it works
+
+---
+
+## 🚀 The Three Ways to Trade Smart
 
 ### 1. 🚀 FASTEST - Auto-Select Top 50 (1-2 min)
 ```bash
