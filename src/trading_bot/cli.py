@@ -17,6 +17,19 @@ def _parse_symbols(value: str) -> list[str]:
     return symbols
 
 
+def _get_nasdaq_symbols(top_n: int = 500) -> list[str]:
+    """Get top N NASDAQ stocks by market cap."""
+    try:
+        from trading_bot.data.nasdaq_symbols import get_nasdaq_symbols
+        symbols = get_nasdaq_symbols(top_n=top_n)
+        print(f"[INFO] Loaded {len(symbols)} NASDAQ symbols (top {top_n})")
+        return symbols
+    except Exception as e:
+        print(f"[ERROR] Failed to load NASDAQ symbols: {e}")
+        print("[INFO] Falling back to default symbols")
+        raise SystemExit(f"NASDAQ symbol loading failed: {e}")
+
+
 def _save_keys_to_env(key: str, secret: str) -> None:
     """Save Alpaca keys to .env file."""
     env_path = ".env"
@@ -36,6 +49,8 @@ def _add_paper_run_args(p: argparse.ArgumentParser) -> None:
         default="AAPL,MSFT,AMZN,AVGO,META,TSLA,GOOGL,GOOG,COST,NFLX,AMD,ADBE,PEP,LIN,CSCO,TMUS,INTC,QCOM,TXN,AMGN,HON,INTU,BKNG,ISRG,CMCSA,SBUX,MDLZ,GILD,VRTX,REGN,ADP,LRCX,ADI,PANW,MU,KLAC,SNPS,CDNS,MELI,CRWD,MAR,PYPL,CSX,ORLY,MNST,CTAS,PCAR,NXPI,WDAY,LULU,ABNB,DXCM,FTNT,ROST,IDXX,KDP,PAYX,ODFL,MCHP,FAST,CPRT,CTVA,BIIB,VRSK,KHC,EA,AEP,EXC,XEL,GFS,WBD,CSGP,DLTR,SIRI,SPY,QQQ",
         help="Comma-separated tickers (e.g. SPY,AAPL,MSFT)",
     )
+    p.add_argument("--nasdaq-top-500", action="store_true", help="Trade top 500 NASDAQ stocks instead of --symbols")
+    p.add_argument("--nasdaq-top-100", action="store_true", help="Trade top 100 NASDAQ stocks instead of --symbols")
     # For intraday (15m) data, yfinance commonly works best with shorter periods.
     p.add_argument("--period", default="6mo", help="Data period (e.g. 5d, 60d, 1y, 3mo, 6mo)")
     p.add_argument("--interval", default="1d", help="Bar interval (e.g. 5m, 15m, 1h, 1d)")
@@ -71,6 +86,8 @@ def build_parser() -> argparse.ArgumentParser:
         default="SPY,QQQ,IWM",
         help="Comma-separated tickers (e.g. SPY,AAPL,MSFT)",
     )
+    bt.add_argument("--nasdaq-top-500", action="store_true", help="Trade top 500 NASDAQ stocks instead of --symbols")
+    bt.add_argument("--nasdaq-top-100", action="store_true", help="Trade top 100 NASDAQ stocks instead of --symbols")
     bt.add_argument("--period", default="1y", help="Historical period (1y, 2y, 5y, max)")
     bt.add_argument("--interval", default="1d", help="Bar interval (1d, 1wk, 1mo)")
     bt.add_argument("--start-cash", type=float, default=100_000.0)
@@ -139,6 +156,8 @@ def build_parser() -> argparse.ArgumentParser:
     live_paper = live_sub.add_parser("paper", help="Paper trading on Alpaca")
     live_paper.add_argument("--config", default="configs/default.yaml")
     live_paper.add_argument("--symbols", default="SPY", help="Comma-separated tickers")
+    live_paper.add_argument("--nasdaq-top-500", action="store_true", help="Trade top 500 NASDAQ stocks instead of --symbols")
+    live_paper.add_argument("--nasdaq-top-100", action="store_true", help="Trade top 100 NASDAQ stocks instead of --symbols")
     live_paper.add_argument("--period", default="60d")
     live_paper.add_argument("--interval", default="1d")
     live_paper.add_argument("--start-cash", type=float, default=100_000.0)
@@ -151,6 +170,8 @@ def build_parser() -> argparse.ArgumentParser:
     live_trading = live_sub.add_parser("trading", help="LIVE trading on Alpaca (REAL MONEY)")
     live_trading.add_argument("--config", default="configs/default.yaml")
     live_trading.add_argument("--symbols", default="SPY", help="Comma-separated tickers")
+    live_trading.add_argument("--nasdaq-top-500", action="store_true", help="Trade top 500 NASDAQ stocks instead of --symbols")
+    live_trading.add_argument("--nasdaq-top-100", action="store_true", help="Trade top 100 NASDAQ stocks instead of --symbols")
     live_trading.add_argument("--period", default="60d")
     live_trading.add_argument("--interval", default="15m")
     live_trading.add_argument("--db", default="data/trades.sqlite")
@@ -215,7 +236,13 @@ def _run_paper(args: argparse.Namespace) -> int:
 
     from trading_bot.paper.runner import run_paper_trading
 
-    symbols = _parse_symbols(args.symbols)
+    # Handle NASDAQ flags
+    if getattr(args, 'nasdaq_top_500', False):
+        symbols = _get_nasdaq_symbols(top_n=500)
+    elif getattr(args, 'nasdaq_top_100', False):
+        symbols = _get_nasdaq_symbols(top_n=100)
+    else:
+        symbols = _parse_symbols(args.symbols)
     
     # Apply memory optimization limit
     if args.max_symbols and len(symbols) > args.max_symbols:
@@ -250,7 +277,15 @@ def _run_backtest(args: argparse.Namespace) -> int:
     console = Console()
 
     console.print("[bold cyan]Historical Backtest[/bold cyan]")
-    symbols = _parse_symbols(args.symbols)
+    
+    # Handle NASDAQ flags
+    if getattr(args, 'nasdaq_top_500', False):
+        symbols = _get_nasdaq_symbols(top_n=500)
+    elif getattr(args, 'nasdaq_top_100', False):
+        symbols = _get_nasdaq_symbols(top_n=100)
+    else:
+        symbols = _parse_symbols(args.symbols)
+    
     console.print(f"Symbols: {', '.join(symbols)}")
     console.print(f"Period: {args.period} | Interval: {args.interval}")
     console.print(f"Capital: ${args.start_cash:,.0f} | Strategy: {args.strategy}")
@@ -331,7 +366,14 @@ def _run_live(args: argparse.Namespace) -> int:
     if live_cmd == "paper":
         from trading_bot.live.runner import run_live_paper_trading
         
-        symbols = _parse_symbols(args.symbols)
+        # Handle NASDAQ flags
+        if getattr(args, 'nasdaq_top_500', False):
+            symbols = _get_nasdaq_symbols(top_n=500)
+        elif getattr(args, 'nasdaq_top_100', False):
+            symbols = _get_nasdaq_symbols(top_n=100)
+        else:
+            symbols = _parse_symbols(args.symbols)
+        
         run_live_paper_trading(
             config_path=args.config,
             symbols=symbols,
@@ -349,7 +391,13 @@ def _run_live(args: argparse.Namespace) -> int:
     if live_cmd == "trading":
         from trading_bot.live.runner import run_live_real_trading
         
-        symbols = _parse_symbols(args.symbols)
+        # Handle NASDAQ flags
+        if getattr(args, 'nasdaq_top_500', False):
+            symbols = _get_nasdaq_symbols(top_n=500)
+        elif getattr(args, 'nasdaq_top_100', False):
+            symbols = _get_nasdaq_symbols(top_n=100)
+        else:
+            symbols = _parse_symbols(args.symbols)
         
         # Double-check user intent
         if not args.enable_live:

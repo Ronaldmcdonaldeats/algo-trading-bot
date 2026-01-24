@@ -35,3 +35,8 @@ data/
 logs/
 trades.sqlite
 .env
+
+# Build and debug logs
+bot_debug.log
+build.log
+*.log
