@@ -1,183 +1,234 @@
-# algo-trading-bot
-Python-based algorithmic trading bot scaffold with backtesting + paper trading foundations.
+# 📈 Algo Trading Bot
 
-## Safety / compliance
-This repository is a software template. Trading involves risk. Ensure you comply with all broker rules and applicable regulations (SEC/FINRA/etc.).
+An intelligent Python-based algorithmic trading bot with real-time web dashboard, automated learning system, and live trading capabilities via Alpaca.
 
-## Quickstart (Windows PowerShell)
-1) Create a venv
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-2) Install
-```powershell
-python -m pip install -U pip
-python -m pip install -e ".[dev]"
-```
-3) Lint
-```powershell
-ruff check .
-```
-4) Run tests
-```powershell
-pytest
-```
-5) Run CLI help
-```powershell
-python -m trading_bot --help
-```
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Docker Ready](https://img.shields.io/badge/Docker-Ready-blue)](docker-compose.yml)
 
-## Project layout
-- `src/trading_bot/` - library + CLI
-- `configs/` - YAML configuration
-- `tests/` - unit tests
-- `notebooks/` - research notebooks
+## 🎯 Features
 
-## Features (Phase 4 Complete ✅)
+### 📊 Real-Time Web Dashboard
+- Live equity curve and performance metrics
+- Holdings breakdown visualization
+- Open positions with P&L tracking
+- Sharpe ratio, max drawdown, win rate
+- Auto-refreshing every 2 seconds
+- **Access at:** `http://localhost:5000`
 
-### Live Trading with Alpaca
-- **Paper Trading Mode** - Test strategies on Alpaca sandbox (no real money)
-- **Live Trading Mode** - Real money trading with safety controls
-- **Market Data Integration** - Historical and real-time data from Alpaca
-- **Order Management** - Market and limit orders with execution tracking
-- **Portfolio Management** - Real-time cash, positions, and equity tracking
-- **Safety Controls** - Drawdown kill switch, daily loss limits, position sizing
-- **Risk Management** - Automated controls prevent catastrophic losses
-- **CLI Integration** - Simple commands for paper and live trading
+### 🤖 Intelligent Trading Strategies
+- **RSI Mean Reversion** - Oversold/overbought entry signals
+- **MACD Volume Momentum** - Trend confirmation with volume
+- **ATR Breakout** - Volatility-based position sizing
 
-### Trading Strategies
-- **RSI Mean Reversion** - Oversold entry (configurable RSI threshold), fixed exit
-- **MACD+Volume Momentum** - Crossover signals with volume confirmation
-- **ATR Breakout** - Resistance breaks with ATR multiplier sizing
+### 🧠 Autonomous Learning System
+- Market regime detection (trending, ranging, volatile)
+- Adaptive strategy weighting based on performance
+- Real-time metrics: Sharpe, drawdown, win rate
+- Weekly parameter optimization
+- Complete audit trail for compliance
 
-### Autonomous Learning System
-- **Market Regime Detection** - Detects trending/ranging/volatile conditions with confidence scoring
-- **Adaptive Strategy Selection** - Blends learned weights (70%) with regime affinity (30%)
-- **Performance Analytics** - Sharpe ratio, max drawdown, win rate, profit factor tracking
-- **Trade Pattern Recognition** - Win/loss streak detection, anomaly alerts
-- **Autonomous Parameter Optimization** - Bounded adjustments for RSI, MACD, ATR parameters
-- **Complete Audit Trail** - Full decision logging with explanations for compliance
+### 📱 Paper & Live Trading
+- **Paper Trading** - Risk-free testing on Alpaca sandbox
+- **Live Trading** - Real money with built-in safety controls
+- **Backtesting** - Historical performance analysis
+- **Portfolio Management** - Cash, positions, equity tracking
 
-### Ensemble Learning
-- **Bandit Algorithm** - ExponentialWeightsEnsemble with reward-driven weight updates
-- **Weekly Tuning** - Grid search on strategy parameters with bounded ranges
-- **State Persistence** - All decisions, regime history, metrics logged to SQLite
+### 🛡️ Risk Management
+- Automatic drawdown kill switch
+- Daily loss limits
+- Position sizing based on volatility
+- Multi-level profit taking
+- Time-based exits
 
-## Running with Learning System
+---
 
-### Default (Learning Enabled)
-```powershell
-python -m trading_bot paper run --iterations 10 --no-ui --period 1y --interval 1d
-```
+## 🚀 Quick Start
 
-### Concurrent Monitoring (New!)
-While paper trading is running, inspect learning state in another terminal:
+### Option 1: Docker Compose (Recommended)
 
-```powershell
-# Terminal 1: Start paper trading
-python -m trading_bot paper run --iterations 100 --no-ui --period 180d --interval 1d
-
-# Terminal 2 (while Terminal 1 is running): Monitor learning
-python -m trading_bot learn inspect        # Current regime + weights + recent decisions
-python -m trading_bot learn history        # Market regime history
-python -m trading_bot learn decisions      # Adaptive decision timeline
-python -m trading_bot learn metrics        # Performance snapshots
-```
-
-### Demo Script
-```powershell
-# Run complete demo with learning monitoring
-.\demo_learning_monitoring.ps1
-```
-
-### Output Example
-```
-iter=1 cash=100,000.00 equity=100,000.00 fills=0 rejections=0
-iter=2 cash=100,000.00 equity=100,000.00 fills=0 rejections=0
-iter=3 cash=100,000.00 equity=100,000.00 fills=0 rejections=0
-
-# Learning CLI Output:
-╭─ LATEST MARKET REGIME
-│  Regime:       ranging (90.3% confidence)
-│  Volatility:   0.141
-│  Trend Str:    0.097
-│
-├─ LATEST ADAPTIVE DECISION
-│  Adjusted Weights:
-│    mean_reversion_rsi  : 0.5864
-│    breakout_atr        : 0.2068
-│    momentum_macd_volume: 0.2068
-│
-└─ EXPLANATION
-   Blended 70% learned weights + 30% regime affinity
-```
-
-### Learning Data (SQLite)
-- `regime_history` - Market regime observations
-- `adaptive_decisions` - Learning decisions + explanations
-- `performance_metrics` - Performance snapshots
-
-## Architecture
-
-```
-Market Data (OHLCV)
-         ↓
-  [3 Strategies]
-         ↓
-  [Ensemble Learning] → Weighted signal
-         ↓
-  [Regime Detector] → Market condition
-         ↓
-  [Trade Analyzer] → Patterns + performance
-         ↓
-  [Adaptive Controller] → Blended weights + recommendations
-         ↓
-  [PaperEngine] → Execution + logging
-  [AlpacaBroker] → Live order execution (Phase 4)
-  [SafetyControls] → Risk management (Phase 4)
-```
-
-## Documentation
-
-- **Phase 3 - Learning System**: See [PHASE_3_AND_CLI_COMPLETE.md](PHASE_3_AND_CLI_COMPLETE.md)
-- **Phase 4 - Alpaca Live Trading**: See [PHASE_4_IMPLEMENTATION_COMPLETE.md](PHASE_4_IMPLEMENTATION_COMPLETE.md)
-- **Phase 4 Quick Start Guide**: See [PHASE_4_QUICK_START.md](PHASE_4_QUICK_START.md)
-
-## Phase 4: Live Trading with Alpaca
-
-### Paper Trading (Sandbox - No Real Money)
 ```bash
-python -m trading_bot live paper \
-    --config configs/default.yaml \
-    --symbols AAPL MSFT \
-    --period 30d \
-    --interval 1d \
-    --iterations 5
+docker-compose up --build
 ```
 
-### Live Trading (Real Money - Requires Safety Confirmation)
+Visit: **http://localhost:5000**
+
+All services start automatically:
+- Web dashboard on port 5000
+- PostgreSQL database on port 5432
+- Trading bot running in background
+
+### Option 2: Local Installation
+
+```bash
+# Create virtual environment
+python -m venv .venv
+.venv\Scripts\Activate.ps1  # Windows
+source .venv/bin/activate   # Mac/Linux
+
+# Install
+pip install -U pip
+pip install -e ".[dev]"
+
+# Run paper trading
+python -m trading_bot paper --symbols AAPL,GOOGL,MSFT --period 6mo
+
+# Or start web dashboard
+python -m trading_bot.ui.web
+```
+
+---
+
+## 📋 Common Commands
+
+### Paper Trading (No Real Money)
+```bash
+python -m trading_bot paper \
+    --symbols AAPL,MSFT,GOOGL \
+    --period 6mo \
+    --iterations 50
+```
+
+### Backtesting
+```bash
+python -m trading_bot backtest \
+    --symbols SPY \
+    --period 1y
+```
+
+### Live Trading (Real Money)
 ```bash
 python -m trading_bot live trading \
-    --config configs/default.yaml \
     --symbols AAPL \
-    --enable-live \
     --max-drawdown 5.0 \
-    --max-daily-loss 2.0 \
-    --iterations 10
+    --max-daily-loss 2.0
 ```
 
-**Safety Features**:
-- ✅ Explicit user confirmation required (`--enable-live` flag)
-- ✅ Warning banner displayed before trading
-- ✅ Drawdown kill switch (stops if drawdown exceeds limit)
-- ✅ Daily loss limit enforcement
-- ✅ All trades audited in database
+### Monitor Learning System
+```bash
+# In another terminal while trading runs:
+python -m trading_bot learn inspect      # Current state
+python -m trading_bot learn history      # Regime history
+python -m trading_bot learn decisions    # Decision log
+python -m trading_bot learn metrics      # Performance
+```
 
-For detailed setup instructions, see [PHASE_4_QUICK_START.md](PHASE_4_QUICK_START.md).
+---
 
-## Roadmap (Phase 5+)
+## 🏗️ Project Structure
 
-- **Phase 5 - Backtesting**: Walk-forward optimization, Monte Carlo robustness
-- **Phase 6 - Monitoring**: Streamlit dashboard, performance alerts, drawdown warnings
-- **Phase 7 - Risk Controls**: Max 2% risk/trade, 1.5% stop loss, 3% take profit, sector diversification
+```
+algo-trading-bot/
+├── src/trading_bot/
+│   ├── engine/          # Trading engine & strategies
+│   ├── learn/           # Learning system & tuning
+│   ├── broker/          # Alpaca integration
+│   ├── ui/              # Web dashboard (Flask)
+│   ├── db/              # SQLite database layer
+│   ├── strategy/        # Trading strategies (RSI, MACD, ATR)
+│   └── cli.py           # Command-line interface
+├── docs/                # Documentation & guides
+├── data/                # Runtime data (trades.sqlite, logs)
+├── configs/             # YAML configuration
+├── tests/               # Unit tests
+└── docker-compose.yml   # Docker services
+```
+
+---
+
+## 🔧 Configuration
+
+Edit `configs/default.yaml`:
+
+```yaml
+strategies:
+  - name: mean_reversion_rsi
+    enabled: true
+    rsi_threshold: 30
+    
+  - name: macd_volume_momentum
+    enabled: true
+    
+  - name: atr_breakout
+    enabled: true
+
+risk:
+  max_position_size: 0.05
+  stop_loss_pct: 2.0
+  take_profit_pct: 3.0
+```
+
+---
+
+## 📊 Performance Metrics
+
+The system tracks:
+- **Sharpe Ratio** - Risk-adjusted returns
+- **Max Drawdown %** - Largest peak-to-trough decline
+- **Win Rate %** - Percentage of winning trades
+- **Total Trades** - Number of completed trades
+- **Current P&L** - Profit/loss from starting balance
+
+---
+
+## 🔐 Safety & Compliance
+
+This is a software template for educational and testing purposes.
+
+**Trading involves real financial risk.** Before using with real money:
+- ✅ Understand all trading logic and risks
+- ✅ Paper trade thoroughly first
+- ✅ Review all broker terms and regulations
+- ✅ Comply with SEC/FINRA regulations in your jurisdiction
+- ✅ Set appropriate risk limits and drawdown controls
+- ✅ Audit all trades post-execution
+
+---
+
+## 🛠️ Development
+
+### Run Tests
+```bash
+pytest
+```
+
+### Lint Code
+```bash
+ruff check .
+```
+
+### Build Docker Image
+```bash
+docker build -t algo-trading-bot .
+```
+
+---
+
+## 📚 Documentation
+
+- [Docker Setup Guide](docs/DOCKER_COMPOSE_GUIDE.md)
+- [Quick Start](docs/QUICK_START.md)
+- [Optimization Summary](docs/OPTIMIZATION_SUMMARY.md)
+- [Folder Structure](docs/FOLDER_STRUCTURE.md)
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push and create a pull request
+
+---
+
+## 📝 License
+
+MIT License - See LICENSE file
+
+---
+
+## ⚠️ Disclaimer
+
+This software is provided as-is for educational purposes. The author is not liable for trading losses or financial consequences. Always paper trade first and understand all risks before using real money.
