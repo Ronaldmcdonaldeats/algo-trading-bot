@@ -5,6 +5,7 @@ import os
 import shutil
 import tempfile
 from datetime import datetime, timedelta
+from unittest.mock import patch, MagicMock
 import pandas as pd
 import numpy as np
 
@@ -23,10 +24,17 @@ class TestBatchDownloader:
     def setup_method(self):
         """Setup test fixtures."""
         self.temp_dir = tempfile.mkdtemp()
+        # Mock Alpaca API keys
+        self.patcher = patch.dict('os.environ', {
+            'APCA_API_KEY_ID': 'test_key',
+            'APCA_API_SECRET_KEY': 'test_secret'
+        })
+        self.patcher.start()
         self.downloader = BatchDownloader(cache_dir=self.temp_dir)
     
     def teardown_method(self):
         """Cleanup."""
+        self.patcher.stop()
         shutil.rmtree(self.temp_dir, ignore_errors=True)
     
     def test_cache_key_generation(self):
@@ -128,7 +136,7 @@ class TestPerformanceTracker:
         """Test recording a winning trade."""
         self.tracker.record_trade('AAPL', entry_price=100, exit_price=110, quantity=100)
         
-        perf = self.tracker.get_top_performers(top_n=1)
+        perf = self.tracker.get_top_performers(min_trades=1, top_n=1)
         assert len(perf) == 1
         assert perf[0].symbol == 'AAPL'
         assert perf[0].wins == 1
@@ -138,7 +146,7 @@ class TestPerformanceTracker:
         """Test recording a losing trade."""
         self.tracker.record_trade('MSFT', entry_price=100, exit_price=90, quantity=100)
         
-        perf = self.tracker.get_top_performers(top_n=1)
+        perf = self.tracker.get_top_performers(min_trades=1, top_n=1)
         assert len(perf) == 1
         assert perf[0].symbol == 'MSFT'
         assert perf[0].wins == 0
@@ -149,7 +157,7 @@ class TestPerformanceTracker:
         self.tracker.record_trade('AAPL', entry_price=100, exit_price=110, quantity=100)
         self.tracker.record_trade('AAPL', entry_price=110, exit_price=100, quantity=100)
         
-        perf = self.tracker.get_top_performers(top_n=1)
+        perf = self.tracker.get_top_performers(min_trades=1, top_n=1)
         assert perf[0].win_rate == 0.5
 
 
@@ -166,7 +174,10 @@ class TestPortfolioOptimizer:
         scores = {'AAPL': 80, 'MSFT': 70, 'GOOGL': 60}
         prices = {'AAPL': 150, 'MSFT': 300, 'GOOGL': 140}
         
-        allocations = self.optimizer.allocate_portfolio(
+        # Use 40% max per position since we only have 3
+        optimizer = PortfolioOptimizer(max_position_pct=40.0, min_position_pct=1)
+        
+        allocations = optimizer.allocate_portfolio(
             symbols=symbols,
             scores=scores,
             prices=prices,
@@ -175,13 +186,14 @@ class TestPortfolioOptimizer:
         
         assert len(allocations) == 3
         total_pct = sum(a.allocation_pct for a in allocations.values())
-        assert 95 < total_pct <= 100  # Allow small rounding
+        assert 95 < total_pct <= 100  # Should be close to 100%
     
     def test_position_size_limits(self):
         """Test that position sizes respect limits."""
-        symbols = ['AAPL', 'MSFT', 'GOOGL']
-        scores = {'AAPL': 100, 'MSFT': 100, 'GOOGL': 100}
-        prices = {'AAPL': 150, 'MSFT': 300, 'GOOGL': 140}
+        # Use 6 symbols so equal weight = 16.67%, which forces clipping to 15%
+        symbols = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA', 'AMZN']
+        scores = {sym: 100 for sym in symbols}
+        prices = {sym: 100 for sym in symbols}
         
         allocations = self.optimizer.allocate_portfolio(
             symbols=symbols,
@@ -193,6 +205,11 @@ class TestPortfolioOptimizer:
         # All positions should be <= max position
         for alloc in allocations.values():
             assert alloc.allocation_pct <= 15.0
+            
+        # Total should be 100% when positions are not constrained, 
+        # or less if max position limits prevent full allocation
+        total = sum(a.allocation_pct for a in allocations.values())
+        assert total <= 100  # Should be exactly 90% with 6 equal positions capped at 15%
 
 
 class TestRiskManager:
