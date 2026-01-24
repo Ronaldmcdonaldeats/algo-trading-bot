@@ -44,7 +44,13 @@ class MacdVolumeMomentumStrategy:
         in_long = False
         for idx in df.index:
             md = macd_diff.loc[idx]
-            v_ok = bool(vol_ok.loc[idx]) if pd.notna(vol_ok.loc[idx]) else False
+            if isinstance(md, pd.Series):
+                md = md.iloc[0] if len(md) > 0 else float('nan')
+            
+            vol_ok_val = vol_ok.loc[idx]
+            if isinstance(vol_ok_val, pd.Series):
+                vol_ok_val = vol_ok_val.iloc[0] if len(vol_ok_val) > 0 else False
+            v_ok = bool(vol_ok_val) if pd.notna(vol_ok_val) else False
 
             if not in_long and pd.notna(md) and float(md) > 0 and v_ok:
                 in_long = True

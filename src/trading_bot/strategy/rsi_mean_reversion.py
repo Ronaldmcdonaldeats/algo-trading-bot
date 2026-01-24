@@ -28,10 +28,13 @@ class RsiMeanReversionStrategy:
         sig = pd.Series(0, index=df.index, dtype="int64")
         in_long = False
         for idx in df.index:
-            r = float(rsi.loc[idx]) if pd.notna(rsi.loc[idx]) else float("nan")
-            if not in_long and pd.notna(rsi.loc[idx]) and r <= float(self.entry_oversold):
+            rsi_val = rsi.loc[idx]
+            if isinstance(rsi_val, pd.Series):
+                rsi_val = rsi_val.iloc[0] if len(rsi_val) > 0 else float('nan')
+            r = float(rsi_val) if pd.notna(rsi_val) else float("nan")
+            if not in_long and pd.notna(rsi_val) and r <= float(self.entry_oversold):
                 in_long = True
-            elif in_long and pd.notna(rsi.loc[idx]) and r >= float(self.exit_rsi):
+            elif in_long and pd.notna(rsi_val) and r >= float(self.exit_rsi):
                 in_long = False
             sig.loc[idx] = 1 if in_long else 0
 

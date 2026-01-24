@@ -55,9 +55,17 @@ class AtrBreakoutStrategy:
         in_long = False
         for idx in df.index:
             rh = roll_high.loc[idx]
+            if isinstance(rh, pd.Series):
+                rh = rh.iloc[0] if len(rh) > 0 else float('nan')
             rl = roll_low.loc[idx]
+            if isinstance(rl, pd.Series):
+                rl = rl.iloc[0] if len(rl) > 0 else float('nan')
             a = atr.loc[idx]
+            if isinstance(a, pd.Series):
+                a = a.iloc[0] if len(a) > 0 else float('nan')
             c = close.loc[idx]
+            if isinstance(c, pd.Series):
+                c = c.iloc[0] if len(c) > 0 else float('nan')
 
             if not in_long and pd.notna(rh) and pd.notna(a) and float(c) > float(rh) + float(a) * float(self.atr_mult):
                 in_long = True
