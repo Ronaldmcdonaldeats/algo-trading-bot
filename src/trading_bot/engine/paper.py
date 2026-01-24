@@ -14,9 +14,9 @@ import pandas as pd
 
 from trading_bot.broker.base import OrderRejection
 from trading_bot.broker.paper import PaperBroker, PaperBrokerConfig
-from trading_bot.config import load_config
+from trading_bot.configs import load_config
 from trading_bot.core.models import Fill, Order, Portfolio
-from trading_bot.data.providers import MarketDataProvider, MockDataProvider
+from trading_bot.data.providers import MarketDataProvider, AlpacaProvider, MockDataProvider
 from trading_bot.db.repository import SqliteRepository
 from trading_bot.learn.adaptive_controller import AdaptiveLearningController
 from trading_bot.learn.ensemble import ExponentialWeightsEnsemble, reward_to_unit_interval
@@ -266,7 +266,7 @@ class PaperEngine:
             period=self.cfg.period,
             interval=self.cfg.interval,
         )
-        print(" ✓", flush=True)
+        print(" [OK]", flush=True)
 
         # Normalize bars per symbol first (process in batches to reduce memory spikes).
         ohlcv_by_symbol: Dict[str, pd.DataFrame] = {}
@@ -537,7 +537,7 @@ class PaperEngine:
             else:
                 self._signal_confirmation[sym] = 0  # Reset on signal loss
             
-            confirmed_signal = dec.signal == 1 and self._signal_confirmation[sym] >= 2
+            confirmed_signal = dec.signal == 1 and self._signal_confirmation[sym] >= 1
 
             # Execute to target position (long/flat).
             if confirmed_signal and pos.qty == 0:
@@ -648,7 +648,7 @@ class PaperEngine:
         self._prev_prices = dict(prices)
         self._prev_signals_by_symbol = current_signals_by_symbol
         
-        print(f" ✓ ({len(fills)} fills)", flush=True)
+        print(f" [OK] ({len(fills)} fills)", flush=True)
 
         # Calculate real-time metrics
         sharpe, max_dd, win_rate, num_trades, pnl = self._calculate_metrics()

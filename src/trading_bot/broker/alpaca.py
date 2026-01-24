@@ -409,10 +409,14 @@ class AlpacaBroker(Broker):
         
         try:
             # Map OrderType and Side to Alpaca enums
-            side = OrderSide.BUY if order.side == Side.BUY else OrderSide.SELL
+            # Handle both string and enum inputs
+            if isinstance(order.side, str):
+                side = OrderSide.BUY if order.side.upper() == "BUY" else OrderSide.SELL
+            else:
+                side = OrderSide.BUY if order.side == Side.BUY else OrderSide.SELL
             
             # Market order
-            if order.order_type == OrderType.MARKET:
+            if order.order_type == OrderType.MARKET or order.type == "MARKET":
                 request = MarketOrderRequest(
                     symbol=order.symbol,
                     qty=order.qty,
@@ -420,7 +424,7 @@ class AlpacaBroker(Broker):
                     time_in_force=TimeInForce.DAY,
                 )
             # Limit order
-            elif order.order_type == OrderType.LIMIT:
+            elif order.order_type == OrderType.LIMIT or order.type == "LIMIT":
                 request = LimitOrderRequest(
                     symbol=order.symbol,
                     qty=order.qty,

@@ -169,7 +169,7 @@ def run_paper_tui(*, engine: PaperEngine, schedule: MarketSchedule) -> int:
             else:
                 # Format benchmark string
                 bench_str = ""
-                if self.state.last_update.benchmarks:
+                if hasattr(self.state.last_update, 'benchmarks') and self.state.last_update.benchmarks:
                     my_ret = self.state.last_update.benchmarks.get("Portfolio", 0.0)
                     parts = [f"Return: {my_ret:+.2%}"]
                     for k, v in self.state.last_update.benchmarks.items():

@@ -15,7 +15,7 @@ import pandas as pd
 
 from trading_bot.broker.alpaca import AlpacaConfig, AlpacaBroker, SafetyControls, AlpacaProvider
 from trading_bot.core.models import Order, OrderType, Side
-from trading_bot.config import load_config
+from trading_bot.configs import load_config
 from trading_bot.strategy.mean_reversion_momentum import generate_signals
 from trading_bot.db.repository import SqliteRepository
 

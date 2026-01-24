@@ -10,7 +10,8 @@ RUN python -m pip install -U pip
 COPY pyproject.toml README.md /app/
 COPY src /app/src
 
-# Install runtime deps + Flask for web dashboard
-RUN python -m pip install . flask flask-cors
+# Install runtime deps + Flask + Gunicorn for production WSGI server
+RUN python -m pip install . flask flask-cors gunicorn
 
-CMD ["python", "-m", "trading_bot", "--help"]
+# Production WSGI server command
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--worker-class", "sync", "--timeout", "60", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "info", "trading_bot.ui.web:app"]

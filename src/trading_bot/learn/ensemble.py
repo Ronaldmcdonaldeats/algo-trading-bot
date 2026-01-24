@@ -96,7 +96,7 @@ class ExponentialWeightsEnsemble:
             score += ww * float(out.signal)
             conf += ww * float(_clip(float(out.confidence), 0.0, 1.0))
 
-        signal = 1 if score >= 0.5 else 0
+        signal = 1 if score >= 0.3 else (-1 if score <= -0.3 else 0)
 
         return StrategyDecision(
             signal=int(signal),

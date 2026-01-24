@@ -22,7 +22,7 @@ import os
 os.environ.setdefault("APCA_API_BASE_URL", "https://paper-api.alpaca.markets")
 
 # Import after environment is set
-from trading_bot.auto_start import auto_start_with_defaults
+from trading_bot.utils.auto_start import auto_start_with_defaults
 
 if __name__ == "__main__":
     print("🤖 AI-Powered Trading Bot with Strategy Learning")

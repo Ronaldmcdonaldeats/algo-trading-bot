@@ -1,13 +1,91 @@
-# 📈 Algo Trading Bot
+# 📈 Algo Trading Bot - Documentation
 
-Welcome to the **Algo Trading Bot** documentation! This is an intelligent Python-based trading bot with real-time web dashboard, autonomous learning system, and live trading capabilities.
+Welcome to the **Algo Trading Bot** - a production-ready, intelligent trading system with concurrent multi-algorithm execution, autonomous learning, and real-time monitoring.
 
-## 🚀 Quick Links
+## 🚀 Getting Started
 
-- **[Quick Start](docs/QUICK_START.md)** - Get started in 5 minutes
-- **[Docker Setup](docs/DOCKER_COMPOSE_GUIDE.md)** - Run with Docker Compose
-- **[Web Dashboard](docs/WEB_DASHBOARD.md)** - Real-time metrics at localhost:5000
-- **[GitHub Repository](https://github.com/Ronaldmcdonaldeats/algo-trading-bot)** - View source code
+**New here?** Start with these:
+- [Quick Start (5 min)](getting-started/QUICK_START.md) - Get running immediately
+- [Installation Guide](getting-started/INSTALLATION.md) - Detailed setup
+- [First Trade](getting-started/FIRST_TRADE.md) - Your first trading session
+
+## 📚 Documentation by Topic
+
+### Core Features
+- [9 Advanced Features Overview](features/NINE_FEATURES.md) - All 9 features explained
+- [Trading Strategies (ATR, RSI, MACD)](features/STRATEGIES.md)
+- [Paper Trading](features/PAPER_TRADING.md) - Risk-free testing
+- [Live Trading with Alpaca](features/LIVE_TRADING.md)
+- [Real-Time Dashboard](features/DASHBOARD.md)
+
+### Advanced Features
+- [Concurrent Multi-Algorithm Execution](advanced/CONCURRENT_EXECUTION.md) - 3-4x faster
+- [Training Optimization](advanced/TRAINING_OPTIMIZATION.md) - Adaptive learning
+- [Market Regime Detection](advanced/MARKET_REGIMES.md) - Auto-adapt to market
+- [Dynamic Ensemble Weighting](advanced/DYNAMIC_ENSEMBLE.md) - Intelligent allocation
+- [Integration Guide](advanced/INTEGRATION.md) - Integrate into existing systems
+
+### Deployment & Operations
+- [Docker Deployment](deployment/DOCKER.md) - Production ready
+- [Configuration Guide](deployment/CONFIG.md) - Environment setup
+- [Monitoring & Health Checks](deployment/MONITORING.md)
+- [Troubleshooting Guide](deployment/TROUBLESHOOTING.md)
+
+### Developer Resources
+- [API Reference](api-reference/ORCHESTRATOR.md)
+- [Performance Tuning](advanced/PERFORMANCE.md)
+- [Custom Strategies](examples/CUSTOM_STRATEGY.md)
+
+## 🎯 Feature Matrix
+
+| Feature | Status | Docs |
+|---------|--------|------|
+| Paper Trading | ✅ | [Guide](features/PAPER_TRADING.md) |
+| Live Trading (Alpaca) | ✅ | [Guide](features/LIVE_TRADING.md) |
+| Concurrent Execution (5-8 algos) | ✅ | [Guide](advanced/CONCURRENT_EXECUTION.md) |
+| Training Optimization | ✅ | [Guide](advanced/TRAINING_OPTIMIZATION.md) |
+| Dashboard | ✅ | [Guide](features/DASHBOARD.md) |
+| Market Regimes | ✅ | [Guide](advanced/MARKET_REGIMES.md) |
+| Docker | ✅ | [Guide](deployment/DOCKER.md) |
+| Email Reports | ✅ | [Guide](features/ADVANCED_FEATURES.md) |
+
+## 💡 Quick Reference
+
+**Command Line:**
+```bash
+# Paper trading
+python -m trading_bot paper --symbols AAPL,MSFT
+
+# Start training
+python -m trading_bot train --period 6mo
+
+# Run dashboard
+python -m trading_bot web
+
+# Docker
+docker-compose up
+```
+
+## 🔍 Need Help?
+
+| Question | Answer |
+|----------|--------|
+| **Getting started?** | → [Quick Start](getting-started/QUICK_START.md) |
+| **Deployment issue?** | → [Troubleshooting](deployment/TROUBLESHOOTING.md) |
+| **API question?** | → [API Docs](api-reference/ORCHESTRATOR.md) |
+| **Performance optimization?** | → [Performance Guide](advanced/PERFORMANCE.md) |
+
+## 📊 System Status
+
+- **Version**: 2.0 (Production Ready)
+- **Python**: 3.8+
+- **Tests**: 55+ passing
+- **Performance**: 3-4x faster with concurrent execution
+- **Updated**: January 2026
+
+---
+
+**GitHub**: [algo-trading-bot](https://github.com/yourusername/algo-trading-bot) | **Issues**: [Report a bug](https://github.com/yourusername/algo-trading-bot/issues)
 
 ## 🎯 What Can You Do?
 

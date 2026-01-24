@@ -491,9 +491,12 @@ def create_web_app():
     return app
 
 
+# Create app instance for Gunicorn WSGI server
+app = create_web_app()
+
+
 def run_web_server(host: str = "0.0.0.0", port: int = 5000, debug: bool = False):
     """Run the web server."""
-    app = create_web_app()
     app.run(host=host, port=port, debug=debug, threaded=True)
 
 

@@ -269,6 +269,23 @@ def build_parser() -> argparse.ArgumentParser:
     live_trading.add_argument("--alpaca-key", help="Alpaca API Key ID")
     live_trading.add_argument("--alpaca-secret", help="Alpaca Secret Key")
 
+    # Pre-market Data Fetching
+    premarket = sub.add_parser("premarket", help="Fetch overnight and pre-market data before market open")
+    premarket_sub = premarket.add_subparsers(dest="premarket_cmd", required=False)
+
+    premarket_fetch = premarket_sub.add_parser("fetch", help="Fetch pre-market data immediately")
+    premarket_fetch.add_argument("--symbols", default="AAPL,MSFT,GOOGL", help="Comma-separated tickers")
+    premarket_fetch.add_argument("--config", default="configs/default.yaml")
+    premarket_fetch.add_argument("--db", default="data/trades.sqlite")
+    premarket_fetch.add_argument("--use-mock", action="store_true", help="Use MockDataProvider instead of Alpaca")
+
+    premarket_schedule = premarket_sub.add_parser("schedule", help="Schedule automatic pre-market data fetching")
+    premarket_schedule.add_argument("--symbols", default="AAPL,MSFT,GOOGL,NVDA,TSLA", help="Comma-separated tickers")
+    premarket_schedule.add_argument("--fetch-now", action="store_true", help="Fetch data immediately before scheduling")
+    premarket_schedule.add_argument("--frequent-updates", action="store_true", help="Update every 5 minutes before market open")
+    premarket_schedule.add_argument("--hour", type=int, default=9, help="Hour to fetch daily (EST, 24-hour format)")
+    premarket_schedule.add_argument("--minute", type=int, default=0, help="Minute to fetch daily")
+
     # Maintenance CLI
     maintenance = sub.add_parser("maintenance", help="Database and learning maintenance")
     maintenance_sub = maintenance.add_subparsers(dest="maintenance_cmd", required=False)
@@ -620,6 +637,57 @@ def _run_maintenance(args: argparse.Namespace) -> int:
     raise SystemExit(f"Unknown maintenance subcommand: {maintenance_cmd}")
 
 
+def _run_premarket(args: argparse.Namespace) -> int:
+    """Run pre-market data fetching commands."""
+    premarket_cmd = args.premarket_cmd or "fetch"
+    
+    if premarket_cmd == "fetch":
+        # Fetch pre-market data immediately
+        from trading_bot.schedule.premarket import PremarketDataFetcher
+        
+        symbols = _parse_symbols(args.symbols)
+        print(f"\n{'=' * 80}")
+        print(f"FETCHING PRE-MARKET DATA")
+        print(f"{'=' * 80}")
+        print(f"Symbols: {', '.join(symbols)}")
+        
+        fetcher = PremarketDataFetcher(
+            config_path=args.config,
+            db_path=args.db,
+            use_alpaca=not args.use_mock,
+        )
+        
+        success = fetcher.prepare_for_market_open(symbols)
+        
+        if success:
+            print(f"[OK] Successfully prepared for market open\n")
+            return 0
+        else:
+            print(f"[FAILED] Failed to prepare for market open\n")
+            return 1
+    
+    if premarket_cmd == "schedule":
+        # Schedule automatic pre-market fetching
+        from trading_bot.schedule.scheduler import run_scheduler
+        
+        symbols = _parse_symbols(args.symbols)
+        
+        print(f"\n{'=' * 80}")
+        print(f"SCHEDULING PRE-MARKET DATA FETCHING")
+        print(f"{'=' * 80}")
+        
+        run_scheduler(
+            symbols=symbols,
+            fetch_now=args.fetch_now,
+            frequent_updates=args.frequent_updates,
+            fetch_hour=args.hour,
+            fetch_minute=args.minute,
+        )
+        return 0
+    
+    raise SystemExit(f"Unknown premarket subcommand: {premarket_cmd}")
+
+
 def main(argv: list[str] | None = None) -> int:
     # Load environment variables from .env file
     load_dotenv()
@@ -688,7 +756,7 @@ def main(argv: list[str] | None = None) -> int:
         return _run_paper(args)
 
     if args.cmd == "auto":
-        from trading_bot.auto_start import auto_start_paper_trading
+        from trading_bot.utils.auto_start import auto_start_paper_trading
         
         symbols = None
         if hasattr(args, 'symbols') and args.symbols:
@@ -746,5 +814,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "maintenance":
         return _run_maintenance(args)
+
+    if args.cmd == "premarket":
+        return _run_premarket(args)
 
     return 2

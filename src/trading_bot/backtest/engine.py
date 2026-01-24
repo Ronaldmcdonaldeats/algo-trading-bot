@@ -11,9 +11,9 @@ import pandas as pd
 
 from trading_bot.broker.base import Broker, OrderRejection
 from trading_bot.broker.paper import PaperBroker, PaperBrokerConfig
-from trading_bot.config import load_config
+from trading_bot.configs import load_config
 from trading_bot.core.models import Fill, Order
-from trading_bot.data.providers import MarketDataProvider, YFinanceProvider, MockDataProvider
+from trading_bot.data.providers import MarketDataProvider, AlpacaProvider, MockDataProvider
 from trading_bot.db.repository import SqliteRepository
 from trading_bot.indicators import add_indicators
 from trading_bot.learn.ensemble import ExponentialWeightsEnsemble

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from trading_bot.config import load_config
+from trading_bot.configs import load_config
 
 
 def test_load_default_config():
