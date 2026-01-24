@@ -151,20 +151,20 @@ def render_paper_dashboard(update: PaperEngineUpdate, state: DashboardState) -> 
     summary = Table.grid(padding=(0, 1))
     summary.add_column(justify="right")
     summary.add_column(justify="left")
-    summary.add_row("Cash", f"{pf.cash:,.2f}")
-    summary.add_row("Equity", f"{equity:,.2f}")
-    summary.add_row("Unrealized", f"{unreal:,.2f}")
-    summary.add_row("Realized", f"{realized:,.2f}")
-    summary.add_row("Fees", f"{pf.fees_paid:,.2f}")
+    summary.add_row("Available Cash", f"${pf.cash:,.2f}")
+    summary.add_row("Total Value", f"${equity:,.2f}")
+    summary.add_row("Unrealized Profit/Loss", f"${unreal:,.2f}")
+    summary.add_row("Realized Profit/Loss", f"${realized:,.2f}")
+    summary.add_row("Trading Fees Paid", f"${pf.fees_paid:,.2f}")
 
-    positions = Table(title="Positions", expand=True)
-    positions.add_column("Symbol")
-    positions.add_column("Qty", justify="right")
-    positions.add_column("Avg", justify="right")
-    positions.add_column("Last", justify="right")
-    positions.add_column("Unrl PnL", justify="right")
-    positions.add_column("SL", justify="right")
-    positions.add_column("TP", justify="right")
+    positions = Table(title="Current Positions", expand=True)
+    positions.add_column("Stock")
+    positions.add_column("Shares", justify="right")
+    positions.add_column("Avg Price", justify="right")
+    positions.add_column("Current Price", justify="right")
+    positions.add_column("Profit/Loss", justify="right")
+    positions.add_column("Stop Loss", justify="right")
+    positions.add_column("Take Profit", justify="right")
 
     any_pos = False
     for sym, pos in sorted(pf.positions.items()):
@@ -186,55 +186,59 @@ def render_paper_dashboard(update: PaperEngineUpdate, state: DashboardState) -> 
     if not any_pos:
         positions.add_row("-", "-", "-", "-", "-", "-", "-")
 
-    fills = Table(title="Recent fills (this tick)", expand=True)
-    fills.add_column("Symbol")
-    fills.add_column("Side")
-    fills.add_column("Qty", justify="right")
+    fills = Table(title="Recent Trades (This Update)", expand=True)
+    fills.add_column("Stock")
+    fills.add_column("Type")
+    fills.add_column("Shares", justify="right")
     fills.add_column("Price", justify="right")
     fills.add_column("Fee", justify="right")
-    fills.add_column("Action", justify="left")
+    fills.add_column("What Happened", justify="left")
 
     if update.fills:
         for f in update.fills[-10:]:
             # Determine action description based on side
             if f.side == "BUY":
                 action = "🟢 BOUGHT"
+                action_type = "Purchase"
             elif f.side == "SELL":
                 action = "🔴 SOLD"
+                action_type = "Sell"
             else:
                 action = f.side
+                action_type = f.side
             
             fills.add_row(
                 f.symbol,
-                f.side,
+                action_type,
                 str(f.qty),
-                f"{f.price:,.2f}",
-                f"{f.fee:,.2f}",
+                f"${f.price:,.2f}",
+                f"${f.fee:,.2f}",
                 f"{action} - {f.note}",
             )
     else:
         fills.add_row("-", "-", "-", "-", "-", "-")
 
-    rejs = Table(title="Rejections (this tick)", expand=True)
-    rejs.add_column("Symbol")
-    rejs.add_column("Side")
-    rejs.add_column("Qty", justify="right")
-    rejs.add_column("Reason")
+    rejs = Table(title="Failed Orders (This Update)", expand=True)
+    rejs.add_column("Stock")
+    rejs.add_column("Action")
+    rejs.add_column("Shares", justify="right")
+    rejs.add_column("Why It Failed")
     if update.rejections:
         for r in update.rejections[-10:]:
-            rejs.add_row(r.order.symbol, r.order.side, str(r.order.qty), r.reason)
+            action_type = "Buy" if r.order.side == "BUY" else "Sell"
+            rejs.add_row(r.order.symbol, action_type, str(r.order.qty), r.reason)
     else:
         rejs.add_row("-", "-", "-", "-")
 
     equity_panel = Panel(
         Align.center(
             Group(
-                Text(f"Equity: {equity:,.2f}", style="bold"),
+                Text(f"Account Value: ${equity:,.2f}", style="bold"),
                 Text(_sparkline(state.equity_history, width=60), style="cyan"),
             ),
             vertical="middle",
         ),
-        title="Equity curve",
+        title="Portfolio Growth",
     )
 
     layout = Layout()
