@@ -1,0 +1,15 @@
+PHASE 10: AGGRESSIVE ENSEMBLE WITH POSITION SIZING
+================================================================================
+
+STRATEGY:
+  - Dynamic position sizing (0.3x to 2x leverage)
+  - Based on: trend strength, momentum, volatility, RSI
+  - Aggressive trend following in low volatility
+  - Reduced position in high volatility
+
+RESULTS:
+  Avg Annual Return: -0.0331 (-3.31%)
+  S&P 500: 0.0110
+  Outperformance: -0.0441
+  Target: 0.0610
+  Beats Target: NO
