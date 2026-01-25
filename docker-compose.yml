@@ -13,7 +13,7 @@ services:
       POSTGRES_USER: ${DB_USER:-trading}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-trading}
       POSTGRES_DB: ${DB_NAME:-trading}
-      POSTGRES_INITDB_ARGS: "--no-locale -c shared_buffers=128MB -c max_connections=50"
+      POSTGRES_INITDB_ARGS: "--no-locale -c shared_buffers=256MB -c max_connections=100 -c fsync=off -c synchronous_commit=off"
     ports:
       - "5432:5432"
     volumes:
@@ -22,10 +22,10 @@ services:
       - trading-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-trading}"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
+      interval: 3s
+      timeout: 2s
+      retries: 3
+      start_period: 5s
     restart: unless-stopped
     profiles:
       - ""
@@ -38,30 +38,31 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      cache_from:
+        - algo-trading-bot:latest
     env_file:
       - .env
     volumes:
-      - .:/app
       - ./data:/app/data
-      - ./.cache:/app/.cache
       - ./logs:/app/logs
     environment:
       - PYTHONUNBUFFERED=1
       - FLASK_ENV=production
+      - DISCORD_WEBHOOK_URL
     ports:
       - "5000:5000"
-    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--worker-class", "eventlet", "--timeout", "30", "--access-logfile", "-", "trading_bot.ui.web:app"]
+    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--worker-class", "sync", "--timeout", "20", "--access-logfile", "-", "trading_bot.ui.web:app"]
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - trading-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5000/ || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
       interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+      timeout: 3s
+      retries: 2
+      start_period: 5s
     restart: unless-stopped
     deploy:
       resources:
@@ -76,18 +77,18 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      cache_from:
+        - algo-trading-bot:latest
     env_file:
       - .env
     volumes:
-      - .:/app
       - ./data:/app/data
-      - ./.cache:/app/.cache
       - ./logs:/app/logs
     environment:
       - PYTHONUNBUFFERED=1
       - FLASK_ENV=production
-      - OMP_NUM_THREADS=2
-      - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1464671277867335722/e_LNQxmUwZpR4rTPTk8HOJQibehGbmofnW6GtarwGgyWu9yTHFyy97nWCKiq-qCUS2No
+      - OMP_NUM_THREADS=3
+      - DISCORD_WEBHOOK_URL
     command: sh -c "python -m trading_bot auto --no-ui --nasdaq-top-500 --memory-mode --iterations 10 2>&1 | tee /app/logs/trading_bot.log"
     depends_on:
       postgres:
@@ -97,9 +98,9 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+      timeout: 3s
+      retries: 2
+      start_period: 10s
     restart: unless-stopped
     deploy:
       resources:
