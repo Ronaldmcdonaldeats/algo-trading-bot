@@ -1,0 +1,56 @@
+# Multi-Strategy Bot Configuration
+# Change the 'strategy' field to switch between different strategies without code changes!
+
+# Available strategies:
+#   - ultra_ensemble        (6 expert classifiers, best performer)
+#   - trend_following       (MA crossovers, simple and effective)
+#   - mean_reversion        (Bollinger Bands breakouts)
+#   - rsi                   (RSI overbought/oversold)
+#   - momentum              (Price momentum)
+#   - volatility            (ATR-based breakouts)
+#   - hybrid                (Trend + RSI + Momentum combo)
+
+strategy: ultra_ensemble
+
+symbols:
+  - AAPL
+  - MSFT
+  - GOOGL
+  - AMZN
+  - NVDA
+  - TSLA
+  - META
+  - NFLX
+  - ADBE
+  - INTC
+  - AMD
+  - CSCO
+  - QCOM
+  - COST
+  - AVGO
+  - TMUS
+  - CMCSA
+  - INTU
+  - VRTX
+  - AEP
+  - LRCX
+  - SNPS
+  - CDNS
+  - PCAR
+  - PAYX
+  - ABNB
+  - PANW
+  - CRWD
+  - ZM
+  - DXCM
+  - WDAY
+  - FAST
+  - CPRT
+  - CHKP
+
+strategy_config:
+  entry_threshold: 0.12
+  exit_threshold: -0.12
+  max_position_size: 1.5
+  transaction_cost: 0.001
+  lookback_period: 200
