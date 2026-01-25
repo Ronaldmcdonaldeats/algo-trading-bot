@@ -1,0 +1,33 @@
+PHASE 12: ULTRA ENSEMBLE STRATEGY
+================================================================================
+
+6 Expert Classifiers:
+  1. Trend (40%):              50/200-day MA
+  2. RSI (25%):                Overbought/oversold
+  3. Momentum (20%):           20-day price change
+  4. Mean Reversion (10%):     Bollinger Band position
+  5. Acceleration (3%):        Price velocity change
+  6. Vol Regime (2%):          ATR ratio
+
+Aggressive Position Sizing:
+  |vote| > 0.40: 1.5x (50% leverage)
+  |vote| > 0.25: 1.3x
+  |vote| > 0.15: 1.1x
+  Low vol boost: +20%
+
+RESULTS:
+  Avg Annual Return: 0.1115 (11.15%)
+  Outperformance: 0.1005 (10.05%)
+  Beats 10% target: YES!
+
+TOP 10:
+   1. PANW  :  0.2416 ( 24.16%)
+   2. MSFT  :  0.2387 ( 23.87%)
+   3. SNPS  :  0.2257 ( 22.57%)
+   4. AMD   :  0.2204 ( 22.04%)
+   5. QCOM  :  0.1805 ( 18.05%)
+   6. CPRT  :  0.1726 ( 17.26%)
+   7. AAPL  :  0.1715 ( 17.15%)
+   8. GOOGL :  0.1607 ( 16.07%)
+   9. CMCSA :  0.1586 ( 15.86%)
+  10. TSLA  :  0.1468 ( 14.68%)
