@@ -16,18 +16,18 @@ Aggressive Position Sizing:
   Low vol boost: +20%
 
 RESULTS:
-  Avg Annual Return: 0.1115 (11.15%)
-  Outperformance: 0.1005 (10.05%)
-  Beats 10% target: YES!
+  Avg Annual Return: 0.1091 (10.91%)
+  Outperformance: 0.0981 (9.81%)
+  Beats 10% target: NO
 
 TOP 10:
-   1. PANW  :  0.2416 ( 24.16%)
-   2. MSFT  :  0.2387 ( 23.87%)
-   3. SNPS  :  0.2257 ( 22.57%)
-   4. AMD   :  0.2204 ( 22.04%)
-   5. QCOM  :  0.1805 ( 18.05%)
-   6. CPRT  :  0.1726 ( 17.26%)
-   7. AAPL  :  0.1715 ( 17.15%)
-   8. GOOGL :  0.1607 ( 16.07%)
-   9. CMCSA :  0.1586 ( 15.86%)
-  10. TSLA  :  0.1468 ( 14.68%)
+   1. PCAR  :  0.2897 ( 28.97%)
+   2. CDNS  :  0.2106 ( 21.06%)
+   3. AEP   :  0.2041 ( 20.41%)
+   4. ZM    :  0.2000 ( 20.00%)
+   5. NVDA  :  0.1889 ( 18.89%)
+   6. MSFT  :  0.1844 ( 18.44%)
+   7. PAYX  :  0.1801 ( 18.01%)
+   8. CRWD  :  0.1771 ( 17.71%)
+   9. SNPS  :  0.1524 ( 15.24%)
+  10. AAPL  :  0.1511 ( 15.11%)
