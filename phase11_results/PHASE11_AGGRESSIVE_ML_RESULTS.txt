@@ -1,0 +1,36 @@
+PHASE 11: AGGRESSIVE ML STRATEGY
+================================================================================
+
+MODEL: Ensemble of Expert Classifiers
+  1. Momentum Expert (35%):      Positive/negative momentum
+  2. Trend Expert (35%):        Multi-level trend (5/20/50/200-day)
+  3. RSI Expert (20%):          Overbought/oversold zones
+  4. Mean Reversion (10%):      Price overshooting MA
+
+POSITION SIZING:
+  - Base: 1.0x
+  - Low volatility boost: 2.0x
+  - Hysteresis: Stick with signal until reversal
+
+DECISION RULE:
+  - Ensemble vote > 0.2: Buy with position sizing
+  - Ensemble vote < -0.2: Sell
+  - Neutral zone: Hold or 30% partial exit
+
+RESULTS:
+  Avg Annual Return: 0.0078 (0.78%)
+  S&P 500: 0.0110
+  Outperformance: -0.0032
+  Beats Target: NO
+
+TOP 10 PERFORMERS:
+   1. NVDA  :  0.1253 ( 12.53%)
+   2. AMZN  :  0.0587 (  5.87%)
+   3. MSFT  :  0.0446 (  4.46%)
+   4. AAPL  :  0.0355 (  3.55%)
+   5. GOOGL :  0.0000 (  0.00%)
+   6. TSLA  :  0.0000 (  0.00%)
+   7. META  :  0.0000 (  0.00%)
+   8. NFLX  :  0.0000 (  0.00%)
+   9. ADBE  :  0.0000 (  0.00%)
+  10. INTC  :  0.0000 (  0.00%)

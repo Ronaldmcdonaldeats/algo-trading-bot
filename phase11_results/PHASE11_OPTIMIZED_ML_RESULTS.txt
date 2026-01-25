@@ -1,0 +1,33 @@
+PHASE 11: OPTIMIZED ML STRATEGY
+================================================================================
+
+MODEL: Multi-feature Ensemble Classifier
+Features:
+  - Short-term trend (5/20-day MA): 0.30
+  - Long-term trend (20/200-day MA): 0.20
+  - RSI momentum (14-day): 0.20
+  - Price momentum (20-day): 0.15
+  - Volatility penalty: -0.15
+
+Decision Rules:
+  - Score > 0.15: Buy
+  - Score < -0.15: Sell
+  - -0.15 <= Score <= 0.15: Hold
+
+RESULTS:
+  Avg Annual Return: -0.6433 (-64.33%)
+  S&P 500: 0.0110
+  Outperformance: -0.6543
+  Beats Target: NO
+
+TOP 10 PERFORMERS:
+   1. CPRT  : -0.5469 (-54.69%)
+   2. CHKP  : -0.5652 (-56.52%)
+   3. WDAY  : -0.5682 (-56.82%)
+   4. AEP   : -0.5770 (-57.70%)
+   5. ZM    : -0.5837 (-58.37%)
+   6. DXCM  : -0.5854 (-58.54%)
+   7. NVDA  : -0.5860 (-58.60%)
+   8. INTC  : -0.5917 (-59.17%)
+   9. META  : -0.6112 (-61.12%)
+  10. SNPS  : -0.6114 (-61.14%)

@@ -1,0 +1,31 @@
+PHASE 11: FAST ML STRATEGY
+================================================================================
+
+MODEL: Weighted Linear Classifier
+  - Trend: 0.40 (normalized -1 to 1)
+  - RSI: 0.25 (normalized -1 to 1)
+  - Momentum: 0.20 (price change)
+  - Volatility: -0.15 (penalizes high vol)
+
+DECISION RULE:
+  - Score > 0.25: Buy
+  - Score < -0.25: Sell
+  - Otherwise: Hold
+
+RESULTS:
+  Avg Annual Return: 0.0442 (4.42%)
+  S&P 500: 0.0110
+  Outperformance: 0.0332
+  Beats Target: NO
+
+TOP 10 PERFORMERS:
+   1. FAST  :  0.1242 ( 12.42%)
+   2. ADBE  :  0.1050 ( 10.50%)
+   3. AMD   :  0.0959 (  9.59%)
+   4. PANW  :  0.0914 (  9.14%)
+   5. CPRT  :  0.0866 (  8.66%)
+   6. NFLX  :  0.0797 (  7.97%)
+   7. NVDA  :  0.0736 (  7.36%)
+   8. TMUS  :  0.0697 (  6.97%)
+   9. MSFT  :  0.0695 (  6.95%)
+  10. ZM    :  0.0642 (  6.42%)
