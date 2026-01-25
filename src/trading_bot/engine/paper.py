@@ -21,11 +21,17 @@ from trading_bot.db.repository import SqliteRepository
 from trading_bot.learn.adaptive_controller import AdaptiveLearningController
 from trading_bot.learn.ensemble import ExponentialWeightsEnsemble, reward_to_unit_interval
 from trading_bot.learn.tuner import default_params, maybe_tune_weekly
+from trading_bot.learn.momentum_scaling import MomentumScaler
+from trading_bot.analytics.realtime_metrics import MetricsCollector
 from trading_bot.risk import position_size_shares, stop_loss_price, take_profit_price
+from trading_bot.risk.position_autocorrect import PositionAutocorrector
+from trading_bot.risk.portfolio_optimizer import PortfolioOptimizer
+from trading_bot.risk.options_hedging import OptionsHedger
 from trading_bot.strategy.atr_breakout import AtrBreakoutStrategy
 from trading_bot.strategy.base import StrategyDecision, StrategyOutput
 from trading_bot.strategy.macd_volume_momentum import MacdVolumeMomentumStrategy
 from trading_bot.strategy.rsi_mean_reversion import RsiMeanReversionStrategy
+from trading_bot.strategy.advanced_entry_filter import AdvancedEntryFilter
 
 
 @dataclass(frozen=True)
@@ -186,6 +192,53 @@ class PaperEngine:
         # Multi-level profit taking: track entry price and bars held for time-based exits
         self._position_entry_bars: Dict[str, int] = {}  # symbol -> entry iteration
         self._position_entry_prices: Dict[str, float] = {}  # symbol -> entry price
+        
+        # Phase 21: Options hedging - track which positions have hedges
+        self._hedged_positions: set[str] = set()  # Symbols with active hedges
+        
+        # ML Signal Manager (Phase 16)
+        from trading_bot.learn.ml_signals import MLSignalManager
+        self.ml_manager = MLSignalManager()
+        self.ml_enabled = True  # Can be toggled via config
+        self._ml_trained_symbols: set[str] = set()
+        self._ohlcv_cache: Dict[str, pd.DataFrame] = {}  # Cache OHLCV for ML training
+        
+        # Position Autocorrection (Phase 17)
+        self.position_autocorrector = PositionAutocorrector(
+            max_position_risk_pct=float(self.app_cfg.risk.max_risk_per_trade),
+            max_drawdown_pct=3.0,  # Exit if position down 3%
+            max_hold_bars=30,  # Max bars to hold a position
+        )
+        self.autocorrection_enabled = True
+        
+        # Portfolio Optimizer (Phase 19)
+        self.portfolio_optimizer = PortfolioOptimizer(
+            lookback_bars=50,
+            rebalance_interval=20,
+            max_concentration=0.25,
+            correlation_threshold=0.7,
+        )
+        self.portfolio_optimization_enabled = True
+        
+        # Momentum Scaler (Phase 20)
+        self.momentum_scaler = MomentumScaler()
+        self.momentum_scaling_enabled = True
+        
+        # Options Hedger (Phase 21)
+        self.options_hedger = OptionsHedger(
+            hedge_threshold=-2.0,
+            put_strike_pct=0.95,
+            collar_call_pct=1.05,
+        )
+        self.hedging_enabled = False  # Disabled by default (paper trading only)
+        
+        # Advanced Entry Filter (Phase 22)
+        self.entry_filter = AdvancedEntryFilter()
+        self.entry_filtering_enabled = True
+        
+        # Real-Time Metrics Monitor (Phase 23)
+        self.metrics_collector = MetricsCollector(window_size=100)
+        self.metrics_enabled = True
 
     def _build_strategies(self, params: Dict[str, Dict[str, Any]]) -> Dict[str, StrategyOutput | Any]:
         """Build strategy instances from parameters."""
@@ -280,6 +333,18 @@ class PaperEngine:
                 px = float(ohlcv["Close"].iloc[-1])
                 prices[sym] = px
                 self.broker.set_price(sym, px)
+                
+                # Update portfolio optimizer history
+                if self.portfolio_optimization_enabled:
+                    self.portfolio_optimizer.update_history(sym, ohlcv)
+                
+                # Update momentum scaling (Phase 20)
+                if self.momentum_scaling_enabled:
+                    self.momentum_scaler.update_metrics(sym, ohlcv)
+        
+        # Calculate correlations and optimize allocations (Phase 19)
+        if self.portfolio_optimization_enabled:
+            self.portfolio_optimizer.calculate_correlations(list(prices.keys()))
         
         print(f"[{self.iteration}] Processing {len(ohlcv_by_symbol)} symbols...", end="", flush=True)
 
@@ -371,6 +436,58 @@ class PaperEngine:
         rejections: list[OrderRejection] = []
 
         current_signals_by_symbol: Dict[str, Dict[str, int]] = {}
+        
+        # Position Autocorrection (Phase 17): Scan and fix position issues
+        if self.autocorrection_enabled:
+            portfolio = self.broker.portfolio()
+            issues = self.position_autocorrector.scan_positions(
+                positions=portfolio.positions,
+                prices=prices,
+                equity=portfolio.equity(prices),
+                entry_bars=self._position_entry_bars,
+                entry_prices=self._position_entry_prices,
+                current_bar=self.iteration,
+            )
+            
+            if issues:
+                corrections = self.position_autocorrector.recommend_corrections(
+                    issues=issues,
+                    positions=portfolio.positions,
+                    prices=prices,
+                    entry_prices=self._position_entry_prices,
+                )
+                
+                # Apply critical corrections immediately
+                for correction in corrections:
+                    if correction.symbol in [i.symbol for i in self.position_autocorrector.get_critical_issues()]:
+                        pos = portfolio.get_position(correction.symbol)
+                        
+                        if correction.action_type == "remove_position" and pos.qty != 0:
+                            order = Order(
+                                id=uuid.uuid4().hex,
+                                ts=ts,
+                                symbol=correction.symbol,
+                                side="SELL",
+                                qty=int(abs(pos.qty)),
+                                type="MARKET",
+                                tag=f"autocorrect:{correction.reason.replace(' ', '_')}",
+                            )
+                            res = self.broker.submit_order(order)
+                            if isinstance(res, OrderRejection):
+                                rejections.append(res)
+                            else:
+                                fills.append(res)
+                                # Clear entry tracking
+                                if correction.symbol in self._position_entry_bars:
+                                    del self._position_entry_bars[correction.symbol]
+                                if correction.symbol in self._position_entry_prices:
+                                    del self._position_entry_prices[correction.symbol]
+                        
+                        elif correction.action_type == "add_stop" and pos.qty > 0:
+                            if correction.stop_loss:
+                                pos.stop_loss = correction.stop_loss
+                            if correction.take_profit:
+                                pos.take_profit = correction.take_profit
 
         for sym in self.cfg.symbols:
             ohlcv = ohlcv_by_symbol[sym]
@@ -388,6 +505,42 @@ class PaperEngine:
                 entry_price = self._position_entry_prices[sym]
                 bars_held = self.iteration - self._position_entry_bars[sym]
                 profit_pct = (px - entry_price) / entry_price if entry_price > 0 else 0
+                
+                # Phase 21: Options Hedging - Protect profitable positions with puts/collars
+                if self.hedging_enabled and profit_pct > 0.01 and sym not in self._hedged_positions:
+                    try:
+                        # Check if position should be hedged
+                        should_hedge = self.options_hedger.should_hedge_position(
+                            symbol=sym,
+                            entry_price=entry_price,
+                            current_price=px,
+                            position_qty=pos.qty,
+                        )
+                        
+                        if should_hedge:
+                            # Create protective put hedge (buy insurance)
+                            hedge_cost = self.options_hedger.estimate_hedge_cost(
+                                symbol=sym,
+                                position_qty=pos.qty,
+                                current_price=px,
+                                hedge_type="protective_put"
+                            )
+                            
+                            # Only hedge if cost < 1% of position value
+                            position_value = px * pos.qty
+                            if hedge_cost < position_value * 0.01:
+                                hedge_pos = self.options_hedger.create_protective_put(
+                                    symbol=sym,
+                                    position_qty=pos.qty,
+                                    current_price=px,
+                                    entry_price=entry_price
+                                )
+                                self._hedged_positions.add(sym)
+                                print(f"   [HEDGE] {sym}: Protective put created @ {hedge_pos.strike_price:.2f} "
+                                      f"cost={hedge_cost:.2f} ({hedge_cost/position_value*100:.2f}% of position)", 
+                                      flush=True)
+                    except Exception as e:
+                        print(f"   [HEDGE] {sym}: Failed to create hedge - {e}", flush=True)
                 
                 # Multi-level take profit: exit 50% at +1.5% profit, 25% at +3%, close 25% at +5%
                 take_profits = [
@@ -527,6 +680,47 @@ class PaperEngine:
                     explanations={mode: dict(out.explanation)},
                 )
 
+            # ML Signal Integration (Phase 16)
+            # Train ML model if enough data available
+            if self.ml_enabled and sym not in self._ml_trained_symbols and len(ohlcv) >= 50:
+                try:
+                    self.ml_manager.train_symbol(sym, ohlcv)
+                    self._ml_trained_symbols.add(sym)
+                    print(f"[ML] Model trained for {sym}")
+                except Exception as e:
+                    print(f"[ML] Training failed for {sym}: {e}")
+            
+            # Get ML prediction if available
+            ml_signal = None
+            if self.ml_enabled and sym in self._ml_trained_symbols and len(ohlcv) >= 20:
+                try:
+                    ml_signal = self.ml_manager.predict_signal(sym, ohlcv)
+                    
+                    # Blend ML signal with ensemble decision
+                    # ML acts as a filter: reduce confidence if ML disagrees
+                    ml_agrees = (dec.signal == 1 and ml_signal.is_buy_signal(0.5)) or \
+                                (dec.signal == 0 and ml_signal.is_sell_signal(0.5))
+                    
+                    if not ml_agrees and dec.confidence > 0.6:
+                        # ML disagrees with high-confidence ensemble signal
+                        # Reduce confidence as a caution
+                        dec.confidence *= 0.7
+                    elif ml_agrees:
+                        # ML agrees: boost confidence
+                        dec.confidence = min(1.0, dec.confidence * 1.1)
+                    
+                    # Add ML explanation
+                    if "ml" not in dec.explanations:
+                        dec.explanations["ml"] = {}
+                    dec.explanations["ml"].update({
+                        "prediction": float(ml_signal.prediction),
+                        "confidence": float(ml_signal.confidence),
+                        "probability_up": float(ml_signal.probability_up),
+                        "model_version": ml_signal.model_version,
+                    })
+                except Exception as e:
+                    print(f"[ML] Prediction error for {sym}: {e}")
+
             decisions[sym] = dec
             signals[sym] = int(dec.signal)
             self.repo.log_strategy_decision(ts=ts, symbol=sym, mode=mode, decision=dec)
@@ -538,6 +732,19 @@ class PaperEngine:
                 self._signal_confirmation[sym] = 0  # Reset on signal loss
             
             confirmed_signal = dec.signal == 1 and self._signal_confirmation[sym] >= 1
+
+            # Advanced Entry Filtering (Phase 22): Validate entry before executing
+            if confirmed_signal and self.entry_filtering_enabled:
+                ohlcv = ohlcv_by_symbol[sym]
+                entry_valid = self.entry_filter.validate_entry(sym, ohlcv, dec.signal)
+                
+                if not entry_valid.is_valid:
+                    # Entry filtered out - skip this trade
+                    print(f"   [FILTER] {sym}: Entry rejected - {', '.join(entry_valid.reasons)}", flush=True)
+                    confirmed_signal = False
+                else:
+                    # Add confidence boost from entry filter
+                    dec.confidence = min(1.0, dec.confidence * (0.8 + entry_valid.confidence * 0.4))
 
             # Execute to target position (long/flat).
             if confirmed_signal and pos.qty == 0:
@@ -573,6 +780,35 @@ class PaperEngine:
                 
                 shares = int(shares * regime_multiplier)
                 shares = min(shares, int(self.broker.portfolio().cash // px))
+                
+                # Portfolio Optimization (Phase 19): Adjust position size based on correlations
+                if self.portfolio_optimization_enabled and shares > 0:
+                    portfolio = self.broker.portfolio()
+                    allocations = self.portfolio_optimizer.optimize_allocations(
+                        positions=portfolio.positions,
+                        prices=prices,
+                        equity=float(portfolio.equity(prices)),
+                        current_bar=self.iteration,
+                    )
+                    
+                    # If this symbol has an allocation, apply the adjustment
+                    if sym in allocations:
+                        alloc = allocations[sym]
+                        # This is a new position, so use the optimization recommendation
+                        if alloc.recommendation == "DECREASE":
+                            shares = int(shares * 0.85)  # Reduce by 15%
+                        elif alloc.recommendation == "INCREASE":
+                            shares = int(shares * 1.1)  # Increase by 10%
+
+                # Phase 20: Momentum-Based Position Scaling
+                # Scale position size based on momentum strength (0.5x - 1.5x)
+                if self.momentum_scaling_enabled and shares > 0:
+                    momentum_mult = self.momentum_scaler.get_scaling_multiplier(sym)
+                    shares = int(shares * momentum_mult)
+                    if momentum_mult < 1.0:
+                        print(f"   [MOMENTUM] {sym}: Reduced to {momentum_mult:.2f}x due to weak momentum", flush=True)
+                    elif momentum_mult > 1.0:
+                        print(f"   [MOMENTUM] {sym}: Increased to {momentum_mult:.2f}x due to strong momentum", flush=True)
 
                 if shares > 0:
                     order = Order(
@@ -648,10 +884,58 @@ class PaperEngine:
         self._prev_prices = dict(prices)
         self._prev_signals_by_symbol = current_signals_by_symbol
         
+        # Print ML Signal Status
+        if self.ml_enabled and len(self.ml_manager.signals) > 0:
+            ml_buys = sum(1 for s in self.ml_manager.signals.values() if s.prediction > 0.65)
+            ml_sells = sum(1 for s in self.ml_manager.signals.values() if s.prediction < 0.35)
+            print(f"   [ML] Symbols: {len(self.ml_manager.signals)} | Buy signals: {ml_buys} | Sell signals: {ml_sells}", flush=True)
+        
+        # Print Portfolio Optimization Status (Phase 19)
+        if self.portfolio_optimization_enabled and self.portfolio_optimizer.risk_metrics is not None:
+            metrics = self.portfolio_optimizer.risk_metrics
+            print(f"   [PORTOPT] Concentration: {metrics.concentration_ratio:.3f} | "
+                  f"Diversification: {metrics.diversification_ratio:.2f}x | "
+                  f"Vol: {metrics.portfolio_volatility:.4f}", flush=True)
+        
+        # Print Momentum Scaling Status (Phase 20)
+        if self.momentum_scaling_enabled:
+            avg_momentum = np.mean([self.momentum_scaler.momentum_strength.get(sym, 0.5) for sym in prices.keys()])
+            strong_momentum = sum(1 for sym in prices.keys() if self.momentum_scaler.momentum_strength.get(sym, 0.5) > 0.7)
+            print(f"   [MOMENTUM] Avg strength: {avg_momentum:.2f} | Strong momentum: {strong_momentum} symbols", flush=True)
+        
+        # Print Options Hedging Status (Phase 21)
+        if self.hedging_enabled:
+            hedged_count = len(self._hedged_positions)
+            active_positions = sum(1 for p in self.broker.portfolio().positions.values() if p.qty > 0)
+            coverage = hedged_count / active_positions * 100 if active_positions > 0 else 0
+            print(f"   [HEDGE] Active hedges: {hedged_count}/{active_positions} ({coverage:.1f}%)", flush=True)
+        
+        # Print Entry Filter Status (Phase 22)
+        if self.entry_filtering_enabled:
+            valid_rate = self.entry_filter.get_validation_rate()
+            valid_rate_pct = valid_rate * 100 if valid_rate > 0 else 0
+            print(f"   [FILTER] Validation rate: {valid_rate_pct:.1f}% | Trades filtered: {self.entry_filter.filtered_count}", 
+                  flush=True)
+        
         print(f" [OK] ({len(fills)} fills)", flush=True)
 
         # Calculate real-time metrics
         sharpe, max_dd, win_rate, num_trades, pnl = self._calculate_metrics()
+        
+        # Phase 23: Collect real-time metrics
+        if self.metrics_enabled:
+            snapshot = self.metrics_collector.collect_metrics(
+                ts=ts,
+                iteration=self.iteration,
+                portfolio=self.broker.portfolio(),
+                prices=prices,
+                equity_history=self.equity_history,
+                trade_history=self.trade_history,
+                fills=fills,
+                rejections=rejections,
+            )
+            # Print real-time metrics summary
+            self.metrics_collector.print_status()
 
         return PaperEngineUpdate(
             ts=ts,

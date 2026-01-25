@@ -1,0 +1,2306 @@
+[
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:07:18.329473+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:07:18.329473+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:07:18.329473+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:07:18.329473+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:07:18.329473+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:07:18.329473+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:07:18.329473+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:07:18.329473+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:07:18.329473+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:07:18.329473+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:07:18.329473+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:07:18.329473+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:07:31.791722+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:07:31.791722+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:07:31.791722+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:07:31.791722+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:07:31.791722+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:07:31.791722+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:07:31.791722+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:07:31.791722+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:07:31.791722+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:07:31.791722+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:07:31.791722+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:07:31.791722+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:07:59.589161+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:07:59.589161+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:07:59.589161+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:07:59.589161+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:07:59.589161+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:07:59.589161+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:07:59.589161+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:07:59.589161+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:07:59.589161+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:07:59.589161+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:07:59.589161+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:07:59.589161+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:08:27.601215+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:08:27.601215+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:08:27.601215+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:08:27.601215+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:08:27.601215+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:08:27.601215+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:08:27.601215+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:08:27.601215+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:08:27.601215+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:08:27.601215+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:08:27.601215+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:08:27.601215+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:08:58.395733+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:08:58.395733+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:08:58.395733+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:08:58.395733+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:08:58.395733+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:08:58.395733+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:08:58.395733+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:08:58.395733+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:08:58.395733+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:08:58.395733+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:08:58.395733+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:08:58.395733+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:09:29.291097+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:09:29.291097+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:09:29.291097+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:09:29.291097+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:09:29.291097+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:09:29.291097+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:09:29.291097+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:09:29.291097+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:09:29.291097+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:09:29.291097+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:09:29.291097+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:09:29.291097+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:09:57.348211+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:09:57.348211+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:09:57.348211+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:09:57.348211+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:09:57.348211+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:09:57.348211+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:09:57.348211+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:09:57.348211+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:09:57.348211+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:09:57.348211+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:09:57.348211+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:09:57.348211+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:10:28.201910+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:10:28.201910+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:10:28.201910+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:10:28.201910+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:10:28.201910+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:10:28.201910+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:10:28.201910+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:10:28.201910+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:10:28.201910+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:10:28.201910+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:10:28.201910+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:10:28.201910+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:10:59.186833+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:10:59.186833+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:10:59.186833+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:10:59.186833+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:10:59.186833+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:10:59.186833+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:10:59.186833+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:10:59.186833+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:10:59.186833+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:10:59.186833+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:10:59.186833+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:10:59.186833+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:11:29.946672+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:11:29.946672+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:11:29.946672+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:11:29.946672+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:11:29.946672+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:11:29.946672+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:11:29.946672+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:11:29.946672+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:11:29.946672+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:11:29.946672+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:11:29.946672+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:11:29.946672+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:15:00.987185+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:15:00.987185+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:15:00.987185+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:15:00.987185+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:15:00.987185+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:15:00.987185+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:15:00.987185+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:15:00.987185+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:15:00.987185+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:15:00.987185+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:15:00.987185+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:15:00.987185+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:15:17.324486+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:15:17.324486+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:15:17.324486+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:15:17.324486+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:15:17.324486+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:15:17.324486+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:15:17.324486+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:15:17.324486+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:15:17.324486+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:15:17.324486+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:15:17.324486+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:15:17.324486+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:15:45.239424+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:15:45.239424+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:15:45.239424+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:15:45.239424+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:15:45.239424+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:15:45.239424+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:15:45.239424+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:15:45.239424+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:15:45.239424+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:15:45.239424+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:15:45.239424+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:15:45.239424+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:16:16.078360+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:16:16.078360+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:16:16.078360+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:16:16.078360+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:16:16.078360+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:16:16.078360+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:16:16.078360+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:16:16.078360+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:16:16.078360+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:16:16.078360+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:16:16.078360+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:16:16.078360+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:16:47.020193+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:16:47.020193+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:16:47.020193+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:16:47.020193+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:16:47.020193+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:16:47.020193+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:16:47.020193+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:16:47.020193+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:16:47.020193+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:16:47.020193+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:16:47.020193+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:16:47.020193+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:17:17.810409+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:17:17.810409+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:17:17.810409+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:17:17.810409+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:17:17.810409+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:17:17.810409+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:17:17.810409+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:17:17.810409+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:17:17.810409+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:17:17.810409+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:17:17.810409+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:17:17.810409+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:17:42.645156+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:17:42.645156+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:17:42.645156+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:17:42.645156+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:17:42.645156+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:17:42.645156+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:17:42.645156+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:17:42.645156+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:17:42.645156+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:17:42.645156+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:17:42.645156+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:17:42.645156+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:18:10.817714+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:18:10.817714+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:18:10.817714+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:18:10.817714+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:18:10.817714+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:18:10.817714+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:18:10.817714+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:18:10.817714+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:18:10.817714+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:18:10.817714+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:18:10.817714+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:18:10.817714+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:18:41.656461+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:18:41.656461+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:18:41.656461+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:18:41.656461+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:18:41.656461+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:18:41.656461+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:18:41.656461+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:18:41.656461+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:18:41.656461+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:18:41.656461+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:18:41.656461+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:18:41.656461+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:19:12.652649+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:19:12.652649+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:19:12.652649+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:19:12.652649+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:19:12.652649+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:19:12.652649+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:19:12.652649+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:19:12.652649+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:19:12.652649+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:19:12.652649+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:19:12.652649+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:19:12.652649+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:19:43.645510+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:19:43.645510+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:19:43.645510+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:19:43.645510+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:19:43.645510+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:19:43.645510+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:19:43.645510+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:19:43.645510+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:19:43.645510+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:19:43.645510+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:19:43.645510+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:19:43.645510+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:20:17.548155+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:20:17.548155+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:20:17.548155+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:20:17.548155+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:20:17.548155+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:20:17.548155+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:20:17.548155+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:20:17.548155+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:20:17.548155+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:20:17.548155+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:20:17.548155+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:20:17.548155+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:20:45.654025+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:20:45.654025+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:20:45.654025+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:20:45.654025+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:20:45.654025+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:20:45.654025+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:20:45.654025+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:20:45.654025+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:20:45.654025+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:20:45.654025+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:20:45.654025+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:20:45.654025+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "INTC",
+    "side": "BUY",
+    "qty": 221,
+    "price": 45.065,
+    "timestamp": "2026-01-25T16:21:16.699530+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "MU",
+    "side": "BUY",
+    "qty": 25,
+    "price": 399.625,
+    "timestamp": "2026-01-25T16:21:16.699530+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "LRCX",
+    "side": "BUY",
+    "qty": 45,
+    "price": 217.895,
+    "timestamp": "2026-01-25T16:21:16.699530+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "ON",
+    "side": "BUY",
+    "qty": 161,
+    "price": 61.985,
+    "timestamp": "2026-01-25T16:21:16.699530+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMD",
+    "side": "BUY",
+    "qty": 38,
+    "price": 259.65,
+    "timestamp": "2026-01-25T16:21:16.699530+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "AMAT",
+    "side": "BUY",
+    "qty": 31,
+    "price": 322.45,
+    "timestamp": "2026-01-25T16:21:16.699530+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "BA",
+    "side": "BUY",
+    "qty": 39,
+    "price": 252.11,
+    "timestamp": "2026-01-25T16:21:16.699530+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "META",
+    "side": "BUY",
+    "qty": 15,
+    "price": 658.48,
+    "timestamp": "2026-01-25T16:21:16.699530+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "RTX",
+    "side": "BUY",
+    "qty": 51,
+    "price": 195.935,
+    "timestamp": "2026-01-25T16:21:16.699530+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOG",
+    "side": "BUY",
+    "qty": 30,
+    "price": 328.44,
+    "timestamp": "2026-01-25T16:21:16.699530+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 30,
+    "price": 327.89,
+    "timestamp": "2026-01-25T16:21:16.699530+00:00",
+    "pnl": null
+  },
+  {
+    "symbol": "HON",
+    "side": "BUY",
+    "qty": 45,
+    "price": 221.44,
+    "timestamp": "2026-01-25T16:21:16.699530+00:00",
+    "pnl": null
+  }
+]

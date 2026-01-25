@@ -1,11 +1,43 @@
 version: '3.8'
 
+# QUICK START: docker-compose up
+# Then open browser to http://localhost:5000
+# Click "Logs" tab to see what the bot is doing!
+
 services:
-  # Main trading bot service - runs auto-trading with learning
-  trading-bot:
+  # PostgreSQL database - minimal lean image for speed
+  postgres:
+    image: postgres:16-alpine
+    container_name: trading-bot-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-trading}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-trading}
+      POSTGRES_DB: ${DB_NAME:-trading}
+      POSTGRES_INITDB_ARGS: "--no-locale -c shared_buffers=128MB -c max_connections=50"
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - trading-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-trading}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    profiles:
+      - ""
+
+  # Web dashboard - OPTIMIZED for fast startup
+  # 2-page dashboard: Stats page + real-time Logs page
+  dashboard:
     image: algo-trading-bot:latest
-    container_name: algo-trading-bot
-    build: .
+    container_name: trading-bot-dashboard
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file:
       - .env
     volumes:
@@ -16,68 +48,62 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - FLASK_ENV=production
-    command: ["python", "-m", "trading_bot", "auto"]
+    ports:
+      - "5000:5000"
+    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--worker-class", "eventlet", "--timeout", "30", "--access-logfile", "-", "trading_bot.ui.web:app"]
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - trading-network
     healthcheck:
-      test: ["CMD", "python", "-c", "from trading_bot.learn.strategy_learner import StrategyLearner; StrategyLearner()"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 15s
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
 
-  # Web dashboard service - shows real-time trading data
-  dashboard:
+  # Main trading bot service - auto-trading with learning
+  trading-bot:
     image: algo-trading-bot:latest
-    container_name: trading-bot-dashboard
-    build: .
+    container_name: algo-trading-bot
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file:
       - .env
     volumes:
       - .:/app
       - ./data:/app/data
       - ./.cache:/app/.cache
+      - ./logs:/app/logs
     environment:
       - PYTHONUNBUFFERED=1
       - FLASK_ENV=production
-      - FLASK_APP=trading_bot.ui.web
-    ports:
-      - "5000:5000"
-    command: ["python", "-m", "trading_bot.ui.web"]
+    command: sh -c "python -m trading_bot auto --no-ui --iterations 10 2>&1 | tee /app/logs/trading_bot.log"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - trading-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health || exit 1"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 10s
       timeout: 5s
       retries: 3
+      start_period: 15s
     restart: unless-stopped
-
-  # PostgreSQL database - stores trade history and metrics
-  postgres:
-    image: postgres:16-alpine
-    container_name: trading-bot-postgres
-    environment:
-      POSTGRES_USER: ${DB_USER:-trading}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-trading}
-      POSTGRES_DB: ${DB_NAME:-trading}
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - trading-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-trading}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
 
 networks:
   trading-network:
@@ -86,4 +112,3 @@ networks:
 volumes:
   pgdata:
     driver: local
-  pgdata:

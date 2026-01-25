@@ -1,23 +1,48 @@
+# Environment and Secrets
+.env
+.env.local
+.env.*.local
+*.env
+secrets.json
+credentials.json
+alpaca_credentials.json
+api_keys.json
+
+# Sensitive Database Files
+*.db
+*.sqlite
+*.sqlite3
+trading.db
+*.log
+debug.log
+bot_debug.log
+pgdata/
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+.Python
 
 # Virtual environments
 .venv/
 venv/
 ENV/
+env/
 
 # Packaging
 build/
 dist/
 *.egg-info/
+*.egg
 
 # Test / coverage
 .pytest_cache/
 .coverage
 htmlcov/
+.tox/
+.hypothesis/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -25,18 +50,48 @@ htmlcov/
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+.project
+.pydevproject
+.settings/
 
 # OS
 .DS_Store
 Thumbs.db
+.Thumbs.db
 
 # Local runtime artifacts
 data/
 logs/
 trades.sqlite
-.env
+backtest_results/
+temp/
+tmp/
+*.tmp
+*.bak
 
-# Build and debug logs
-bot_debug.log
-build.log
-*.log
+# Cache
+.cache/
+*.cache
+
+# Docker
+.docker
+docker-compose.override.yml
+
+# Data
+*.csv
+*.xlsx
+!configs/
+
+# Other
+.git/
+.github/wiki/
+docs/archive/
+docs/advanced/
+docs/deployment/
+docs/features/
+docs/getting-started/

@@ -1,0 +1,98 @@
+[
+  {
+    "symbol": "AAPL",
+    "side": "BUY",
+    "qty": 100,
+    "price": 150.0,
+    "timestamp": "2026-01-25T11:12:10.415724",
+    "pnl": null
+  },
+  {
+    "symbol": "AAPL",
+    "side": "SELL",
+    "qty": 100,
+    "price": 155.0,
+    "timestamp": "2026-01-25T13:12:10.415724",
+    "pnl": 500.0
+  },
+  {
+    "symbol": "MSFT",
+    "side": "BUY",
+    "qty": 50,
+    "price": 300.0,
+    "timestamp": "2026-01-25T14:12:10.415724",
+    "pnl": null
+  },
+  {
+    "symbol": "MSFT",
+    "side": "SELL",
+    "qty": 50,
+    "price": 295.0,
+    "timestamp": "2026-01-25T16:12:10.415724",
+    "pnl": -250.0
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 25,
+    "price": 2000.0,
+    "timestamp": "2026-01-25T17:12:10.415724",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "SELL",
+    "qty": 25,
+    "price": 2050.0,
+    "timestamp": "2026-01-25T19:12:10.415724",
+    "pnl": 1250.0
+  },
+  {
+    "symbol": "AAPL",
+    "side": "BUY",
+    "qty": 100,
+    "price": 150.0,
+    "timestamp": "2026-01-25T11:12:23.092271",
+    "pnl": null
+  },
+  {
+    "symbol": "AAPL",
+    "side": "SELL",
+    "qty": 100,
+    "price": 155.0,
+    "timestamp": "2026-01-25T13:12:23.092271",
+    "pnl": 500.0
+  },
+  {
+    "symbol": "MSFT",
+    "side": "BUY",
+    "qty": 50,
+    "price": 300.0,
+    "timestamp": "2026-01-25T14:12:23.092271",
+    "pnl": null
+  },
+  {
+    "symbol": "MSFT",
+    "side": "SELL",
+    "qty": 50,
+    "price": 295.0,
+    "timestamp": "2026-01-25T16:12:23.092271",
+    "pnl": -250.0
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "BUY",
+    "qty": 25,
+    "price": 2000.0,
+    "timestamp": "2026-01-25T17:12:23.092271",
+    "pnl": null
+  },
+  {
+    "symbol": "GOOGL",
+    "side": "SELL",
+    "qty": 25,
+    "price": 2050.0,
+    "timestamp": "2026-01-25T19:12:23.092271",
+    "pnl": 1250.0
+  }
+]

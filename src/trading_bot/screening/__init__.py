@@ -1,5 +1,5 @@
 """Stock screening and opportunity detection"""
 
-from .stock_screener import StockScreener, StockScore
+from .symbol_screener import SymbolScreener
 
-__all__ = ["StockScreener", "StockScore"]
+__all__ = ["SymbolScreener"]

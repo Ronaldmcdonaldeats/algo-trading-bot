@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trading Bot Dashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        
+        header {
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            color: white;
+        }
+        
+        header h1 {
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .nav-tab.active {
+            background: #2a5298;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .status-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .status-item {
+            background: rgba(255,255,255,0.9);
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #2a5298;
+        }
+        
+        .status-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .status-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 12px;
+        }
+        
+        .btn-primary { background: #2a5298; color: white; }
+        .btn-primary:hover { background: #1e3c72; }
+        
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-danger:hover { background: #c0392b; }
+        
+        .btn-success { background: #27ae60; color: white; }
+        .btn-success:hover { background: #229954; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #1e3c72;
+            margin-bottom: 12px;
+            font-size: 16px;
+            border-bottom: 2px solid #2a5298;
+            padding-bottom: 8px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: #f5f5f5;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+        
+        /* LOGS PAGE STYLES */
+        .logs-container {
+            background: #1e1e1e;
+            border-radius: 6px;
+            padding: 12px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #333;
+        }
+        
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .logs-header h3 {
+            color: #fff;
+            margin: 0;
+            font-size: 14px;
+        }
+        
+        .logs-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-small {
+            padding: 4px 10px;
+            font-size: 11px;
+            border: 1px solid #666;
+            background: #2a2a2a;
+            color: #fff;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-small:hover {
+            background: #404040;
+            border-color: #888;
+        }
+        
+        #logs-content {
+            flex: 1;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .log-entry {
+            color: #a3a3a3;
+            white-space: pre-wrap;
+            word-break: break-word;
+            padding: 2px 0;
+            user-select: text;
+        }
+        
+        .log-entry.error { color: #ff6b6b; }
+        .log-entry.warning { color: #ffa500; }
+        .log-entry.success { color: #51cf66; }
+        .log-entry.info { color: #74c0fc; }
+        
+        .stat-box {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2a5298;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Trading Bot Dashboard</h1>
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="status-label">Equity</div>
+                    <div class="status-value" id="equity">$100,000</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Day P&L</div>
+                    <div class="status-value" id="day_pnl">$0</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Trades</div>
+                    <div class="status-value" id="trades">0</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Status</div>
+                    <div class="status-value" id="recovery">Normal</div>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn-primary" onclick="startBot()">▶ Start</button>
+                <button class="btn-danger" onclick="stopBot()">⏹ Stop</button>
+                <button class="btn-success" onclick="recordTrade()">📝 Record Trade</button>
+                <button class="btn-primary" onclick="runOptimization()">⚙ Optimize</button>
+            </div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchPage(event, 'overview')">📊 Overview</button>
+                <button class="nav-tab" onclick="switchPage(event, 'logs')">📋 Logs</button>
+                <button class="nav-tab" onclick="switchPage(event, 'trades')">💼 Trades</button>
+            </div>
+        </header>
+
+        <!-- OVERVIEW PAGE -->
+        <div id="overview" class="page active">
+            <div class="grid">
+                <div class="card">
+                    <h2>Recent Trades</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Entry</th>
+                                <th>Exit</th>
+                                <th>P&L</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trades-table">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #999;">No trades yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="card">
+                    <h2>Systems Status</h2>
+                    <table style="border: none;">
+                        <tr style="border: none;">
+                            <td style="border: none; padding: 8px 0;">Trade Journal</td>
+                            <td style="border: none; text-align: right; color: #27ae60;">✓ Active</td>
+                        </tr>
+                        <tr style="border: none;">
+                            <td style="border: none; padding: 8px 0;">Drawdown Recovery</td>
+                            <td style="border: none; text-align: right; color: #27ae60;">✓ Active</td>
+                        </tr>
+                        <tr style="border: none;">
+                            <td style="border: none; padding: 8px 0;">Auto-Tuning</td>
+                            <td style="border: none; text-align: right; color: #27ae60;">✓ Active</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="card">
+                    <h2>Quick Stats</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div class="stat-box">
+                            <div class="stat-number" id="total_trades">0</div>
+                            <div class="stat-label">Total Trades</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number" id="win_rate">0%</div>
+                            <div class="stat-label">Win Rate</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number" id="max_dd">0%</div>
+                            <div class="stat-label">Max Drawdown</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number" id="sharpe">0.0</div>
+                            <div class="stat-label">Sharpe Ratio</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOGS PAGE -->
+        <div id="logs" class="page">
+            <div class="logs-container">
+                <div class="logs-header">
+                    <h3>Activity Logs</h3>
+                    <div class="logs-actions">
+                        <button class="btn-small" onclick="copyLogs()">📋 Copy All</button>
+                        <button class="btn-small" onclick="clearLogs()">🗑️ Clear</button>
+                    </div>
+                </div>
+                <div id="logs-content"></div>
+            </div>
+        </div>
+
+        <!-- TRADES PAGE -->
+        <div id="trades" class="page">
+            <div class="card" style="width: 100%;">
+                <h2>Trade History</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Symbol</th>
+                            <th>Entry</th>
+                            <th>Exit</th>
+                            <th>Qty</th>
+                            <th>P&L</th>
+                            <th>Strategy</th>
+                        </tr>
+                    </thead>
+                    <tbody id="all-trades-table">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #999;">No trades yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        let logs = [];
+        const MAX_LOGS = 500;
+
+        // Page Switching
+        function switchPage(event, pageName) {
+            console.log('Switching to page:', pageName);
+            
+            // Hide all pages
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(p => p.classList.remove('active'));
+            
+            // Show selected page
+            const pageEl = document.getElementById(pageName);
+            if (pageEl) {
+                pageEl.classList.add('active');
+            }
+            
+            // Update nav tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // WebSocket Connection
+        socket.on('connect', function() {
+            console.log('Connected to WebSocket');
+            addLog('Dashboard connected', 'success');
+            socket.emit('request_logs');
+        });
+
+        socket.on('log', function(data) {
+            console.log('Log received:', data);
+            addLog(data.message, data.level || 'info', data.timestamp);
+        });
+
+        socket.on('logs_history', function(data) {
+            console.log('Logs history received:', data);
+            if (data.logs && data.logs.length > 0) {
+                data.logs.forEach(log => {
+                    logs.push(log);
+                });
+                renderLogs();
+            }
+        });
+
+        socket.on('status_update', function(data) {
+            console.log('Status update:', data);
+            if (data.equity !== undefined) {
+                document.getElementById('equity').textContent = `$${data.equity.toLocaleString('en-US', {maximumFractionDigits: 2})}`;
+            }
+            if (data.day_pnl !== undefined) {
+                const pnlElem = document.getElementById('day_pnl');
+                pnlElem.textContent = `$${data.day_pnl.toLocaleString('en-US', {maximumFractionDigits: 2})}`;
+            }
+            if (data.day_trades !== undefined) {
+                document.getElementById('trades').textContent = data.day_trades;
+            }
+        });
+
+        // Logging Functions
+        function addLog(message, level = 'info', timestamp = null) {
+            const ts = timestamp ? new Date(timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
+            logs.push({ timestamp: ts, message, level });
+            
+            if (logs.length > MAX_LOGS) {
+                logs = logs.slice(-MAX_LOGS);
+            }
+            
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const logsContent = document.getElementById('logs-content');
+            if (!logsContent) return;
+            
+            logsContent.innerHTML = logs.map(log => 
+                `<div class="log-entry ${log.level}">[${log.timestamp}] ${log.message}</div>`
+            ).join('');
+            
+            logsContent.scrollTop = logsContent.scrollHeight;
+        }
+
+        function copyLogs() {
+            const logText = logs.map(log => `[${log.timestamp}] ${log.message}`).join('\n');
+            navigator.clipboard.writeText(logText).then(() => {
+                alert('✓ Logs copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = logText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('✓ Logs copied to clipboard!');
+            });
+        }
+
+        function clearLogs() {
+            if (confirm('Clear all logs?')) {
+                logs = [];
+                renderLogs();
+                addLog('Logs cleared', 'info');
+            }
+        }
+
+        // Bot Controls
+        function startBot() {
+            addLog('Starting bot...', 'info');
+            fetch('/api/start', { method: 'POST' })
+                .then(r => r.json())
+                .then(d => addLog('Bot started successfully', 'success'))
+                .catch(err => addLog(`Error starting bot: ${err}`, 'error'));
+        }
+
+        function stopBot() {
+            addLog('Stopping bot...', 'warning');
+            fetch('/api/stop', { method: 'POST' })
+                .then(r => r.json())
+                .then(d => addLog('Bot stopped', 'warning'))
+                .catch(err => addLog(`Error stopping bot: ${err}`, 'error'));
+        }
+
+        function recordTrade() {
+            const symbol = prompt('Symbol:', 'AAPL');
+            if (!symbol) return;
+            
+            const entry = prompt('Entry Price:', '150');
+            if (!entry) return;
+            
+            const exit = prompt('Exit Price:', '152');
+            if (!exit) return;
+            
+            const qty = prompt('Quantity:', '100');
+            if (!qty) return;
+
+            const trade = {
+                symbol: symbol,
+                entry_price: parseFloat(entry),
+                exit_price: parseFloat(exit),
+                quantity: parseInt(qty),
+                side: 'long',
+                strategy: 'Manual'
+            };
+
+            addLog(`Recording trade: ${symbol}...`, 'info');
+            fetch('/api/trade', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(trade)
+            }).then(r => r.json()).then(d => {
+                addLog(`✓ Trade recorded: ${symbol} @ $${entry} → $${exit}`, 'success');
+            }).catch(err => {
+                addLog(`✗ Error recording trade: ${err}`, 'error');
+            });
+        }
+
+        function runOptimization() {
+            addLog('Starting optimization...', 'info');
+            fetch('/api/tuning/optimize', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bounds: {} })
+            }).then(r => r.json()).then(d => {
+                const score = d.result ? d.result.score : 'unknown';
+                addLog(`✓ Optimization complete! Score: ${score}`, 'success');
+            }).catch(err => {
+                addLog(`✗ Optimization error: ${err}`, 'error');
+            });
+        }
+
+        // Status Updates
+        function fetchStatus() {
+            fetch('/api/status')
+                .then(r => r.json())
+                .then(d => {
+                    socket.emit('status_update', d);
+                })
+                .catch(err => console.error('Error fetching status:', err));
+        }
+
+        // Auto-refresh every 5 seconds
+        setInterval(() => {
+            socket.emit('request_status');
+        }, 5000);
+
+        // Initial message
+        addLog('🚀 Dashboard ready', 'success');
+    </script>
+</body>
+</html>

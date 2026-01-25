@@ -8,6 +8,8 @@ from rich.console import Console
 
 from trading_bot.engine.paper import PaperEngine, PaperEngineConfig
 from trading_bot.schedule.us_equities import MarketSchedule, parse_interval
+from trading_bot.learn.ml_signals import MLSignalManager
+from trading_bot.analytics.realtime_dashboard import RealtimeDashboard
 
 
 @dataclass(frozen=True)
@@ -49,6 +51,10 @@ def run_paper_trading(
     )
 
     engine = PaperEngine(cfg=engine_cfg)
+    
+    # Initialize realtime dashboard
+    dashboard = RealtimeDashboard()
+    dashboard.initialize(float(start_cash))
 
     try:
         td = parse_interval(interval)
@@ -84,6 +90,32 @@ def run_paper_trading(
         schedule.mark_ran(now)
 
         equity = update.portfolio.equity(update.prices)
+        
+        # Update dashboard
+        dashboard.update_portfolio(
+            cash=update.portfolio.cash,
+            equity=equity,
+            buying_power=equity,
+            total_return_pct=(equity - float(start_cash)) / float(start_cash) * 100,
+            realized_pnl=0.0,  # Could be enhanced with actual tracking
+            unrealized_pnl=0.0,
+            num_open_positions=len([p for p in update.portfolio.positions.values() if p.qty != 0]),
+            num_trades_today=len(update.fills),
+        )
+        
+        dashboard.update_metrics(
+            sharpe_ratio=update.sharpe_ratio,
+            sortino_ratio=0.0,  # Could be calculated
+            max_drawdown_pct=update.max_drawdown_pct,
+            win_rate_pct=update.win_rate * 100,
+            profit_factor=1.0,  # Could be calculated
+            total_return_pct=(equity - float(start_cash)) / float(start_cash) * 100,
+            num_trades=update.num_trades,
+            num_wins=int(update.win_rate * update.num_trades) if update.num_trades > 0 else 0,
+            num_losses=update.num_trades - int(update.win_rate * update.num_trades) if update.num_trades > 0 else 0,
+            avg_win=0.0,  # Could be calculated
+            avg_loss=0.0,  # Could be calculated
+        )
         
         # Format metrics for display
         sharpe_str = f"{update.sharpe_ratio:+.2f}" if update.sharpe_ratio != 0 else "N/A"

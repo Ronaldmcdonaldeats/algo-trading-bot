@@ -1,0 +1,81 @@
+###############################################################################
+# PRODUCTION CONFIGURATION - LIVE MARKET TRADING
+###############################################################################
+
+# Market data provider configuration
+market_data:
+  provider: "yfinance"  # Options: yfinance, alpaca
+  symbols:
+    - AAPL
+    - MSFT
+    - GOOGL
+    - TSLA
+    - AMZN
+    - META
+    - NVDA
+    - JPM
+    - V
+    - JNJ
+  refresh_interval_seconds: 60  # Update data every 60 seconds during market hours
+
+# Broker configuration
+broker:
+  type: "alpaca"  # Options: paper, alpaca (real), interactive_brokers
+  mode: "paper"  # paper, live
+  starting_cash: 100000
+  commission_bps: 10  # 0.1% commission
+  slippage_bps: 5    # 0.05% slippage on market orders
+
+# Trading strategy configuration
+strategy:
+  ensemble_enabled: true
+  strategies:
+    - atr_breakout
+    - macd_volume
+    - rsi_mean_reversion
+  
+  atr_breakout:
+    atr_period: 14
+    breakout_lookback: 20
+    atr_mult: 1.0
+  
+  macd_volume:
+    macd_fast: 12
+    macd_slow: 26
+    macd_signal: 9
+    vol_sma: 20
+    vol_mult: 1.0
+  
+  rsi_mean_reversion:
+    rsi_period: 14
+    entry_oversold: 30.0
+    exit_rsi: 50.0
+
+# Risk management
+risk:
+  max_position_size_pct: 0.10  # Max 10% of portfolio per position
+  daily_loss_limit_pct: 0.05   # Stop trading if down 5% daily
+  portfolio_loss_limit_pct: 0.20  # Stop trading if down 20% total
+  position_size_reduction: 0.5  # Reduce sizes by 50% during recovery
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  capture_trades: true
+  capture_signals: true
+  capture_fills: true
+
+# Market hours (US Eastern Time)
+market_hours:
+  open: "09:30"
+  close: "16:00"
+  pre_market: "04:00"
+  after_hours: "20:00"
+  timezone: "US/Eastern"
+
+# Backtest/Demo settings (leave as is for live trading)
+backtest:
+  enabled: false
+  start_date: null
+  end_date: null
+  interval: "1d"
