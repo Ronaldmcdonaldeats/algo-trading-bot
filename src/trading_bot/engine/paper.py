@@ -23,10 +23,12 @@ from trading_bot.learn.ensemble import ExponentialWeightsEnsemble, reward_to_uni
 from trading_bot.learn.tuner import default_params, maybe_tune_weekly
 from trading_bot.learn.momentum_scaling import MomentumScaler
 from trading_bot.analytics.realtime_metrics import MetricsCollector
+from trading_bot.analytics.position_monitor import PositionMonitor, AlertType
 from trading_bot.risk import position_size_shares, stop_loss_price, take_profit_price
 from trading_bot.risk.position_autocorrect import PositionAutocorrector
 from trading_bot.risk.portfolio_optimizer import PortfolioOptimizer
 from trading_bot.risk.options_hedging import OptionsHedger
+from trading_bot.risk.risk_adjusted_sizer import RiskAdjustedSizer
 from trading_bot.strategy.atr_breakout import AtrBreakoutStrategy
 from trading_bot.strategy.base import StrategyDecision, StrategyOutput
 from trading_bot.strategy.macd_volume_momentum import MacdVolumeMomentumStrategy
@@ -239,6 +241,30 @@ class PaperEngine:
         # Real-Time Metrics Monitor (Phase 23)
         self.metrics_collector = MetricsCollector(window_size=100)
         self.metrics_enabled = True
+        
+        # Position Monitor (Phase 24)
+        self.position_monitor = PositionMonitor(
+            tp_threshold=0.01,  # Alert within 1% of take profit
+            sl_threshold=0.005,  # Alert within 0.5% of stop loss
+            drawdown_threshold=0.03,  # Alert if down >3% from peak
+            age_threshold=200,  # Alert if held >200 bars
+            momentum_shift_threshold=0.2,  # Alert if momentum shifts >0.2
+        )
+        self.position_monitoring_enabled = True
+        
+        # Risk-Adjusted Position Sizer (Phase 25)
+        self.risk_sizer = RiskAdjustedSizer(
+            base_risk_pct=0.01,  # 1% risk per trade
+            max_position_pct=0.15,  # Max 15% of portfolio per trade
+            min_position_pct=0.001,  # Min 0.1% of portfolio per trade
+            volatility_scale=1.0,  # Scale of volatility impact
+            drawdown_scale=1.0,  # Scale of drawdown impact
+            win_streak_boost=1.2,  # Up to 20% boost on hot streak
+            loss_streak_reduction=0.7,  # Down to 70% on cold streak
+            hot_streak_min=3,  # 3+ consecutive wins for boost
+            cold_streak_min=2,  # 2+ consecutive losses for reduction
+        )
+        self.risk_adjusted_sizing_enabled = True
 
     def _build_strategies(self, params: Dict[str, Dict[str, Any]]) -> Dict[str, StrategyOutput | Any]:
         """Build strategy instances from parameters."""
@@ -492,6 +518,22 @@ class PaperEngine:
         for sym in self.cfg.symbols:
             ohlcv = ohlcv_by_symbol[sym]
             px = float(prices[sym])
+            
+            # Phase 24: Update position monitoring (if position is active)
+            if self.position_monitoring_enabled and sym in self.position_monitor.positions:
+                momentum_score = self.momentum_scaler.get_momentum_score(sym) if self.momentum_scaling_enabled else 0.0
+                pos = self.broker.portfolio().get_position(sym)
+                
+                self.position_monitor.update_position(
+                    symbol=sym,
+                    current_price=px,
+                    momentum_score=momentum_score,
+                    iteration=self.iteration,
+                    ts=ts,
+                    take_profit=getattr(pos, 'take_profit', None),
+                    stop_loss=getattr(pos, 'stop_loss', None),
+                    hedged=sym in self._hedged_positions if self.hedging_enabled else False,
+                )
 
             # Strategy outputs for explainability.
             outputs: Dict[str, StrategyOutput] = {
@@ -810,6 +852,51 @@ class PaperEngine:
                     elif momentum_mult > 1.0:
                         print(f"   [MOMENTUM] {sym}: Increased to {momentum_mult:.2f}x due to strong momentum", flush=True)
 
+                # Phase 25: Risk-Adjusted Position Sizing
+                # Adjust position size based on portfolio risk state (volatility, drawdown, win rate)
+                if self.risk_adjusted_sizing_enabled and shares > 0:
+                    # Update risk sizer state
+                    sharpe, max_dd, win_rate, num_trades, pnl = self._calculate_metrics()
+                    
+                    # Get consecutive win/loss counts
+                    consecutive_wins = 0
+                    consecutive_losses = 0
+                    if self.trade_history:
+                        for trade in reversed(self.trade_history):
+                            if trade.get("pnl", 0) > 0:
+                                consecutive_wins += 1
+                            else:
+                                break
+                        for trade in reversed(self.trade_history):
+                            if trade.get("pnl", 0) <= 0:
+                                consecutive_losses += 1
+                            else:
+                                break
+                    
+                    # Get current volatility
+                    ohlcv = ohlcv_by_symbol[sym]
+                    returns = ohlcv['Close'].pct_change().dropna()
+                    current_vol = float(returns.std()) if len(returns) > 0 else 0.02
+                    
+                    # Update sizer state
+                    eq = self.broker.portfolio().equity(self.broker.prices())
+                    self.risk_sizer.update_state(
+                        current_equity=float(eq),
+                        consecutive_wins=consecutive_wins,
+                        consecutive_losses=consecutive_losses,
+                        total_trades=num_trades,
+                        winning_trades=int(num_trades * win_rate),
+                        losing_trades=int(num_trades * (1 - win_rate)),
+                        volatility=current_vol,
+                        sharpe_ratio=sharpe,
+                    )
+                    
+                    # Apply risk adjustment
+                    risk_mult = self.risk_sizer.get_position_multiplier()
+                    shares = int(shares * risk_mult)
+                    risk_level = self.risk_sizer.get_risk_level()
+                    print(f"   [RISK] {sym}: Risk level {risk_level}, mult {risk_mult:.2f}x", flush=True)
+
                 if shares > 0:
                     order = Order(
                         id=uuid.uuid4().hex,
@@ -835,6 +922,16 @@ class PaperEngine:
                         # Track entry for time-based and multi-level exits
                         self._position_entry_bars[sym] = self.iteration
                         self._position_entry_prices[sym] = float(px)
+                        
+                        # Phase 24: Add position to monitor
+                        if self.position_monitoring_enabled:
+                            self.position_monitor.add_position(
+                                symbol=sym,
+                                entry_price=float(px),
+                                qty=int(shares),
+                                entry_bar=self.iteration,
+                                ts=ts,
+                            )
 
                         self.repo.log_order_filled(order)
                         self.repo.log_fill(res)
@@ -857,6 +954,10 @@ class PaperEngine:
                     fills.append(res)
                     self.repo.log_order_filled(order)
                     self.repo.log_fill(res)
+                    
+                    # Phase 24: Remove position from monitor when closed
+                    if self.position_monitoring_enabled and sym in self.position_monitor.positions:
+                        self.position_monitor.remove_position(sym)
 
         self.repo.log_snapshot(ts=ts, portfolio=self.broker.portfolio(), prices=prices)
 
@@ -916,6 +1017,14 @@ class PaperEngine:
             valid_rate_pct = valid_rate * 100 if valid_rate > 0 else 0
             print(f"   [FILTER] Validation rate: {valid_rate_pct:.1f}% | Trades filtered: {self.entry_filter.filtered_count}", 
                   flush=True)
+        
+        # Phase 24: Print Position Monitor Status
+        if self.position_monitoring_enabled:
+            self.position_monitor.print_position_status()
+        
+        # Phase 25: Print Risk-Adjusted Sizing Status
+        if self.risk_adjusted_sizing_enabled:
+            self.risk_sizer.print_status()
         
         print(f" [OK] ({len(fills)} fills)", flush=True)
 
