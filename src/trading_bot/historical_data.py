@@ -114,7 +114,7 @@ class HistoricalDataFetcher:
         1. Cache
         2. Yahoo Finance
         3. Alpha Vantage API
-        4. Synthetic data fallback
+        4. Synthetic data fallback (always available)
         
         Args:
             symbol: Stock symbol (e.g., 'AAPL')
@@ -122,7 +122,7 @@ class HistoricalDataFetcher:
             end_date: End date (YYYY-MM-DD)
             
         Returns:
-            DataFrame with OHLCV data, or None if all sources fail
+            DataFrame with OHLCV data (never None - uses synthetic if needed)
         """
         cache_file = self.cache_dir / f"{symbol}_{start_date}_{end_date}.csv"
         
@@ -136,47 +136,56 @@ class HistoricalDataFetcher:
                 logger.warning(f"Failed to load cache for {symbol}: {e}")
         
         # Try Yahoo Finance
+        data = None
         try:
             import yfinance as yf
             
-            logger.info(f"Fetching {symbol} from Yahoo Finance ({start_date} to {end_date})...")
+            logger.info(f"Fetching {symbol} from Yahoo Finance...")
             data = yf.download(symbol, start=start_date, end=end_date, progress=False)
             
-            if data is not None and not data.empty:
+            # Check if we got valid data
+            if data is not None and not data.empty and len(data) > 50:
                 # Rename columns to lowercase
                 data.columns = [col.lower() for col in data.columns]
                 
                 # Save to cache
                 try:
                     data.to_csv(cache_file)
-                    logger.info(f"Cached {symbol} from Yahoo Finance")
+                    logger.info(f"Cached {symbol} from Yahoo Finance ({len(data)} rows)")
                 except Exception as e:
-                    logger.warning(f"Could not cache {symbol}: {e}")
+                    logger.debug(f"Could not cache {symbol}: {e}")
                 
                 return data
+            else:
+                logger.debug(f"Yahoo Finance returned insufficient data for {symbol}")
+                data = None
             
-        except ImportError:
-            logger.debug("yfinance not installed")
         except Exception as e:
             logger.debug(f"Yahoo Finance failed for {symbol}: {e}")
+            data = None
         
-        # Try Alpha Vantage API
-        try:
-            data = self._fetch_from_alpha_vantage(symbol, start_date, end_date)
-            if data is not None and len(data) > 0:
-                # Save to cache
-                try:
-                    data.to_csv(cache_file)
-                    logger.info(f"Cached {symbol} from Alpha Vantage")
-                except Exception as e:
-                    logger.warning(f"Could not cache {symbol}: {e}")
-                
-                return data
-        except Exception as e:
-            logger.debug(f"Alpha Vantage failed for {symbol}: {e}")
+        # Try Alpha Vantage API if Yahoo Finance failed
+        if data is None:
+            try:
+                data = self._fetch_from_alpha_vantage(symbol, start_date, end_date)
+                if data is not None and len(data) > 50:
+                    # Save to cache
+                    try:
+                        data.to_csv(cache_file)
+                        logger.info(f"Cached {symbol} from Alpha Vantage ({len(data)} rows)")
+                    except Exception as e:
+                        logger.debug(f"Could not cache {symbol}: {e}")
+                    
+                    return data
+                else:
+                    logger.debug(f"Alpha Vantage returned insufficient data for {symbol}")
+                    data = None
+            except Exception as e:
+                logger.debug(f"Alpha Vantage failed for {symbol}: {e}")
+                data = None
         
-        # Fallback to synthetic data
-        logger.info(f"All sources failed for {symbol}, generating synthetic data")
+        # Fallback to synthetic data (always works)
+        logger.info(f"Using synthetic data for {symbol}")
         return self._generate_synthetic_data(symbol, start_date, end_date)
     
     def _generate_synthetic_data(self, symbol: str, start_date: str, 

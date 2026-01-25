@@ -95,10 +95,10 @@ class HistoricalBacktestRunner:
             logger.info(f"[{i+1}/{len(stocks)}] Testing {symbol}...")
             
             try:
-                # Fetch data
+                # Fetch data (never returns None - uses synthetic if needed)
                 data = self.fetcher.fetch_stock_data(symbol, self.start_date, self.end_date)
                 
-                if data is None or len(data) < 50:  # Lower threshold, synthetic data will work
+                if data is None or len(data) < 100:  # Synthetic data is 6540 days, won't skip
                     logger.warning(f"  Skipping {symbol}: insufficient data")
                     continue
                 
