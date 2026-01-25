@@ -1,0 +1,141 @@
+
+# Alert rules for Algo Trading Bot
+
+groups:
+  - name: trading_alerts
+    interval: 30s
+    rules:
+      # Trading Performance Alerts
+      - alert: HighDrawdown
+        expr: trading_max_drawdown > 0.20
+        for: 1h
+        labels:
+          severity: warning
+          component: trading
+        annotations:
+          summary: "High drawdown detected: {{ $value | humanizePercentage }}"
+          description: "Maximum drawdown exceeded 20% for {{ $labels.instance }}"
+
+      - alert: LowWinRate
+        expr: trading_win_rate < 0.40
+        for: 1h
+        labels:
+          severity: warning
+          component: trading
+        annotations:
+          summary: "Low win rate: {{ $value | humanizePercentage }}"
+          description: "Win rate below 40% for {{ $labels.instance }}"
+
+      - alert: ExcessiveSlippage
+        expr: trading_avg_slippage_bps > 50
+        for: 30m
+        labels:
+          severity: warning
+          component: trading
+        annotations:
+          summary: "Excessive slippage: {{ $value }} bps"
+          description: "Average slippage exceeded 50 basis points"
+
+      - alert: DailyLossExceeded
+        expr: trading_daily_loss > 5000
+        for: 5m
+        labels:
+          severity: critical
+          component: trading
+        annotations:
+          summary: "Daily loss limit exceeded: ${{ $value | humanize }}"
+          description: "Daily loss exceeded $5,000 threshold"
+
+      # System Health Alerts
+      - alert: HighCPUUsage
+        expr: system_cpu_usage > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High CPU usage: {{ $value | humanizePercentage }}"
+          description: "CPU usage exceeded 80% on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: system_memory_usage > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High memory usage: {{ $value | humanizePercentage }}"
+          description: "Memory usage exceeded 85% on {{ $labels.instance }}"
+
+      - alert: LowDiskSpace
+        expr: node_filesystem_avail_bytes / node_filesystem_size_bytes < 0.10
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "Low disk space: {{ $value | humanizePercentage }}"
+          description: "Less than 10% disk space available"
+
+      # API & Service Alerts
+      - alert: HighAPILatency
+        expr: system_request_latency_ms > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API latency: {{ $value | humanize }} ms"
+          description: "Request latency exceeded 1 second"
+
+      - alert: APIErrorRate
+        expr: rate(system_api_errors_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API error rate: {{ $value | humanizePercentage }}"
+          description: "Error rate exceeded 5% over 5 minutes"
+
+      # Database Alerts
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database is unreachable"
+
+      - alert: PostgreSQLSlowQueries
+        expr: postgres_slow_queries_total > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Slow queries detected: {{ $value }}"
+          description: "High number of slow queries on PostgreSQL"
+
+      # Cache Alerts
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: cache
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache is unreachable"
+
+      - alert: RedisMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.90
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "High Redis memory usage: {{ $value | humanizePercentage }}"
+          description: "Redis memory usage exceeded 90%"
