@@ -8,9 +8,13 @@ from typing import Optional, List, Dict, Any
 import logging
 import asyncio
 import aiohttp
+import os
 from enum import Enum
 
 logger = logging.getLogger(__name__)
+
+# Discord webhook configuration - use DISCORD_WEBHOOK_URL environment variable
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
 
 
 class AlertSeverity(Enum):
@@ -210,9 +214,10 @@ class AlertNotifier:
         """Initialize notifier.
         
         Args:
-            webhook_url: Discord webhook URL
+            webhook_url: Discord webhook URL (uses default if not provided)
         """
-        self.webhook = DiscordWebhook(webhook_url) if webhook_url else None
+        webhook = webhook_url or DISCORD_WEBHOOK_URL
+        self.webhook = DiscordWebhook(webhook) if webhook else None
         self.alert_history: List[Alert] = []
         self.muted_categories: List[AlertCategory] = []
     
