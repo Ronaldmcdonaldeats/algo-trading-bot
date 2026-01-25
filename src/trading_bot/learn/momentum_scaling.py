@@ -220,7 +220,7 @@ class MomentumScaler:
     
     def _ewma(self, data: np.ndarray, span: int) -> np.ndarray:
         """Calculate exponential weighted moving average"""
-        return pd.Series(data).ewm(span=span, adjust=False).values
+        return pd.Series(data).ewm(span=span, adjust=False).mean().values
     
     def update_metrics(self, symbol: str, ohlcv: pd.DataFrame) -> Optional[MomentumMetrics]:
         """Update momentum metrics for a symbol"""

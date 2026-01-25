@@ -34,6 +34,7 @@ from trading_bot.strategy.base import StrategyDecision, StrategyOutput
 from trading_bot.strategy.macd_volume_momentum import MacdVolumeMomentumStrategy
 from trading_bot.strategy.rsi_mean_reversion import RsiMeanReversionStrategy
 from trading_bot.strategy.advanced_entry_filter import AdvancedEntryFilter
+from trading_bot.strategy.multitimeframe_signals import MultiTimeframeSignalValidator
 
 
 @dataclass(frozen=True)
@@ -265,6 +266,17 @@ class PaperEngine:
             cold_streak_min=2,  # 2+ consecutive losses for reduction
         )
         self.risk_adjusted_sizing_enabled = True
+        
+        # Multi-Timeframe Signal Validator (Phase 26)
+        self.mtf_validator = MultiTimeframeSignalValidator(
+            hourly_weight=0.4,
+            daily_weight=0.6,
+            correlation_threshold=0.65,
+            vol_threshold_low=0.15,
+            vol_threshold_high=0.35,
+            min_alignment_strength=0.5,
+        )
+        self.multitimeframe_enabled = True
 
     def _build_strategies(self, params: Dict[str, Dict[str, Any]]) -> Dict[str, StrategyOutput | Any]:
         """Build strategy instances from parameters."""
@@ -766,6 +778,64 @@ class PaperEngine:
             decisions[sym] = dec
             signals[sym] = int(dec.signal)
             self.repo.log_strategy_decision(ts=ts, symbol=sym, mode=mode, decision=dec)
+            
+            # Multi-Timeframe Signal Validation (Phase 26)
+            # Feed signal to MTF validator and check confirmation
+            if self.multitimeframe_enabled and dec.signal != 0:
+                # Determine if this is hourly or daily signal based on context
+                # For now, treat as hourly since we're analyzing 1d bars (but could be 1h in real trading)
+                self.mtf_validator.add_signal(
+                    symbol=sym,
+                    signal=int(dec.signal),
+                    strength=float(dec.confidence),
+                    price=float(px),
+                    timeframe="1h",
+                    indicators={
+                        "win_rate": 0.55 + (dec.confidence * 0.15),  # Estimate from confidence
+                        "signal_type": mode,
+                    }
+                )
+                
+                # Get multi-timeframe analysis
+                mtf_analysis = self.mtf_validator.analyze(sym)
+                
+                # Log MTF analysis
+                if mtf_analysis.is_confirmed:
+                    print(f"   [MTF] {sym}: {mtf_analysis.recommendation} "
+                          f"(conf={mtf_analysis.confidence:.2f}, EV=${mtf_analysis.expected_value:.0f})",
+                          flush=True)
+                else:
+                    print(f"   [MTF] {sym}: Signal not confirmed across timeframes (conf={mtf_analysis.confidence:.2f})",
+                          flush=True)
+                
+                # Add MTF explanation to decision
+                dec.explanations["mtf"] = {
+                    "confirmed": mtf_analysis.is_confirmed,
+                    "alignment": mtf_analysis.alignment_strength,
+                    "expected_value": mtf_analysis.expected_value,
+                    "volatility_regime": mtf_analysis.volatility_regime,
+                    "correlation_warning": mtf_analysis.correlation_warning,
+                    "recommendation": mtf_analysis.recommendation,
+                    "mtf_confidence": mtf_analysis.confidence,
+                }
+                
+                # Only proceed with signal if MTF confirmed (unless low confidence)
+                # For weak signals, require MTF confirmation
+                # For strong signals, use MTF as a boost
+                if dec.confidence < 0.6 and not mtf_analysis.is_confirmed:
+                    # Weak signal and not confirmed = skip
+                    dec.confidence = 0.0
+                    dec.signal = 0
+                    confirmed_signal = False
+                elif mtf_analysis.is_confirmed:
+                    # MTF confirmed: boost confidence
+                    dec.confidence = min(1.0, dec.confidence * (1.0 + mtf_analysis.alignment_strength * 0.2))
+                elif mtf_analysis.correlation_warning:
+                    # Too many correlated signals: reduce confidence
+                    dec.confidence *= 0.8
+
+            decisions[sym] = dec
+            signals[sym] = int(dec.signal)
 
             # Signal confirmation: require 2 consecutive bars with signal=1 before entering (reduces false signals)
             if dec.signal == 1:
