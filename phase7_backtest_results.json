@@ -1,0 +1,1310 @@
+{
+  "AAPL": {
+    "symbol": "AAPL",
+    "total_return": 0.14045294451992116,
+    "buy_hold_return": 0.11306128697548834,
+    "outperformance": 0.027391657544432818,
+    "num_trades": 3,
+    "win_rate": 1.0,
+    "sharpe": 4.859421357116274,
+    "avg_return": 0.04482292934912488,
+    "max_dd": 0.034211904823266664,
+    "trade_list": [
+      {
+        "entry_date": "2022-09-06 00:00:00",
+        "exit_date": "2022-09-19 00:00:00",
+        "entry_price": 151.05305642406955,
+        "exit_price": 159.6176541295365,
+        "return": 0.05669926784812959,
+        "days": 13
+      },
+      {
+        "entry_date": "2023-03-21 00:00:00",
+        "exit_date": "2023-04-06 00:00:00",
+        "entry_price": 153.2546649147687,
+        "exit_price": 159.93007266370066,
+        "return": 0.04355761537597839,
+        "days": 16
+      },
+      {
+        "entry_date": "2024-06-07 00:00:00",
+        "exit_date": "2024-07-16 00:00:00",
+        "entry_price": 154.23270366224955,
+        "exit_price": 159.50929824057752,
+        "return": 0.034211904823266664,
+        "days": 39
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 11,
+      "buy_threshold": 31.5,
+      "sell_threshold": 68.5,
+      "volatility_scalar": 0.5414805358424258,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 3,
+      "mean_return": 0.04482292934912488,
+      "mean_win_rate": 1.0
+    }
+  },
+  "MSFT": {
+    "symbol": "MSFT",
+    "total_return": 0.13390754354023854,
+    "buy_hold_return": 0.16520148679091284,
+    "outperformance": -0.031293943250674305,
+    "num_trades": 5,
+    "win_rate": 1.0,
+    "sharpe": 2.1006043466126525,
+    "avg_return": 0.02552459891200028,
+    "max_dd": 0.007151014861460655,
+    "trade_list": [
+      {
+        "entry_date": "2020-02-27 00:00:00",
+        "exit_date": "2020-04-07 00:00:00",
+        "entry_price": 286.87570243246,
+        "exit_price": 298.3926022032172,
+        "return": 0.0401459575457377,
+        "days": 40
+      },
+      {
+        "entry_date": "2020-12-01 00:00:00",
+        "exit_date": "2020-12-11 00:00:00",
+        "entry_price": 293.6487464592231,
+        "exit_price": 304.3094218708085,
+        "return": 0.03630417476706561,
+        "days": 10
+      },
+      {
+        "entry_date": "2021-07-15 00:00:00",
+        "exit_date": "2021-08-25 00:00:00",
+        "entry_price": 305.4465069469243,
+        "exit_price": 310.7051279759846,
+        "return": 0.017216176677293322,
+        "days": 41
+      },
+      {
+        "entry_date": "2022-12-23 00:00:00",
+        "exit_date": "2023-01-26 00:00:00",
+        "entry_price": 321.15009117503723,
+        "exit_price": 323.44664024978937,
+        "return": 0.007151014861460655,
+        "days": 34
+      },
+      {
+        "entry_date": "2024-08-22 00:00:00",
+        "exit_date": "2024-09-16 00:00:00",
+        "entry_price": 344.07229775264466,
+        "exit_price": 353.2953864660998,
+        "return": 0.02680567070844411,
+        "days": 25
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 32.5,
+      "sell_threshold": 67.5,
+      "volatility_scalar": 0.4320596481754902,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 5,
+      "mean_return": 0.02552459891200028,
+      "mean_win_rate": 1.0
+    }
+  },
+  "AMZN": {
+    "symbol": "AMZN",
+    "total_return": 0.7300146757646129,
+    "buy_hold_return": 0.062233179206607314,
+    "outperformance": 0.6677814965580056,
+    "num_trades": 9,
+    "win_rate": 1.0,
+    "sharpe": 5.202476738176822,
+    "avg_return": 0.06286450589951954,
+    "max_dd": 0.047751632784700695,
+    "trade_list": [
+      {
+        "entry_date": "2020-08-24 00:00:00",
+        "exit_date": "2020-09-08 00:00:00",
+        "entry_price": 3291.9051656017955,
+        "exit_price": 3494.552016921247,
+        "return": 0.06155914011040635,
+        "days": 15
+      },
+      {
+        "entry_date": "2021-01-13 00:00:00",
+        "exit_date": "2021-01-26 00:00:00",
+        "entry_price": 3355.7819767506526,
+        "exit_price": 3527.8862701695743,
+        "return": 0.05128589837220816,
+        "days": 13
+      },
+      {
+        "entry_date": "2021-03-30 00:00:00",
+        "exit_date": "2021-04-05 00:00:00",
+        "entry_price": 3301.6707299808827,
+        "exit_price": 3480.343923212823,
+        "return": 0.05411599394497309,
+        "days": 6
+      },
+      {
+        "entry_date": "2021-05-04 00:00:00",
+        "exit_date": "2021-05-13 00:00:00",
+        "entry_price": 3179.713329022841,
+        "exit_price": 3390.4428382143906,
+        "return": 0.0662731156510605,
+        "days": 9
+      },
+      {
+        "entry_date": "2023-02-09 00:00:00",
+        "exit_date": "2023-03-07 00:00:00",
+        "entry_price": 3186.1952687180515,
+        "exit_price": 3444.7266656635575,
+        "return": 0.08114110251928304,
+        "days": 26
+      },
+      {
+        "entry_date": "2023-06-01 00:00:00",
+        "exit_date": "2023-06-08 00:00:00",
+        "entry_price": 3457.649060810251,
+        "exit_price": 3675.2354789623996,
+        "return": 0.06292900590124104,
+        "days": 7
+      },
+      {
+        "entry_date": "2023-06-22 00:00:00",
+        "exit_date": "2023-07-06 00:00:00",
+        "entry_price": 3316.42703772538,
+        "exit_price": 3597.569630846462,
+        "return": 0.08477273581568305,
+        "days": 14
+      },
+      {
+        "entry_date": "2023-12-05 00:00:00",
+        "exit_date": "2024-01-04 00:00:00",
+        "entry_price": 3625.7020035997675,
+        "exit_price": 3798.835194262417,
+        "return": 0.047751632784700695,
+        "days": 30
+      },
+      {
+        "entry_date": "2024-05-15 00:00:00",
+        "exit_date": "2024-05-28 00:00:00",
+        "entry_price": 3557.9714231515613,
+        "exit_price": 3757.04678403199,
+        "return": 0.05595192799611991,
+        "days": 13
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 34.5,
+      "sell_threshold": 65.5,
+      "volatility_scalar": 0.8245973543387656,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 9,
+      "mean_return": 0.06286450589951954,
+      "mean_win_rate": 1.0
+    }
+  },
+  "NVDA": {
+    "symbol": "NVDA",
+    "total_return": 1.1567061460740322,
+    "buy_hold_return": 0.10435228183251355,
+    "outperformance": 1.0523538642415187,
+    "num_trades": 7,
+    "win_rate": 1.0,
+    "sharpe": 4.056507065847038,
+    "avg_return": 0.11642596285471528,
+    "max_dd": 0.06549042629000552,
+    "trade_list": [
+      {
+        "entry_date": "2020-05-22 00:00:00",
+        "exit_date": "2020-07-27 00:00:00",
+        "entry_price": 448.2868168397374,
+        "exit_price": 508.222402779538,
+        "return": 0.13369919365982066,
+        "days": 66
+      },
+      {
+        "entry_date": "2021-06-28 00:00:00",
+        "exit_date": "2021-07-23 00:00:00",
+        "entry_price": 479.6987750906912,
+        "exit_price": 539.0017789251515,
+        "return": 0.12362550607565874,
+        "days": 25
+      },
+      {
+        "entry_date": "2021-09-13 00:00:00",
+        "exit_date": "2021-10-01 00:00:00",
+        "entry_price": 479.4107382118671,
+        "exit_price": 544.2771238799826,
+        "return": 0.13530440705199415,
+        "days": 18
+      },
+      {
+        "entry_date": "2021-11-25 00:00:00",
+        "exit_date": "2022-01-04 00:00:00",
+        "entry_price": 472.42250240069967,
+        "exit_price": 532.1037542982749,
+        "return": 0.12633024801802253,
+        "days": 40
+      },
+      {
+        "entry_date": "2022-04-13 00:00:00",
+        "exit_date": "2022-05-12 00:00:00",
+        "entry_price": 475.76315596438843,
+        "exit_price": 546.9608245347574,
+        "return": 0.1496493952459367,
+        "days": 29
+      },
+      {
+        "entry_date": "2022-11-24 00:00:00",
+        "exit_date": "2023-01-24 00:00:00",
+        "entry_price": 513.3661309450321,
+        "exit_price": 554.8884997026195,
+        "return": 0.08088256364156861,
+        "days": 61
+      },
+      {
+        "entry_date": "2023-11-10 00:00:00",
+        "exit_date": "2023-12-28 00:00:00",
+        "entry_price": 520.3469659168245,
+        "exit_price": 554.4247105334283,
+        "return": 0.06549042629000552,
+        "days": 48
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 33.5,
+      "sell_threshold": 66.5,
+      "volatility_scalar": 0.8695236951822382,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 7,
+      "mean_return": 0.11642596285471528,
+      "mean_win_rate": 1.0
+    }
+  },
+  "GOOGL": {
+    "symbol": "GOOGL",
+    "total_return": 0.27646193377244416,
+    "buy_hold_return": 0.11775195148822148,
+    "outperformance": 0.15870998228422267,
+    "num_trades": 5,
+    "win_rate": 1.0,
+    "sharpe": 5.754291648233125,
+    "avg_return": 0.05006570237969049,
+    "max_dd": 0.03883495427524231,
+    "trade_list": [
+      {
+        "entry_date": "2020-07-24 00:00:00",
+        "exit_date": "2020-09-15 00:00:00",
+        "entry_price": 2501.434398582952,
+        "exit_price": 2620.66430617103,
+        "return": 0.047664615012738824,
+        "days": 53
+      },
+      {
+        "entry_date": "2022-01-31 00:00:00",
+        "exit_date": "2022-03-01 00:00:00",
+        "entry_price": 2451.5906018990836,
+        "exit_price": 2599.268598101544,
+        "return": 0.060237625355580963,
+        "days": 29
+      },
+      {
+        "entry_date": "2022-07-27 00:00:00",
+        "exit_date": "2022-08-05 00:00:00",
+        "entry_price": 2424.719320886478,
+        "exit_price": 2570.388540148487,
+        "return": 0.060076734658406857,
+        "days": 9
+      },
+      {
+        "entry_date": "2024-03-07 00:00:00",
+        "exit_date": "2024-04-02 00:00:00",
+        "entry_price": 2658.136832615369,
+        "exit_price": 2773.8045473709653,
+        "return": 0.04351458259648351,
+        "days": 26
+      },
+      {
+        "entry_date": "2024-09-02 00:00:00",
+        "exit_date": "2024-10-16 00:00:00",
+        "entry_price": 2713.1989712995373,
+        "exit_price": 2818.5659292895893,
+        "return": 0.03883495427524231,
+        "days": 44
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 32.5,
+      "sell_threshold": 67.5,
+      "volatility_scalar": 0.5313709110529821,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 5,
+      "mean_return": 0.05006570237969049,
+      "mean_win_rate": 1.0
+    }
+  },
+  "GOOG": {
+    "symbol": "GOOG",
+    "total_return": 0.3423481597893088,
+    "buy_hold_return": 0.1404262634163227,
+    "outperformance": 0.20192189637298613,
+    "num_trades": 5,
+    "win_rate": 1.0,
+    "sharpe": 7.261575775525508,
+    "avg_return": 0.06068502072736741,
+    "max_dd": 0.05179380658376402,
+    "trade_list": [
+      {
+        "entry_date": "2021-01-29 00:00:00",
+        "exit_date": "2021-03-08 00:00:00",
+        "entry_price": 219.55109441498925,
+        "exit_price": 230.92248133437292,
+        "return": 0.05179380658376402,
+        "days": 38
+      },
+      {
+        "entry_date": "2021-03-25 00:00:00",
+        "exit_date": "2021-04-29 00:00:00",
+        "entry_price": 211.3816239727819,
+        "exit_price": 227.5726431476565,
+        "return": 0.07659615282811615,
+        "days": 35
+      },
+      {
+        "entry_date": "2022-04-29 00:00:00",
+        "exit_date": "2022-06-08 00:00:00",
+        "entry_price": 212.67085581574318,
+        "exit_price": 225.06681346443457,
+        "return": 0.0582870539601871,
+        "days": 40
+      },
+      {
+        "entry_date": "2022-10-21 00:00:00",
+        "exit_date": "2022-11-25 00:00:00",
+        "entry_price": 221.59183397966467,
+        "exit_price": 234.64307375575768,
+        "return": 0.05889765674889769,
+        "days": 35
+      },
+      {
+        "entry_date": "2024-07-30 00:00:00",
+        "exit_date": "2024-08-21 00:00:00",
+        "entry_price": 239.43090993463935,
+        "exit_price": 253.28209187145796,
+        "return": 0.05785043351587212,
+        "days": 22
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 32.5,
+      "sell_threshold": 67.5,
+      "volatility_scalar": 0.571846198888004,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 5,
+      "mean_return": 0.06068502072736741,
+      "mean_win_rate": 1.0
+    }
+  },
+  "TESLA": {
+    "symbol": "TESLA",
+    "total_return": 0.18936356213976877,
+    "buy_hold_return": -0.009221291665280185,
+    "outperformance": 0.19858485380504895,
+    "num_trades": 5,
+    "win_rate": 0.8,
+    "sharpe": 1.5838029550988815,
+    "avg_return": 0.03554064558803756,
+    "max_dd": -0.009196812890749043,
+    "trade_list": [
+      {
+        "entry_date": "2020-06-29 00:00:00",
+        "exit_date": "2020-08-07 00:00:00",
+        "entry_price": 85.65388115151906,
+        "exit_price": 89.78628020293124,
+        "return": 0.0482453217047117,
+        "days": 39
+      },
+      {
+        "entry_date": "2020-11-13 00:00:00",
+        "exit_date": "2020-12-28 00:00:00",
+        "entry_price": 84.39200637060162,
+        "exit_price": 88.32295790853148,
+        "return": 0.04657966680715419,
+        "days": 45
+      },
+      {
+        "entry_date": "2022-06-14 00:00:00",
+        "exit_date": "2022-07-04 00:00:00",
+        "entry_price": 84.41718146559867,
+        "exit_price": 88.09077135545238,
+        "return": 0.043517087707444335,
+        "days": 20
+      },
+      {
+        "entry_date": "2023-08-31 00:00:00",
+        "exit_date": "2023-09-21 00:00:00",
+        "entry_price": 86.32325475815023,
+        "exit_price": 90.51493630785691,
+        "return": 0.0485579646116266,
+        "days": 21
+      },
+      {
+        "entry_date": "2024-05-08 00:00:00",
+        "exit_date": "2024-07-01 00:00:00",
+        "entry_price": 90.04227813924001,
+        "exit_price": 89.21417615493664,
+        "return": -0.009196812890749043,
+        "days": 54
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 32.5,
+      "sell_threshold": 67.5,
+      "volatility_scalar": 0.46423783388521284,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 5,
+      "mean_return": 0.03554064558803756,
+      "mean_win_rate": 0.8
+    }
+  },
+  "META": {
+    "symbol": "META",
+    "total_return": 0.15874721653468324,
+    "buy_hold_return": 0.1063909245673127,
+    "outperformance": 0.052356291967370544,
+    "num_trades": 4,
+    "win_rate": 1.0,
+    "sharpe": 1.4142198850884027,
+    "avg_return": 0.03786732633849775,
+    "max_dd": 0.003837334819078239,
+    "trade_list": [
+      {
+        "entry_date": "2020-11-03 00:00:00",
+        "exit_date": "2020-11-16 00:00:00",
+        "entry_price": 252.45394870759637,
+        "exit_price": 270.3938208505634,
+        "return": 0.07106195896244737,
+        "days": 13
+      },
+      {
+        "entry_date": "2021-02-17 00:00:00",
+        "exit_date": "2021-04-14 00:00:00",
+        "entry_price": 248.4729596777048,
+        "exit_price": 253.6550054838865,
+        "return": 0.020855572424876095,
+        "days": 56
+      },
+      {
+        "entry_date": "2022-01-27 00:00:00",
+        "exit_date": "2022-03-03 00:00:00",
+        "entry_price": 262.9256986162064,
+        "exit_price": 263.9346325543368,
+        "return": 0.003837334819078239,
+        "days": 35
+      },
+      {
+        "entry_date": "2023-01-04 00:00:00",
+        "exit_date": "2023-01-13 00:00:00",
+        "entry_price": 244.8087035642924,
+        "exit_price": 258.4480831818254,
+        "return": 0.0557144391475893,
+        "days": 9
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 32.0,
+      "sell_threshold": 68.0,
+      "volatility_scalar": 0.5770795859205445,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 4,
+      "mean_return": 0.03786732633849775,
+      "mean_win_rate": 1.0
+    }
+  },
+  "AVGO": {
+    "symbol": "AVGO",
+    "total_return": 0.2711115001613143,
+    "buy_hold_return": 0.09516800010171478,
+    "outperformance": 0.17594350005959952,
+    "num_trades": 6,
+    "win_rate": 1.0,
+    "sharpe": 3.292475415868757,
+    "avg_return": 0.04086613245261934,
+    "max_dd": 0.021842071434811622,
+    "trade_list": [
+      {
+        "entry_date": "2020-11-24 00:00:00",
+        "exit_date": "2020-12-03 00:00:00",
+        "entry_price": 353.642860284056,
+        "exit_price": 373.3624391802926,
+        "return": 0.05576128097255317,
+        "days": 9
+      },
+      {
+        "entry_date": "2020-12-29 00:00:00",
+        "exit_date": "2021-02-18 00:00:00",
+        "entry_price": 353.918463394506,
+        "exit_price": 366.3157979858037,
+        "return": 0.03502878734382016,
+        "days": 51
+      },
+      {
+        "entry_date": "2021-10-07 00:00:00",
+        "exit_date": "2021-10-22 00:00:00",
+        "entry_price": 353.04216275904395,
+        "exit_price": 371.64966818959124,
+        "return": 0.05270618468097015,
+        "days": 15
+      },
+      {
+        "entry_date": "2022-01-14 00:00:00",
+        "exit_date": "2022-02-02 00:00:00",
+        "entry_price": 352.40044297781697,
+        "exit_price": 369.6679510769448,
+        "return": 0.048999677620197545,
+        "days": 19
+      },
+      {
+        "entry_date": "2022-11-16 00:00:00",
+        "exit_date": "2022-12-07 00:00:00",
+        "entry_price": 370.0354687924221,
+        "exit_price": 381.4543166019779,
+        "return": 0.030858792663363353,
+        "days": 21
+      },
+      {
+        "entry_date": "2023-09-15 00:00:00",
+        "exit_date": "2023-10-12 00:00:00",
+        "entry_price": 353.6066349277315,
+        "exit_price": 361.33013630764634,
+        "return": 0.021842071434811622,
+        "days": 27
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 33.0,
+      "sell_threshold": 67.0,
+      "volatility_scalar": 0.5495373185697393,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 6,
+      "mean_return": 0.04086613245261934,
+      "mean_win_rate": 1.0
+    }
+  },
+  "COST": {
+    "symbol": "COST",
+    "total_return": 1.0575265151427802,
+    "buy_hold_return": 0.0738278529799683,
+    "outperformance": 0.9836986621628119,
+    "num_trades": 8,
+    "win_rate": 1.0,
+    "sharpe": 6.98624875989302,
+    "avg_return": 0.09446377712159251,
+    "max_dd": 0.07254247939702532,
+    "trade_list": [
+      {
+        "entry_date": "2020-05-15 00:00:00",
+        "exit_date": "2020-06-10 00:00:00",
+        "entry_price": 370.36534567839743,
+        "exit_price": 407.1063071420793,
+        "return": 0.09920194179178268,
+        "days": 26
+      },
+      {
+        "entry_date": "2020-09-29 00:00:00",
+        "exit_date": "2020-12-15 00:00:00",
+        "entry_price": 386.8823981104962,
+        "exit_price": 424.38071564517236,
+        "return": 0.09692433079875194,
+        "days": 77
+      },
+      {
+        "entry_date": "2021-05-18 00:00:00",
+        "exit_date": "2021-06-04 00:00:00",
+        "entry_price": 378.7656082726636,
+        "exit_price": 417.94949768080437,
+        "return": 0.10345155038451458,
+        "days": 17
+      },
+      {
+        "entry_date": "2021-09-27 00:00:00",
+        "exit_date": "2021-10-13 00:00:00",
+        "entry_price": 368.9062951219589,
+        "exit_price": 403.4616874865856,
+        "return": 0.09366983654535585,
+        "days": 16
+      },
+      {
+        "entry_date": "2022-11-15 00:00:00",
+        "exit_date": "2023-01-11 00:00:00",
+        "entry_price": 372.9676448077234,
+        "exit_price": 401.21007042066935,
+        "return": 0.07572352724458399,
+        "days": 57
+      },
+      {
+        "entry_date": "2023-08-28 00:00:00",
+        "exit_date": "2023-10-05 00:00:00",
+        "entry_price": 364.3527443785159,
+        "exit_price": 399.71525103578244,
+        "return": 0.0970556890344962,
+        "days": 38
+      },
+      {
+        "entry_date": "2024-01-02 00:00:00",
+        "exit_date": "2024-02-06 00:00:00",
+        "entry_price": 369.19898397613673,
+        "exit_price": 412.44727112600975,
+        "return": 0.11714086177622955,
+        "days": 35
+      },
+      {
+        "entry_date": "2024-05-10 00:00:00",
+        "exit_date": "2024-06-07 00:00:00",
+        "entry_price": 372.0373519203194,
+        "exit_price": 399.025863856923,
+        "return": 0.07254247939702532,
+        "days": 28
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 34.0,
+      "sell_threshold": 66.0,
+      "volatility_scalar": 0.657150452273405,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 8,
+      "mean_return": 0.09446377712159251,
+      "mean_win_rate": 1.0
+    }
+  },
+  "NFLX": {
+    "symbol": "NFLX",
+    "total_return": 0.3070886161575158,
+    "buy_hold_return": 0.0839257500998094,
+    "outperformance": 0.2231628660577064,
+    "num_trades": 3,
+    "win_rate": 1.0,
+    "sharpe": 5.378333639357356,
+    "avg_return": 0.093511167172641,
+    "max_dd": 0.0724995748261633,
+    "trade_list": [
+      {
+        "entry_date": "2022-05-25 00:00:00",
+        "exit_date": "2022-06-20 00:00:00",
+        "entry_price": 367.1266877698618,
+        "exit_price": 401.2536005370908,
+        "return": 0.0929567746069768,
+        "days": 26
+      },
+      {
+        "entry_date": "2022-11-24 00:00:00",
+        "exit_date": "2022-12-09 00:00:00",
+        "entry_price": 389.02984801183646,
+        "exit_price": 417.23434658738154,
+        "return": 0.0724995748261633,
+        "days": 15
+      },
+      {
+        "entry_date": "2023-10-18 00:00:00",
+        "exit_date": "2023-11-07 00:00:00",
+        "entry_price": 384.8400758506547,
+        "exit_price": 429.1263757876399,
+        "return": 0.11507715208478292,
+        "days": 20
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 11,
+      "buy_threshold": 31.5,
+      "sell_threshold": 68.5,
+      "volatility_scalar": 0.7090159088451476,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 3,
+      "mean_return": 0.093511167172641,
+      "mean_win_rate": 1.0
+    }
+  },
+  "ADBE": {
+    "symbol": "ADBE",
+    "total_return": 0.243414567001511,
+    "buy_hold_return": 0.10823731172287387,
+    "outperformance": 0.13517725527863714,
+    "num_trades": 4,
+    "win_rate": 1.0,
+    "sharpe": 3.2549065936383497,
+    "avg_return": 0.05611650493184252,
+    "max_dd": 0.03336260842013186,
+    "trade_list": [
+      {
+        "entry_date": "2021-03-03 00:00:00",
+        "exit_date": "2021-04-08 00:00:00",
+        "entry_price": 217.5846041143741,
+        "exit_price": 224.84379405969136,
+        "return": 0.03336260842013186,
+        "days": 36
+      },
+      {
+        "entry_date": "2022-09-09 00:00:00",
+        "exit_date": "2022-09-28 00:00:00",
+        "entry_price": 221.71558254373065,
+        "exit_price": 239.39347773637186,
+        "return": 0.07973230834668317,
+        "days": 19
+      },
+      {
+        "entry_date": "2022-11-02 00:00:00",
+        "exit_date": "2022-11-21 00:00:00",
+        "entry_price": 212.1803178752432,
+        "exit_price": 222.39986475905644,
+        "return": 0.048164443272359005,
+        "days": 19
+      },
+      {
+        "entry_date": "2023-02-28 00:00:00",
+        "exit_date": "2023-04-04 00:00:00",
+        "entry_price": 217.46918497133856,
+        "exit_price": 231.2146857384913,
+        "return": 0.06320665968819601,
+        "days": 35
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 32.0,
+      "sell_threshold": 68.0,
+      "volatility_scalar": 0.637361836102968,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 4,
+      "mean_return": 0.05611650493184252,
+      "mean_win_rate": 1.0
+    }
+  },
+  "CMCSA": {
+    "symbol": "CMCSA",
+    "total_return": 0.6294856261361373,
+    "buy_hold_return": -0.033982904356878785,
+    "outperformance": 0.6634685304930161,
+    "num_trades": 5,
+    "win_rate": 1.0,
+    "sharpe": 4.209784140506636,
+    "avg_return": 0.10284737593335831,
+    "max_dd": 0.0777975862077944,
+    "trade_list": [
+      {
+        "entry_date": "2020-02-17 00:00:00",
+        "exit_date": "2020-03-30 00:00:00",
+        "entry_price": 439.41207867542386,
+        "exit_price": 488.684301557442,
+        "return": 0.11213215401485026,
+        "days": 42
+      },
+      {
+        "entry_date": "2020-09-16 00:00:00",
+        "exit_date": "2020-10-07 00:00:00",
+        "entry_price": 489.4931307787728,
+        "exit_price": 561.045700345771,
+        "return": 0.1461768614672072,
+        "days": 21
+      },
+      {
+        "entry_date": "2020-11-02 00:00:00",
+        "exit_date": "2021-03-05 00:00:00",
+        "entry_price": 490.7640376815199,
+        "exit_price": 533.2123812706146,
+        "return": 0.08649440531468097,
+        "days": 123
+      },
+      {
+        "entry_date": "2023-07-27 00:00:00",
+        "exit_date": "2023-09-26 00:00:00",
+        "entry_price": 444.8786479737702,
+        "exit_price": 479.48913294151663,
+        "return": 0.0777975862077944,
+        "days": 61
+      },
+      {
+        "entry_date": "2024-09-27 00:00:00",
+        "exit_date": "2024-10-29 00:00:00",
+        "entry_price": 433.76756824252703,
+        "exit_price": 473.51623789101683,
+        "return": 0.09163587266225864,
+        "days": 32
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 32.5,
+      "sell_threshold": 67.5,
+      "volatility_scalar": 0.8416337959508614,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 5,
+      "mean_return": 0.10284737593335831,
+      "mean_win_rate": 1.0
+    }
+  },
+  "QCOM": {
+    "symbol": "QCOM",
+    "total_return": 0.08982680479557967,
+    "buy_hold_return": 0.03939368799030518,
+    "outperformance": 0.050433116805274486,
+    "num_trades": 2,
+    "win_rate": 1.0,
+    "sharpe": 74.44384613306555,
+    "avg_return": 0.043947869056602716,
+    "max_dd": 0.043357519802239265,
+    "trade_list": [
+      {
+        "entry_date": "2020-08-25 00:00:00",
+        "exit_date": "2020-09-30 00:00:00",
+        "entry_price": 497.7320131758195,
+        "exit_price": 519.9001102390008,
+        "return": 0.04453821831096617,
+        "days": 36
+      },
+      {
+        "entry_date": "2024-09-06 00:00:00",
+        "exit_date": "2024-09-30 00:00:00",
+        "entry_price": 501.70736466202425,
+        "exit_price": 523.4601516602872,
+        "return": 0.043357519802239265,
+        "days": 24
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 12,
+      "buy_threshold": 31.0,
+      "sell_threshold": 69.0,
+      "volatility_scalar": 0.5986227738592809,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 2,
+      "mean_return": 0.043947869056602716,
+      "mean_win_rate": 1.0
+    }
+  },
+  "AEP": {
+    "symbol": "AEP",
+    "total_return": 0.39425925038657383,
+    "buy_hold_return": 0.10114926874492491,
+    "outperformance": 0.2931099816416489,
+    "num_trades": 7,
+    "win_rate": 0.8571428571428571,
+    "sharpe": 1.474068102883643,
+    "avg_return": 0.049173573597229014,
+    "max_dd": -0.026598444095379106,
+    "trade_list": [
+      {
+        "entry_date": "2020-01-01 00:00:00",
+        "exit_date": "2020-03-10 00:00:00",
+        "entry_price": 99.25148247363947,
+        "exit_price": 96.61154746568087,
+        "return": -0.026598444095379106,
+        "days": 69
+      },
+      {
+        "entry_date": "2020-08-05 00:00:00",
+        "exit_date": "2020-08-24 00:00:00",
+        "entry_price": 91.33299868928057,
+        "exit_price": 97.87096701425789,
+        "return": 0.07158385708127037,
+        "days": 19
+      },
+      {
+        "entry_date": "2021-06-14 00:00:00",
+        "exit_date": "2021-07-06 00:00:00",
+        "entry_price": 92.10875329430073,
+        "exit_price": 99.56379714285437,
+        "return": 0.08093740911608807,
+        "days": 22
+      },
+      {
+        "entry_date": "2021-09-01 00:00:00",
+        "exit_date": "2021-09-21 00:00:00",
+        "entry_price": 95.19887900658613,
+        "exit_price": 99.20028680917754,
+        "return": 0.04203208949881214,
+        "days": 20
+      },
+      {
+        "entry_date": "2022-02-04 00:00:00",
+        "exit_date": "2022-03-25 00:00:00",
+        "entry_price": 92.8392648763751,
+        "exit_price": 97.8649256168201,
+        "return": 0.05413292260701528,
+        "days": 49
+      },
+      {
+        "entry_date": "2022-05-19 00:00:00",
+        "exit_date": "2022-06-10 00:00:00",
+        "entry_price": 96.09461421865316,
+        "exit_price": 101.05364879229408,
+        "return": 0.05160574933322652,
+        "days": 22
+      },
+      {
+        "entry_date": "2023-06-26 00:00:00",
+        "exit_date": "2023-08-03 00:00:00",
+        "entry_price": 93.65760620802908,
+        "exit_price": 100.26247468175436,
+        "return": 0.07052143163956985,
+        "days": 38
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 11,
+      "buy_threshold": 32.5,
+      "sell_threshold": 67.5,
+      "volatility_scalar": 0.6632395004252315,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 7,
+      "mean_return": 0.049173573597229014,
+      "mean_win_rate": 0.8571428571428571
+    }
+  },
+  "INTC": {
+    "symbol": "INTC",
+    "total_return": 0.31562272731928764,
+    "buy_hold_return": -0.07622181651085458,
+    "outperformance": 0.3918445438301422,
+    "num_trades": 6,
+    "win_rate": 1.0,
+    "sharpe": 2.095663928694122,
+    "avg_return": 0.040996675776015554,
+    "max_dd": 0.00902047451504523,
+    "trade_list": [
+      {
+        "entry_date": "2021-03-26 00:00:00",
+        "exit_date": "2021-06-07 00:00:00",
+        "entry_price": 387.1865459170061,
+        "exit_price": 402.63273943625353,
+        "return": 0.03989341489814672,
+        "days": 73
+      },
+      {
+        "entry_date": "2022-07-11 00:00:00",
+        "exit_date": "2022-07-25 00:00:00",
+        "entry_price": 377.3707529802241,
+        "exit_price": 398.26203263973156,
+        "return": 0.05536009214948954,
+        "days": 14
+      },
+      {
+        "entry_date": "2022-11-23 00:00:00",
+        "exit_date": "2022-12-19 00:00:00",
+        "entry_price": 367.59118910295985,
+        "exit_price": 392.24855187005056,
+        "return": 0.06707822031116299,
+        "days": 26
+      },
+      {
+        "entry_date": "2023-05-16 00:00:00",
+        "exit_date": "2023-05-24 00:00:00",
+        "entry_price": 388.0490855991368,
+        "exit_price": 407.72627452016144,
+        "return": 0.05070798940459718,
+        "days": 8
+      },
+      {
+        "entry_date": "2023-06-23 00:00:00",
+        "exit_date": "2023-08-11 00:00:00",
+        "entry_price": 381.6305721704991,
+        "exit_price": 385.0730610209252,
+        "return": 0.00902047451504523,
+        "days": 49
+      },
+      {
+        "entry_date": "2024-03-26 00:00:00",
+        "exit_date": "2024-05-20 00:00:00",
+        "entry_price": 366.84679669418523,
+        "exit_price": 375.6217219516393,
+        "return": 0.023919863377651677,
+        "days": 55
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 33.0,
+      "sell_threshold": 67.0,
+      "volatility_scalar": 0.42022078593543893,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 6,
+      "mean_return": 0.04099667577601556,
+      "mean_win_rate": 1.0
+    }
+  },
+  "AMD": {
+    "symbol": "AMD",
+    "total_return": 0.17667548031597283,
+    "buy_hold_return": 0.06330522501747438,
+    "outperformance": 0.11337025529849845,
+    "num_trades": 4,
+    "win_rate": 1.0,
+    "sharpe": 1.6957259304792356,
+    "avg_return": 0.04180066034463874,
+    "max_dd": 0.01598963546759408,
+    "trade_list": [
+      {
+        "entry_date": "2020-03-13 00:00:00",
+        "exit_date": "2020-05-08 00:00:00",
+        "entry_price": 279.93693999176605,
+        "exit_price": 284.41302961614815,
+        "return": 0.01598963546759408,
+        "days": 56
+      },
+      {
+        "entry_date": "2023-11-14 00:00:00",
+        "exit_date": "2023-12-07 00:00:00",
+        "entry_price": 287.19639321120536,
+        "exit_price": 310.33084215377664,
+        "return": 0.080552714064059,
+        "days": 23
+      },
+      {
+        "entry_date": "2024-01-09 00:00:00",
+        "exit_date": "2024-02-06 00:00:00",
+        "entry_price": 287.3626739524569,
+        "exit_price": 300.2333800900211,
+        "return": 0.044789067280511366,
+        "days": 28
+      },
+      {
+        "entry_date": "2024-08-21 00:00:00",
+        "exit_date": "2024-09-25 00:00:00",
+        "entry_price": 280.5136697719741,
+        "exit_price": 287.77090191658715,
+        "return": 0.025871224566390526,
+        "days": 35
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 32.0,
+      "sell_threshold": 68.0,
+      "volatility_scalar": 0.5830206418232269,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 4,
+      "mean_return": 0.04180066034463874,
+      "mean_win_rate": 1.0
+    }
+  },
+  "INTU": {
+    "symbol": "INTU",
+    "total_return": 0.33043117792198434,
+    "buy_hold_return": 0.3163968267029438,
+    "outperformance": 0.014034351219040564,
+    "num_trades": 5,
+    "win_rate": 1.0,
+    "sharpe": 3.1387499471543094,
+    "avg_return": 0.05892856931705075,
+    "max_dd": 0.035347321497542376,
+    "trade_list": [
+      {
+        "entry_date": "2020-09-14 00:00:00",
+        "exit_date": "2020-10-20 00:00:00",
+        "entry_price": 138.87043674530074,
+        "exit_price": 143.779134719441,
+        "return": 0.035347321497542376,
+        "days": 36
+      },
+      {
+        "entry_date": "2021-11-09 00:00:00",
+        "exit_date": "2021-12-03 00:00:00",
+        "entry_price": 148.473533987757,
+        "exit_price": 159.92158684547982,
+        "return": 0.07710500686719567,
+        "days": 24
+      },
+      {
+        "entry_date": "2022-05-25 00:00:00",
+        "exit_date": "2022-06-24 00:00:00",
+        "entry_price": 145.07192750466314,
+        "exit_price": 157.19854443440354,
+        "return": 0.08359037574206502,
+        "days": 30
+      },
+      {
+        "entry_date": "2022-12-16 00:00:00",
+        "exit_date": "2023-02-23 00:00:00",
+        "entry_price": 153.7454087394107,
+        "exit_price": 160.33859677750758,
+        "return": 0.04288380441507651,
+        "days": 69
+      },
+      {
+        "entry_date": "2023-07-06 00:00:00",
+        "exit_date": "2023-07-24 00:00:00",
+        "entry_price": 156.32894684743047,
+        "exit_price": 165.03902329907316,
+        "return": 0.0557163380633742,
+        "days": 18
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 10,
+      "buy_threshold": 32.5,
+      "sell_threshold": 67.5,
+      "volatility_scalar": 0.5966981633321107,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 5,
+      "mean_return": 0.05892856931705075,
+      "mean_win_rate": 1.0
+    }
+  },
+  "CSCO": {
+    "symbol": "CSCO",
+    "total_return": 0.2547649314413476,
+    "buy_hold_return": 0.061925600520831736,
+    "outperformance": 0.19283933092051586,
+    "num_trades": 5,
+    "win_rate": 0.8,
+    "sharpe": 1.1948321977489254,
+    "avg_return": 0.04720477759938802,
+    "max_dd": -0.028429929614324376,
+    "trade_list": [
+      {
+        "entry_date": "2020-07-20 00:00:00",
+        "exit_date": "2020-08-17 00:00:00",
+        "entry_price": 160.8942291859347,
+        "exit_price": 168.33677430290723,
+        "return": 0.04625737762397726,
+        "days": 28
+      },
+      {
+        "entry_date": "2022-09-02 00:00:00",
+        "exit_date": "2022-12-06 00:00:00",
+        "entry_price": 179.556327010272,
+        "exit_price": 174.45155327156337,
+        "return": -0.028429929614324376,
+        "days": 95
+      },
+      {
+        "entry_date": "2023-01-03 00:00:00",
+        "exit_date": "2023-01-20 00:00:00",
+        "entry_price": 157.53252746132355,
+        "exit_price": 169.7895877585304,
+        "return": 0.07780653617847981,
+        "days": 17
+      },
+      {
+        "entry_date": "2023-07-17 00:00:00",
+        "exit_date": "2023-09-05 00:00:00",
+        "entry_price": 175.50045730122946,
+        "exit_price": 186.64815353828783,
+        "return": 0.06351947116539094,
+        "days": 50
+      },
+      {
+        "entry_date": "2024-07-30 00:00:00",
+        "exit_date": "2024-08-16 00:00:00",
+        "entry_price": 170.99263702925003,
+        "exit_price": 184.13691501652715,
+        "return": 0.07687043264341645,
+        "days": 17
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 11,
+      "buy_threshold": 32.0,
+      "sell_threshold": 68.0,
+      "volatility_scalar": 0.5597227967329902,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 5,
+      "mean_return": 0.04720477759938802,
+      "mean_win_rate": 0.8
+    }
+  },
+  "TMUS": {
+    "symbol": "TMUS",
+    "total_return": 0.24702607350798542,
+    "buy_hold_return": 0.11214969060981317,
+    "outperformance": 0.13487638289817225,
+    "num_trades": 3,
+    "win_rate": 1.0,
+    "sharpe": 2.122161748870236,
+    "avg_return": 0.07697967693766299,
+    "max_dd": 0.0279522472116598,
+    "trade_list": [
+      {
+        "entry_date": "2023-06-14 00:00:00",
+        "exit_date": "2023-07-05 00:00:00",
+        "entry_price": 77.94108923728348,
+        "exit_price": 86.8706801819892,
+        "return": 0.11456846487634421,
+        "days": 21
+      },
+      {
+        "entry_date": "2023-12-19 00:00:00",
+        "exit_date": "2024-04-03 00:00:00",
+        "entry_price": 87.54967824077691,
+        "exit_price": 89.99688849026438,
+        "return": 0.0279522472116598,
+        "days": 106
+      },
+      {
+        "entry_date": "2024-06-20 00:00:00",
+        "exit_date": "2024-07-25 00:00:00",
+        "entry_price": 82.54283531694723,
+        "exit_price": 89.84113403846501,
+        "return": 0.08841831872498492,
+        "days": 35
+      }
+    ],
+    "strategy_params": {
+      "rsi_period": 11,
+      "buy_threshold": 31.5,
+      "sell_threshold": 68.5,
+      "volatility_scalar": 0.7317531024644165,
+      "trade_frequency": 1.0
+    },
+    "learning_stats": {
+      "n_trades": 3,
+      "mean_return": 0.07697967693766299,
+      "mean_win_rate": 1.0
+    }
+  }
+}
