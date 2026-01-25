@@ -87,6 +87,7 @@ services:
       - PYTHONUNBUFFERED=1
       - FLASK_ENV=production
       - OMP_NUM_THREADS=2
+      - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1464671277867335722/e_LNQxmUwZpR4rTPTk8HOJQibehGbmofnW6GtarwGgyWu9yTHFyy97nWCKiq-qCUS2No
     command: sh -c "python -m trading_bot auto --no-ui --nasdaq-top-500 --memory-mode --iterations 10 2>&1 | tee /app/logs/trading_bot.log"
     depends_on:
       postgres:
