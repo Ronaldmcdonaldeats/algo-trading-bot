@@ -1,0 +1,160 @@
+{
+  "dashboard": {
+    "title": "Algo Trading Bot - System Health",
+    "description": "System resource usage and health metrics",
+    "tags": [
+      "system",
+      "infrastructure"
+    ],
+    "timezone": "browser",
+    "panels": [
+      {
+        "title": "CPU Usage",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 6
+        },
+        "targets": [
+          {
+            "expr": "system_cpu_usage",
+            "legendFormat": "CPU %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "custom": {
+              "lineWidth": 2
+            },
+            "thresholds": {
+              "mode": "percentage",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 70
+                },
+                {
+                  "color": "red",
+                  "value": 90
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "title": "Memory Usage",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 12,
+          "h": 6
+        },
+        "targets": [
+          {
+            "expr": "system_memory_usage",
+            "legendFormat": "Memory %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "custom": {
+              "lineWidth": 2
+            },
+            "thresholds": {
+              "mode": "percentage",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 75
+                },
+                {
+                  "color": "red",
+                  "value": 90
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "title": "API Request Latency",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 0,
+          "y": 6,
+          "w": 12,
+          "h": 6
+        },
+        "targets": [
+          {
+            "expr": "system_request_latency_ms",
+            "legendFormat": "Latency (ms)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "custom": {
+              "lineWidth": 1
+            }
+          }
+        }
+      },
+      {
+        "title": "Error Rate",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 12,
+          "y": 6,
+          "w": 12,
+          "h": 6
+        },
+        "targets": [
+          {
+            "expr": "rate(system_api_errors_total[5m])",
+            "legendFormat": "Error Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "custom": {
+              "lineWidth": 2
+            },
+            "thresholds": {
+              "mode": "percentage",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 0.02
+                },
+                {
+                  "color": "red",
+                  "value": 0.05
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

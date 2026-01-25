@@ -1,0 +1,301 @@
+---
+# Prometheus Deployment for Algo Trading Bot Metrics
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: algo-trading
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+    
+    scrape_configs:
+      - job_name: 'algo-trading-bot'
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - algo-trading
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            action: keep
+            regex: algo-trading-bot
+          - source_labels: [__meta_kubernetes_pod_container_port_number]
+            action: keep
+            regex: "9090"
+          - source_labels: [__address__]
+            target_label: __param_target
+          - target_label: __address__
+            replacement: localhost:9090
+
+      - job_name: 'redis'
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - algo-trading
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            action: keep
+            regex: redis
+          - source_labels: [__meta_kubernetes_pod_container_port_number]
+            action: keep
+            regex: "6379"
+
+      - job_name: 'postgres'
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - algo-trading
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            action: keep
+            regex: postgres
+          - source_labels: [__meta_kubernetes_pod_container_port_number]
+            action: keep
+            regex: "5432"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: algo-trading
+data:
+  alert-rules.yml: |
+    groups:
+      - name: trading_alerts
+        interval: 30s
+        rules:
+          - alert: HighDrawdown
+            expr: trading_max_drawdown > 0.20
+            for: 1h
+            labels:
+              severity: warning
+            annotations:
+              summary: "High drawdown: {{ $value | humanizePercentage }}"
+
+          - alert: LowWinRate
+            expr: trading_win_rate < 0.40
+            for: 1h
+            labels:
+              severity: warning
+            annotations:
+              summary: "Low win rate: {{ $value | humanizePercentage }}"
+
+          - alert: HighAPILatency
+            expr: system_request_latency_ms > 1000
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High latency: {{ $value }}ms"
+
+          - alert: HighCPUUsage
+            expr: system_cpu_usage > 80
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High CPU: {{ $value }}%"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: algo-trading
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        args:
+          - '--config.file=/etc/prometheus/prometheus.yml'
+          - '--storage.tsdb.path=/prometheus'
+          - '--storage.tsdb.retention.time=30d'
+        ports:
+        - containerPort: 9090
+          name: web
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+        volumeMounts:
+        - name: prometheus-config
+          mountPath: /etc/prometheus
+        - name: prometheus-rules
+          mountPath: /etc/prometheus/rules
+        - name: prometheus-storage
+          mountPath: /prometheus
+      volumes:
+      - name: prometheus-config
+        configMap:
+          name: prometheus-config
+      - name: prometheus-rules
+        configMap:
+          name: prometheus-rules
+      - name: prometheus-storage
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: algo-trading
+  labels:
+    app: prometheus
+spec:
+  type: ClusterIP
+  selector:
+    app: prometheus
+  ports:
+  - port: 9090
+    targetPort: 9090
+    name: web
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: algo-trading
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+- kind: ServiceAccount
+  name: prometheus
+  namespace: algo-trading
+
+---
+# Grafana Deployment
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: algo-trading
+data:
+  prometheus-datasource.yaml: |
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      access: proxy
+      url: http://prometheus:9090
+      isDefault: true
+      editable: true
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: algo-trading
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:latest
+        ports:
+        - containerPort: 3000
+          name: web
+        env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: "admin"
+        - name: GF_USERS_ALLOW_SIGN_UP
+          value: "false"
+        - name: GF_INSTALL_PLUGINS
+          value: "grafana-piechart-panel"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        volumeMounts:
+        - name: grafana-datasources
+          mountPath: /etc/grafana/provisioning/datasources
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+      volumes:
+      - name: grafana-datasources
+        configMap:
+          name: grafana-datasources
+      - name: grafana-storage
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: algo-trading
+  labels:
+    app: grafana
+spec:
+  type: LoadBalancer
+  selector:
+    app: grafana
+  ports:
+  - port: 3000
+    targetPort: 3000
+    name: web
