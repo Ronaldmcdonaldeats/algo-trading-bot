@@ -145,6 +145,11 @@ def build_parser() -> argparse.ArgumentParser:
     auto.add_argument("--no-ui", action="store_true", help="Disable terminal UI")
     auto.add_argument("--no-learn", action="store_true", help="Disable automatic strategy learning")
     auto.add_argument("--symbols", help="Manual symbols (comma-separated) - overrides auto-selection")
+    auto.add_argument("--nasdaq-top-500", action="store_true", help="Trade top 500 NASDAQ stocks")
+    auto.add_argument("--nasdaq-top-100", action="store_true", help="Trade top 100 NASDAQ stocks")
+    auto.add_argument("--memory-mode", action="store_true", help="Enable aggressive memory optimizations")
+    auto.add_argument("--select-top", type=int, default=50, help="Number of top stocks to select")
+    auto.add_argument("--auto-select", action="store_true", help="Auto-select best stocks using ML")
     auto.add_argument("--period", default="60d", help="Historical data period")
     auto.add_argument("--interval", default="1d", help="Trading interval")
     auto.add_argument("--db", default="data/trades.sqlite")
@@ -758,9 +763,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "auto":
         from trading_bot.utils.auto_start import auto_start_paper_trading
         
+        # Handle symbol selection (priority: manual > nasdaq-top-500 > nasdaq-top-100)
         symbols = None
         if hasattr(args, 'symbols') and args.symbols:
             symbols = _parse_symbols(args.symbols)
+        elif getattr(args, 'nasdaq_top_500', False):
+            symbols = _get_nasdaq_symbols(top_n=500)
+        elif getattr(args, 'nasdaq_top_100', False):
+            symbols = _get_nasdaq_symbols(top_n=100)
         
         return auto_start_paper_trading(
             symbols=symbols,
@@ -775,6 +785,7 @@ def main(argv: list[str] | None = None) -> int:
             ui=not args.no_ui,
             alpaca_key=args.alpaca_key,
             alpaca_secret=args.alpaca_secret,
+            memory_mode=getattr(args, 'memory_mode', False),
         )
 
     if args.cmd == "learn":

@@ -69,7 +69,7 @@ services:
           cpus: '1'
           memory: 512M
 
-  # Main trading bot service - auto-trading with learning
+  # Main trading bot service - auto-trading with learning (500 NASDAQ symbols)
   trading-bot:
     image: algo-trading-bot:latest
     container_name: algo-trading-bot
@@ -86,7 +86,8 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - FLASK_ENV=production
-    command: sh -c "python -m trading_bot auto --no-ui --iterations 10 2>&1 | tee /app/logs/trading_bot.log"
+      - OMP_NUM_THREADS=2
+    command: sh -c "python -m trading_bot auto --no-ui --nasdaq-top-500 --memory-mode --iterations 10 2>&1 | tee /app/logs/trading_bot.log"
     depends_on:
       postgres:
         condition: service_healthy
@@ -102,8 +103,11 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
           cpus: '2'
-          memory: 1G
+          memory: 2G
 
 networks:
   trading-network:

@@ -45,6 +45,7 @@ def auto_start_paper_trading(
     ui: bool = False,
     alpaca_key: str | None = None,
     alpaca_secret: str | None = None,
+    memory_mode: bool = False,
 ):
     """Start automatic paper trading with learning."""
     logger.info("=" * 60)
