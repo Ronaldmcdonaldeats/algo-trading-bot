@@ -13,12 +13,15 @@ from pathlib import Path
 import logging
 import os
 from collections import deque
+import time
 
 from trading_bot.integrated_bot import IntegratedTradingBot
 from trading_bot.trading.trade_journal import TradeJournal
 from trading_bot.risk.drawdown_recovery import DrawdownRecoveryManager
 from trading_bot.learn.auto_tuning import AutoTuningSystem
 from trading_bot.options.strategies import GreeksCalculator, OptionType, IncomeStrategy
+from trading_bot.engine.paper import PaperEngine, PaperEngineConfig
+from trading_bot.config import load_config
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -63,6 +66,8 @@ class TradingBotAPI:
         
         self.bot = IntegratedTradingBot("WebDashboard", config_path=config_path)
         self.is_running = False
+        self.trading_thread = None
+        self.trading_active = False
         
         # Setup log handler
         self.log_handler = WebSocketLogHandler(self.socketio)
@@ -71,6 +76,7 @@ class TradingBotAPI:
         
         self._setup_routes()
         self._setup_websocket()
+        self._start_trading_loop()
         
         logger.info("[API] Trading Bot API initialized")
     
@@ -409,6 +415,65 @@ class TradingBotAPI:
             """Send recent logs"""
             logs = list(self.log_handler.logs)
             emit('logs_history', {'logs': logs})
+    
+    def _start_trading_loop(self):
+        """Start background trading loop thread"""
+        self.trading_active = True
+        self.trading_thread = Thread(target=self._trading_loop, daemon=True)
+        self.trading_thread.start()
+        logger.info("[API] Trading loop thread started")
+    
+    def _trading_loop(self):
+        """Background trading loop that executes trades"""
+        logger.info("[Trading Loop] Starting background trading loop")
+        
+        try:
+            # Try to initialize PaperEngine for live trading
+            try:
+                config = load_config()
+                engine_config = PaperEngineConfig(
+                    config_path="configs/default.yaml",
+                    db_path="trade_bot.db",
+                    symbols=config.get('symbols', ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN']),
+                    period="6mo",
+                    interval="1d",
+                    start_cash=config.get('starting_equity', 100000),
+                    sleep_seconds=30,  # Check every 30 seconds
+                    iterations=0  # Run forever
+                )
+                
+                engine = PaperEngine(config=engine_config)
+                logger.info("[Trading Loop] PaperEngine initialized successfully")
+                
+                # Run the engine's main loop
+                for _ in engine.run():
+                    if not self.trading_active:
+                        logger.info("[Trading Loop] Trading loop stopped by user")
+                        break
+                    time.sleep(1)  # Small delay between iterations
+                    
+            except Exception as e:
+                logger.warning(f"[Trading Loop] PaperEngine initialization failed: {e}")
+                logger.info("[Trading Loop] Falling back to simple trading loop")
+                
+                # Fallback: Simple trading loop that checks is_running flag
+                iteration = 0
+                while self.trading_active:
+                    if self.is_running:
+                        iteration += 1
+                        logger.info(f"[Trading Loop] Iteration {iteration} - Bot is running")
+                        # In a real scenario, here we would:
+                        # 1. Fetch market data
+                        # 2. Generate trading signals
+                        # 3. Execute trades
+                        # For now, just log that the loop is active
+                    
+                    time.sleep(30)  # Check every 30 seconds
+                    
+        except Exception as e:
+            logger.error(f"[Trading Loop] Unexpected error: {e}", exc_info=True)
+        finally:
+            logger.info("[Trading Loop] Trading loop ended")
     
     def run(self, host='127.0.0.1', port=5000, debug=False):
         """Start the API server"""
