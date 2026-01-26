@@ -69,10 +69,12 @@ class TradingBotAPI:
         self.app.config['SECRET_KEY'] = 'trading-bot-secret'
         self.socketio = SocketIO(self.app, cors_allowed_origins="*")
         
-        self.bot = IntegratedTradingBot("WebDashboard", config_path=config_path)
+        # Keep IntegratedTradingBot for backward compatibility with API endpoints
+        self.bot = None  # Will be populated if needed, but _trading_loop takes priority
         self.is_running = False
         self.trading_thread = None
         self.trading_active = False
+        self.config_path = config_path or "configs/default.yaml"
         
         # Setup log handler
         self.log_handler = WebSocketLogHandler(self.socketio)
@@ -81,9 +83,9 @@ class TradingBotAPI:
         
         self._setup_routes()
         self._setup_websocket()
-        self._start_trading_loop()
+        self._start_trading_loop()  # THIS TAKES PRIORITY - uses PaperEngine with live Alpaca
         
-        logger.info("[API] Trading Bot API initialized")
+        logger.info("[API] Trading Bot API initialized - using PaperEngine for live trading")
     
     def _setup_routes(self):
         """Setup REST endpoints"""
@@ -95,14 +97,10 @@ class TradingBotAPI:
         
         @self.app.route('/api/status', methods=['GET'])
         def get_status():
-            """Get current bot status"""
-            recovery_status = self.bot.check_recovery_status()
+            """Get current bot status - using live Alpaca trading"""
             return jsonify({
-                'status': 'running' if self.is_running else 'stopped',
-                'equity': self.bot.current_equity,
-                'day_pnl': self.bot.today_pnl,
-                'day_trades': self.bot.today_trades,
-                'recovery': recovery_status,
+                'status': 'running' if self.trading_active else 'stopped',
+                'message': 'Using live Alpaca trading with PaperEngine',
                 'timestamp': datetime.now().isoformat()
             })
         
