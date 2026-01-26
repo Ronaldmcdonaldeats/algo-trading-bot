@@ -522,7 +522,7 @@ class TradingBotAPI:
                 # Log trading activity
                 if update.fills:
                     for fill in update.fills:
-                        logger.info(f"[Trade] FILL: {fill.symbol} {fill.quantity} @ {fill.price}")
+                        logger.info(f"[Trade] FILL: {fill.symbol} {fill.qty} @ {fill.price}")
                 
                 if update.rejections:
                     for rejection in update.rejections:
@@ -554,7 +554,7 @@ class TradingBotAPI:
                         # Log trading activity
                         if update.fills:
                             for fill in update.fills:
-                                logger.info(f"[Trade] FILL: {fill.symbol} {fill.quantity} @ {fill.price}")
+                                logger.info(f"[Trade] FILL: {fill.symbol} {fill.qty} @ {fill.price}")
                         
                         if update.rejections:
                             for rejection in update.rejections:

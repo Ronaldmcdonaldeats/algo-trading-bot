@@ -111,7 +111,7 @@ class SqliteRepository:
         with Session(engine) as session:
             session.add(
                 FillEvent(
-                    order_id=fill.order_id,
+                    order_id=str(fill.order_id),
                     ts=fill.ts,
                     symbol=fill.symbol,
                     side=fill.side,
