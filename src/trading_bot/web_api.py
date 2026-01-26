@@ -26,7 +26,7 @@ from trading_bot.learn.auto_tuning import AutoTuningSystem
 from trading_bot.options.strategies import GreeksCalculator, OptionType, IncomeStrategy
 from trading_bot.engine.paper import PaperEngineConfig, run_paper_engine
 from trading_bot.configs.config import load_config
-from trading_bot.data.providers import AlpacaProvider
+from trading_bot.data.providers import AlpacaProvider, MockDataProvider
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -424,7 +424,7 @@ class TradingBotAPI:
     def _start_trading_loop(self):
         """Start background trading loop thread"""
         self.trading_active = True
-        self.trading_thread = Thread(target=self._trading_loop, daemon=True)
+        self.trading_thread = Thread(target=self._trading_loop, daemon=False)
         self.trading_thread.start()
         logger.info("[API] Trading loop thread started")
     
@@ -455,6 +455,15 @@ class TradingBotAPI:
             config_path = "configs/default.yaml"
             db_path = "trading_bot.db"
             
+            # Clean up database to avoid conflicts
+            try:
+                import os
+                if os.path.exists(db_path):
+                    os.remove(db_path)
+                    logger.info(f"[Trading Loop] Cleaned up existing database: {db_path}")
+            except Exception as e:
+                logger.warning(f"[Trading Loop] Could not clean database: {e}")
+            
             logger.info(f"[Trading Loop] Configuration loaded. Symbols ({len(symbols)}): {symbols}")
             logger.info(f"[Trading Loop] Config path: {config_path}, DB path: {db_path}")
             
@@ -481,22 +490,10 @@ class TradingBotAPI:
             logger.info("[Trading Loop] PaperEngineConfig created successfully")
             logger.info(f"[Trading Loop] Starting trading loop with {len(symbols)} symbols")
             
-            # Initialize Alpaca data provider for live data
-            try:
-                provider = AlpacaProvider()
-                logger.info("[Trading Loop] Using AlpacaProvider for market data")
-            except Exception as e:
-                logger.warning(f"[Trading Loop] AlpacaProvider failed, falling back to mock data: {e}")
-                provider = None
-            
-            # Clean up database to avoid conflicts
-            try:
-                import os
-                if os.path.exists(db_path):
-                    os.remove(db_path)
-                    logger.info(f"[Trading Loop] Cleaned up existing database: {db_path}")
-            except Exception as e:
-                logger.warning(f"[Trading Loop] Could not clean database: {e}")
+            # Initialize data provider - prefer MockDataProvider for local testing
+            # (Real Alpaca works better on production with live market hours)
+            provider = MockDataProvider()
+            logger.info("[Trading Loop] Using MockDataProvider for synthetic market data (realistic test patterns)")
             
             # Run the paper engine
             iteration = 0
