@@ -14,6 +14,7 @@ import pandas as pd
 
 from trading_bot.broker.base import OrderRejection
 from trading_bot.broker.paper import PaperBroker, PaperBrokerConfig
+from trading_bot.broker.alpaca import AlpacaBroker, AlpacaConfig
 from trading_bot.configs import load_config
 from trading_bot.core.models import Fill, Order, Portfolio
 from trading_bot.data.providers import MarketDataProvider, AlpacaProvider, MockDataProvider
@@ -51,6 +52,10 @@ class PaperEngineConfig:
     commission_bps: float = 0.0
     slippage_bps: float = 0.0
     min_fee: float = 0.0
+
+    # Live Trading
+    live_trading: bool = False  # Set to True to use real Alpaca trading
+    paper_mode: bool = True  # Paper trading mode (paper_mode=True uses fake money on Alpaca)
 
     # Phase 3
     strategy_mode: str = "ensemble"  # ensemble|mean_reversion_rsi|momentum_macd_volume|breakout_atr|ultimate_hybrid
@@ -125,14 +130,33 @@ class PaperEngine:
         self.repo = SqliteRepository(db_path=Path(cfg.db_path))
         self.repo.init_db()
 
-        self.broker = PaperBroker(
-            start_cash=float(cfg.start_cash),
-            config=PaperBrokerConfig(
-                commission_bps=float(cfg.commission_bps),
-                slippage_bps=float(cfg.slippage_bps),
-                min_fee=float(cfg.min_fee),
-            ),
-        )
+        # Initialize broker: live Alpaca or paper broker
+        if cfg.live_trading:
+            try:
+                alpaca_config = AlpacaConfig.from_env(paper_mode=cfg.paper_mode)
+                self.broker = AlpacaBroker(config=alpaca_config)
+                mode = "PAPER" if cfg.paper_mode else "LIVE"
+                print(f"[BROKER] Using AlpacaBroker in {mode} mode")
+            except Exception as e:
+                print(f"[ERROR] Failed to initialize AlpacaBroker: {e}")
+                print(f"[FALLBACK] Using PaperBroker instead")
+                self.broker = PaperBroker(
+                    start_cash=float(cfg.start_cash),
+                    config=PaperBrokerConfig(
+                        commission_bps=float(cfg.commission_bps),
+                        slippage_bps=float(cfg.slippage_bps),
+                        min_fee=float(cfg.min_fee),
+                    ),
+                )
+        else:
+            self.broker = PaperBroker(
+                start_cash=float(cfg.start_cash),
+                config=PaperBrokerConfig(
+                    commission_bps=float(cfg.commission_bps),
+                    slippage_bps=float(cfg.slippage_bps),
+                    min_fee=float(cfg.min_fee),
+                ),
+            )
 
         self.data = provider or MockDataProvider()
         self.iteration = 0

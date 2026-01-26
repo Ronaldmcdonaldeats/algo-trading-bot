@@ -455,6 +455,12 @@ class TradingBotAPI:
             config_path = "configs/default.yaml"
             db_path = "trading_bot.db"
             
+            # Load config to get live_trading setting
+            from trading_bot.configs import load_config
+            app_config = load_config(config_path)
+            live_trading = app_config.get('trading', {}).get('live_trading', False)
+            paper_mode = app_config.get('trading', {}).get('paper_mode', True)
+            
             # Clean up database to avoid conflicts
             try:
                 import os
@@ -466,6 +472,7 @@ class TradingBotAPI:
             
             logger.info(f"[Trading Loop] Configuration loaded. Symbols ({len(symbols)}): {symbols}")
             logger.info(f"[Trading Loop] Config path: {config_path}, DB path: {db_path}")
+            logger.info(f"[Trading Loop] Live Trading: {live_trading}, Paper Mode: {paper_mode}")
             
             # Create PaperEngineConfig
             engine_config = PaperEngineConfig(
@@ -485,6 +492,8 @@ class TradingBotAPI:
                 min_fee=0.0,
                 learning_eta=0.3,
                 memory_mode=False,
+                live_trading=live_trading,
+                paper_mode=paper_mode,
             )
             
             logger.info("[Trading Loop] PaperEngineConfig created successfully")
