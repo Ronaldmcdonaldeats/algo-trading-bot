@@ -35,7 +35,7 @@ try:
         start_cash=100000.0,
         sleep_seconds=0,  # No sleep for testing
         iterations=5,  # Just 5 iterations for testing
-        strategy_mode='ensemble',
+        strategy_mode='ultimate_hybrid',
         enable_learning=False,  # Disable learning for faster test
         tune_weekly=False,
     )

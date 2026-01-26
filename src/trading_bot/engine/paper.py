@@ -35,6 +35,7 @@ from trading_bot.strategy.macd_volume_momentum import MacdVolumeMomentumStrategy
 from trading_bot.strategy.rsi_mean_reversion import RsiMeanReversionStrategy
 from trading_bot.strategy.advanced_entry_filter import AdvancedEntryFilter
 from trading_bot.strategy.multitimeframe_signals import MultiTimeframeSignalValidator
+from trading_bot.strategy.integrated_strategy import MasterIntegratedStrategy
 
 
 @dataclass(frozen=True)
@@ -52,7 +53,7 @@ class PaperEngineConfig:
     min_fee: float = 0.0
 
     # Phase 3
-    strategy_mode: str = "ensemble"  # ensemble|mean_reversion_rsi|momentum_macd_volume|breakout_atr
+    strategy_mode: str = "ensemble"  # ensemble|mean_reversion_rsi|momentum_macd_volume|breakout_atr|ultimate_hybrid
     enable_learning: bool = True  # Enable adaptive learning by default
     tune_weekly: bool = True  # Enable weekly tuning by default
     learning_eta: float = 0.3
@@ -722,6 +723,19 @@ class PaperEngine:
             mode = self.strategy_mode
             if mode == "ensemble":
                 dec = self.ensemble.decide(outputs)
+            elif mode == "ultimate_hybrid":
+                # Use all strategies combined for maximum signal strength
+                all_signals = [int(out.signal) for out in outputs.values()]
+                all_confidences = [float(out.confidence) for out in outputs.values()]
+                final_signal = np.sign(np.mean(all_signals)) if np.mean(all_signals) != 0 else 0
+                final_confidence = np.mean(all_confidences)
+                dec = StrategyDecision(
+                    signal=int(final_signal),
+                    confidence=float(final_confidence),
+                    votes={k: int(v.signal) for k, v in outputs.items()},
+                    weights={k: 1.0/len(outputs) for k in outputs.keys()},
+                    explanations={k: dict(v.explanation) for k, v in outputs.items()},
+                )
             else:
                 if mode not in outputs:
                     raise ValueError(f"Unknown strategy_mode: {mode}")

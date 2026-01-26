@@ -7,6 +7,7 @@ portfolio:
   target_sector_count: 5
 
 # ULTIMATE HYBRID STRATEGY - PRODUCTION DEPLOYMENT
+# Combines all strategies: ATR Breakout + MACD Volume + RSI Mean Reversion
 # 426% backtest return, beats SPY by 10%+
 strategy: ultimate_hybrid
 
