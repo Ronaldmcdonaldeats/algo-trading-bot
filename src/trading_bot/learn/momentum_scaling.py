@@ -89,8 +89,8 @@ class MomentumScaler:
             return None
         
         symbol = ohlcv.index.name or "UNKNOWN"
-        close = ohlcv['close'].values
-        volume = ohlcv['volume'].values if 'volume' in ohlcv.columns else None
+        close = ohlcv['Close'].values
+        volume = ohlcv['Volume'].values if 'Volume' in ohlcv.columns else None
         
         # 1. RSI Momentum
         rsi_momentum = self._calculate_rsi_momentum(close)

@@ -130,7 +130,7 @@ class PortfolioOptimizer:
                 continue
             
             # Calculate returns
-            returns = df['close'].pct_change().dropna()
+            returns = df['Close'].pct_change().dropna()
             if len(returns) == 0:
                 continue
             
@@ -324,7 +324,7 @@ class PortfolioOptimizer:
         returns_by_symbol = {}
         for symbol, df in self.ohlcv_history.items():
             if len(df) > 1:
-                returns_by_symbol[symbol] = df['close'].pct_change().dropna().values
+                returns_by_symbol[symbol] = df['Close'].pct_change().dropna().values
         
         # Calculate portfolio metrics
         self.risk_metrics = self.calculate_portfolio_metrics(

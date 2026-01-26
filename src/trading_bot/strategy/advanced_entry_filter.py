@@ -164,9 +164,9 @@ class AdvancedEntryFilter:
     
     def _check_price_action(self, ohlcv: pd.DataFrame, signal: int) -> tuple[bool, str]:
         """Check if price action looks healthy (not choppy)"""
-        close = ohlcv['close'].values
-        high = ohlcv['high'].values
-        low = ohlcv['low'].values
+        close = ohlcv['Close'].values
+        high = ohlcv['High'].values
+        low = ohlcv['Low'].values
         
         lookback = min(self.price_action_lookback, len(close) - 1)
         
@@ -190,10 +190,10 @@ class AdvancedEntryFilter:
     
     def _check_volume(self, ohlcv: pd.DataFrame) -> tuple[bool, str]:
         """Check if volume is sufficient"""
-        if 'volume' not in ohlcv.columns:
+        if 'Volume' not in ohlcv.columns:
             return True, ""  # Skip if no volume data
         
-        volume = ohlcv['volume'].values
+        volume = ohlcv['Volume'].values
         
         # Current volume should be above average
         recent_volume = volume[-1]
@@ -211,7 +211,7 @@ class AdvancedEntryFilter:
     
     def _check_volatility(self, ohlcv: pd.DataFrame) -> tuple[bool, str]:
         """Check if volatility is in acceptable range"""
-        close = ohlcv['close'].values
+        close = ohlcv['Close'].values
         
         # Calculate recent volatility
         returns = np.diff(close) / close[:-1]
@@ -229,8 +229,8 @@ class AdvancedEntryFilter:
     
     def _check_gap(self, ohlcv: pd.DataFrame) -> tuple[bool, str]:
         """Check if there's a suspicious gap"""
-        close = ohlcv['close'].values
-        open_prices = ohlcv['open'].values
+        close = ohlcv['Close'].values
+        open_prices = ohlcv['Open'].values
         
         if len(close) < 2:
             return True, ""
@@ -251,7 +251,7 @@ class AdvancedEntryFilter:
     
     def _check_trend_alignment(self, ohlcv: pd.DataFrame, signal: int) -> tuple[bool, str]:
         """Check if signal aligns with overall trend"""
-        close = ohlcv['close'].values
+        close = ohlcv['Close'].values
         
         # Calculate short and long term trends
         sma_5 = np.mean(close[-5:])
@@ -273,7 +273,7 @@ class AdvancedEntryFilter:
     
     def _check_momentum(self, ohlcv: pd.DataFrame, signal: int) -> tuple[bool, str]:
         """Check if momentum supports the signal"""
-        close = ohlcv['close'].values
+        close = ohlcv['Close'].values
         
         # Simple momentum: rate of change
         if len(close) < 10:
