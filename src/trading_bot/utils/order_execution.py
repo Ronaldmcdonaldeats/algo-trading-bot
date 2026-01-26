@@ -162,10 +162,16 @@ class OrderExecution:
         - Low volume = wide spread
         - Typical stock: 5-10M shares/day = 0.05-0.1% spread
         """
-        if volume_series.empty or volume_series.mean() == 0:
+        if volume_series.empty:
             return 0.1  # Default 0.1% spread
         
-        avg_volume = volume_series.mean()
+        try:
+            avg_volume = float(volume_series.mean())
+        except (TypeError, ValueError):
+            return 0.1  # Default if can't compute mean
+        
+        if avg_volume <= 0:
+            return 0.1  # Default 0.1% spread
         
         if avg_volume > 10_000_000:  # Very liquid
             spread_pct = 0.05
@@ -213,7 +219,12 @@ class OrderExecution:
         # Estimate volume if not provided
         volume_dollars = 1_000_000  # Conservative estimate
         if volume_data is not None and not volume_data.empty:
-            volume_dollars = (volume_data.mean() * current_price)
+            try:
+                mean_vol = volume_data.mean()
+                avg_vol = float(mean_vol) if not isinstance(mean_vol, pd.Series) else float(mean_vol.iloc[0])
+                volume_dollars = float(avg_vol * float(current_price))
+            except (TypeError, ValueError, AttributeError):
+                pass  # Use conservative estimate
         
         use_limit = OrderExecution.should_use_limit_order(
             spread_bps=spread_bps,

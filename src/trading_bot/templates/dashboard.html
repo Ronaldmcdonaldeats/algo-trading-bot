@@ -771,19 +771,31 @@
 
         // Bot Controls
         function startBot() {
-            addLog('Starting bot...', 'info');
+            addLog('⏳ Starting bot...', 'info');
             fetch('/api/start', { method: 'POST' })
                 .then(r => r.json())
-                .then(d => addLog('Bot started successfully', 'success'))
-                .catch(err => addLog(`Error starting bot: ${err}`, 'error'));
+                .then(d => {
+                    if (d.status === 'started') {
+                        addLog('✓ Bot started successfully', 'success');
+                    } else if (d.status === 'error') {
+                        addLog(`✗ Error starting bot: ${d.message}`, 'error');
+                    }
+                })
+                .catch(err => addLog(`✗ Error starting bot: ${err.message || err}`, 'error'));
         }
 
         function stopBot() {
-            addLog('Stopping bot...', 'warning');
+            addLog('⏳ Stopping bot...', 'warning');
             fetch('/api/stop', { method: 'POST' })
                 .then(r => r.json())
-                .then(d => addLog('Bot stopped', 'warning'))
-                .catch(err => addLog(`Error stopping bot: ${err}`, 'error'));
+                .then(d => {
+                    if (d.status === 'stopped') {
+                        addLog('✓ Bot stopped', 'warning');
+                    } else if (d.status === 'error') {
+                        addLog(`✗ Error stopping bot: ${d.message}`, 'error');
+                    }
+                })
+                .catch(err => addLog(`✗ Error stopping bot: ${err.message || err}`, 'error'));
         }
 
         function recordTrade() {
@@ -851,7 +863,12 @@
                 return;
             }
 
-            addLog(`Starting backtest with ${strategy}...`, 'info');
+            addLog(`⏳ Running backtest with ${strategy}...`, 'info');
+            
+            // Show loading state
+            document.getElementById('backtest-loading').style.display = 'block';
+            document.getElementById('backtest-results').style.display = 'none';
+            document.getElementById('backtest-empty').style.display = 'none';
             
             fetch('/api/backtest', {
                 method: 'POST',
@@ -863,13 +880,19 @@
                     start_cash: capital
                 })
             }).then(r => r.json()).then(d => {
-                if (d.error) {
+                // Check for startup success
+                if (d.status === 'started' || d.status === 'success') {
+                    addLog(`✓ Backtest started (${d.message || 'running in background'})`, 'info');
+                    // Results will come via WebSocket backtest_complete event
+                } else if (d.error) {
                     addLog(`✗ Backtest error: ${d.error}`, 'error');
-                } else {
-                    // Results handled by websocket events
+                    document.getElementById('backtest-loading').style.display = 'none';
+                    document.getElementById('backtest-empty').style.display = 'block';
                 }
             }).catch(err => {
-                addLog(`✗ Backtest error: ${err}`, 'error');
+                addLog(`✗ Failed to start backtest: ${err.message || err}`, 'error');
+                document.getElementById('backtest-loading').style.display = 'none';
+                document.getElementById('backtest-empty').style.display = 'block';
             });
         }
 

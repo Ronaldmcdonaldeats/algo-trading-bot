@@ -9,6 +9,7 @@ This module provides:
 
 from __future__ import annotations
 
+import ast
 import gc
 import logging
 import os
@@ -24,7 +25,7 @@ from typing import Optional
 
 import pandas as pd
 
-from trading_bot.core.models import Fill, Order, OrderType, Portfolio, Side
+from trading_bot.core.models import Fill, Order, OrderType, Portfolio, Side, Position
 from trading_bot.broker.base import Broker, OrderRejection
 
 logger = logging.getLogger(__name__)
@@ -154,9 +155,38 @@ class AlpacaProvider:
                 try:
                     df = pd.read_json(cache_file, orient="split")
                     df.index = pd.to_datetime(df.index)
-                    # Handle MultiIndex columns restoration if needed
-                    if not df.empty and isinstance(df.columns[0], list):
-                        df.columns = pd.MultiIndex.from_tuples([tuple(c) for c in df.columns])
+                    
+                    # Handle MultiIndex columns restoration
+                    # Columns might be stored as string representations like "('Open', 'AAPL')"
+                    if not df.empty and isinstance(df.columns, pd.Index):
+                        # Try to convert string representations back to tuples
+                        new_cols = []
+                        is_multiindex = False
+                        for col in df.columns:
+                            if isinstance(col, str) and col.startswith("('") and col.endswith("')"):
+                                # Parse string representation of tuple
+                                try:
+                                    # Extract the tuple content
+                                    import ast
+                                    parsed = ast.literal_eval(col)
+                                    if isinstance(parsed, tuple):
+                                        new_cols.append(parsed)
+                                        is_multiindex = True
+                                    else:
+                                        new_cols.append(col)
+                                except:
+                                    new_cols.append(col)
+                            elif isinstance(col, list):
+                                new_cols.append(tuple(col))
+                                is_multiindex = True
+                            else:
+                                new_cols.append(col)
+                        
+                        if is_multiindex:
+                            df.columns = pd.MultiIndex.from_tuples(new_cols)
+                        else:
+                            df.columns = new_cols
+                    
                     return df
                 except Exception as e:
                     logger.warning(f"Failed to load cache: {e}")
@@ -416,7 +446,7 @@ class AlpacaBroker(Broker):
                 side = OrderSide.BUY if order.side == Side.BUY else OrderSide.SELL
             
             # Market order
-            if order.order_type == OrderType.MARKET or order.type == "MARKET":
+            if getattr(order, 'type', 'MARKET') == "MARKET":
                 request = MarketOrderRequest(
                     symbol=order.symbol,
                     qty=order.qty,
@@ -424,18 +454,18 @@ class AlpacaBroker(Broker):
                     time_in_force=TimeInForce.DAY,
                 )
             # Limit order
-            elif order.order_type == OrderType.LIMIT or order.type == "LIMIT":
+            elif getattr(order, 'type', 'MARKET') == "LIMIT":
                 request = LimitOrderRequest(
                     symbol=order.symbol,
                     qty=order.qty,
-                    limit_price=order.price or 0.0,
+                    limit_price=order.limit_price or 0.0,
                     side=side,
                     time_in_force=TimeInForce.DAY,
                 )
             else:
                 return OrderRejection(
                     order=order,
-                    reason=f"Unsupported order type: {order.order_type}"
+                    reason=f"Unsupported order type: {getattr(order, 'type', 'UNKNOWN')}"
                 )
             
             # Submit to Alpaca
@@ -443,12 +473,12 @@ class AlpacaBroker(Broker):
             
             # Convert Alpaca order to Fill
             fill = Fill(
+                order_id=alpaca_order.id,
+                ts=datetime.now(timezone.utc),
                 symbol=alpaca_order.symbol,
+                side=order.side,
                 qty=alpaca_order.qty,
                 price=alpaca_order.filled_avg_price or self._prices.get(order.symbol, 0.0),
-                side=order.side,
-                timestamp=datetime.now(timezone.utc),
-                order_id=alpaca_order.id,
             )
             
             return fill
@@ -472,17 +502,20 @@ class AlpacaBroker(Broker):
             # Get positions
             positions = self._client.get_all_positions()
             
-            # Build positions dict
+            # Build positions dict with Position objects
             pos_dict = {}
             for pos in positions:
-                pos_dict[pos.symbol] = {
-                    "qty": pos.qty,
-                    "avg_fill_price": pos.avg_fill_price,
-                    "current_price": pos.current_price or self._prices.get(pos.symbol, pos.avg_fill_price),
-                    "market_value": pos.market_value,
-                    "unrealized_pl": pos.unrealized_pl,
-                    "unrealized_plpc": pos.unrealized_plpc,
-                }
+                # Convert to proper types (Alpaca may return strings)
+                qty = int(pos.qty) if pos.qty else 0
+                avg_price = float(getattr(pos, 'avg_fill_price', None) or getattr(pos, 'avg_entry_price', None) or 0.0)
+                
+                # Create Position object
+                position = Position(
+                    symbol=pos.symbol,
+                    qty=qty,
+                    avg_price=avg_price,
+                )
+                pos_dict[pos.symbol] = position
             
             # Build portfolio
             portfolio = Portfolio(

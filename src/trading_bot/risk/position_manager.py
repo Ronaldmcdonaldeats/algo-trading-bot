@@ -76,6 +76,7 @@ class PositionManager:
         max_positions: int = 10,
         max_portfolio_drawdown_pct: float = 0.1,  # 10% portfolio drawdown limit
         volatility_adjustment: bool = True,  # Reduce position size for volatile stocks
+        starting_equity: float = 100000.0,  # Starting portfolio value
     ):
         self.default_stop_loss_pct = default_stop_loss_pct
         self.default_take_profit_pct = default_take_profit_pct
@@ -87,7 +88,7 @@ class PositionManager:
         
         self.positions: Dict[str, ManagedPosition] = {}
         self.daily_pnl = 0.0
-        self.peak_equity = 100000.0  # Track peak for drawdown calculation
+        self.peak_equity = max(starting_equity, 100000.0)  # Track peak for drawdown calculation, use actual starting equity
         self.closed_positions = []  # Track closed positions for analytics
     
     def open_position(

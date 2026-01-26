@@ -30,7 +30,12 @@ class TradeStats:
 
     def __post_init__(self):
         if self.exit_time and self.entry_time:
-            self.hold_minutes = (self.exit_time - self.entry_time).total_seconds() / 60
+            # Handle timezone-naive vs timezone-aware datetimes
+            try:
+                self.hold_minutes = (self.exit_time - self.entry_time).total_seconds() / 60
+            except TypeError:
+                # If one is naive and one is aware, just set to 0
+                self.hold_minutes = 0.0
 
 
 @dataclass

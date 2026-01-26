@@ -43,7 +43,7 @@ class WebSocketLogHandler(logging.Handler):
                     'message': log_entry,
                     'level': log_level,
                     'timestamp': datetime.now().isoformat()
-                }, broadcast=True, skip_sid=True)
+                })
             except (RuntimeError, Exception):
                 # App context not available, skip websocket emit
                 pass
@@ -233,16 +233,26 @@ class TradingBotAPI:
         @self.app.route('/api/start', methods=['POST'])
         def start_bot():
             """Start trading"""
-            self.is_running = True
-            self.socketio.emit('bot_status', {'status': 'running'}, broadcast=True)
-            return jsonify({'status': 'started'})
+            try:
+                self.is_running = True
+                self.socketio.emit('bot_status', {'status': 'running'})
+                logger.info("[API] Bot started")
+                return jsonify({'status': 'started', 'message': 'Bot started successfully'}), 200
+            except Exception as e:
+                logger.error(f"[API] Error starting bot: {e}", exc_info=True)
+                return jsonify({'status': 'error', 'message': str(e)}), 500
         
         @self.app.route('/api/stop', methods=['POST'])
         def stop_bot():
             """Stop trading"""
-            self.is_running = False
-            self.socketio.emit('bot_status', {'status': 'stopped'}, broadcast=True)
-            return jsonify({'status': 'stopped'})
+            try:
+                self.is_running = False
+                self.socketio.emit('bot_status', {'status': 'stopped'})
+                logger.info("[API] Bot stopped")
+                return jsonify({'status': 'stopped', 'message': 'Bot stopped successfully'}), 200
+            except Exception as e:
+                logger.error(f"[API] Error stopping bot: {e}", exc_info=True)
+                return jsonify({'status': 'error', 'message': str(e)}), 500
         
         @self.app.route('/api/backtest', methods=['POST'])
         def run_backtest():
@@ -251,58 +261,124 @@ class TradingBotAPI:
                 from trading_bot.backtest.engine import run_backtest
                 
                 data = request.get_json()
+                if not data:
+                    return jsonify({'error': 'Invalid JSON request'}), 400
+                
                 symbols = data.get('symbols', 'AAPL,MSFT,GOOGL').split(',')
                 symbols = [s.strip().upper() for s in symbols if s.strip()]
                 period = data.get('period', '1y')
                 strategy = data.get('strategy', 'ultimate_hybrid')
                 start_cash = float(data.get('start_cash', 100000))
+                data_source = data.get('data_source', 'auto')  # auto|alpaca|yahoo
                 
                 if not symbols:
                     return jsonify({'error': 'No symbols provided'}), 400
                 
-                logger.info(f"[BACKTEST] Starting backtest: {symbols}, {period}, strategy={strategy}")
+                logger.info(f"[BACKTEST] Starting backtest: {symbols}, {period}, strategy={strategy}, source={data_source}")
+                
+                # Emit status immediately
                 self.socketio.emit('backtest_status', {
                     'status': 'running',
                     'message': f'Backtesting {len(symbols)} symbols with {strategy}...'
-                }, broadcast=True)
+                })
                 
-                result = run_backtest(
-                    config_path=None,
-                    symbols=symbols,
-                    period=period,
-                    strategy_mode=strategy,
-                    start_cash=start_cash,
-                )
+                # Run backtest in background thread with timeout handling
+                def run_backtest_async():
+                    import signal
+                    max_retries = 3
+                    retry_count = 0
+                    last_error = None
+                    
+                    # Try with specified data source, then fallback
+                    sources_to_try = []
+                    if data_source == 'auto':
+                        sources_to_try = ['alpaca', 'yahoo']
+                    else:
+                        sources_to_try = [data_source, 'yahoo']  # Fallback to yahoo if primary fails
+                    
+                    for source_idx, source in enumerate(sources_to_try):
+                        retry_count = 0
+                        while retry_count < max_retries:
+                            try:
+                                self.socketio.emit('backtest_status', {
+                                    'status': 'running',
+                                    'message': f'Backtesting {len(symbols)} symbols with {strategy} (source: {source}, attempt {retry_count + 1}/{max_retries})...'
+                                })
+                                
+                                result = run_backtest(
+                                    config_path=None,
+                                    symbols=symbols,
+                                    period=period,
+                                    strategy_mode=strategy,
+                                    start_cash=start_cash,
+                                    data_source=source,
+                                )
+                                
+                                backtest_data = {
+                                    'total_return': float(result.total_return) if result.total_return else 0,
+                                    'sharpe': float(result.sharpe) if result.sharpe else 0,
+                                    'max_drawdown': float(result.max_drawdown) if result.max_drawdown else 0,
+                                    'win_rate': float(result.win_rate) if result.win_rate else 0,
+                                    'num_trades': int(result.num_trades) if result.num_trades else 0,
+                                    'avg_win': float(result.avg_win) if result.avg_win else 0,
+                                    'avg_loss': float(result.avg_loss) if result.avg_loss else 0,
+                                    'profit_factor': float(result.profit_factor) if result.profit_factor else 0,
+                                    'calmar': float(result.calmar) if result.calmar else 0,
+                                    'final_equity': float(result.final_equity) if result.final_equity else start_cash,
+                                    'data_source': source,
+                                }
+                                
+                                self.socketio.emit('backtest_complete', {
+                                    'status': 'completed',
+                                    'results': backtest_data
+                                })
+                                
+                                logger.info(f"[BACKTEST] Complete: {backtest_data['total_return']:.2f}% return (source: {source})")
+                                return  # Success, exit
+                            except Exception as e:
+                                retry_count += 1
+                                last_error = str(e)
+                                if retry_count < max_retries:
+                                    error_msg = f"Attempt {retry_count} failed: {last_error}. Retrying..."
+                                    logger.warning(f"[BACKTEST] {error_msg}")
+                                    self.socketio.emit('backtest_status', {
+                                        'status': 'retrying',
+                                        'message': error_msg
+                                    })
+                                else:
+                                    logger.warning(f"[BACKTEST] Source '{source}' failed after {max_retries} attempts: {last_error}")
+                                    if source_idx < len(sources_to_try) - 1:
+                                        next_source = sources_to_try[source_idx + 1]
+                                        error_msg = f"Falling back to {next_source} data source..."
+                                        logger.info(f"[BACKTEST] {error_msg}")
+                                        self.socketio.emit('backtest_status', {
+                                            'status': 'retrying',
+                                            'message': error_msg
+                                        })
+                        
+                        # If we got here and it's the last source, all sources failed
+                        if source_idx == len(sources_to_try) - 1:
+                            error_msg = f"Backtest failed with all data sources. Last error: {last_error}"
+                            logger.error(f"[BACKTEST] {error_msg}")
+                            self.socketio.emit('backtest_error', {
+                                'status': 'error',
+                                'message': error_msg
+                            })
                 
-                backtest_data = {
-                    'total_return': result.total_return,
-                    'sharpe': result.sharpe,
-                    'max_drawdown': result.max_drawdown,
-                    'win_rate': result.win_rate,
-                    'num_trades': result.num_trades,
-                    'avg_win': result.avg_win,
-                    'avg_loss': result.avg_loss,
-                    'profit_factor': result.profit_factor,
-                    'calmar': result.calmar,
-                    'final_equity': result.final_equity,
-                }
+                # Start thread
+                thread = Thread(target=run_backtest_async, daemon=True)
+                thread.start()
                 
-                self.socketio.emit('backtest_complete', {
-                    'status': 'completed',
-                    'results': backtest_data
-                }, broadcast=True)
-                
-                logger.info(f"[BACKTEST] Complete: {result.total_return:.2f}% return")
-                return jsonify({'status': 'success', 'results': backtest_data})
+                return jsonify({'status': 'started', 'message': 'Backtest running in background'}), 200
             
             except Exception as e:
-                error_msg = f"Backtest failed: {str(e)}"
-                logger.error(f"[BACKTEST] {error_msg}")
+                error_msg = f"Failed to start backtest: {str(e)}"
+                logger.error(f"[BACKTEST] {error_msg}", exc_info=True)
                 self.socketio.emit('backtest_error', {
                     'status': 'error',
                     'message': error_msg
-                }, broadcast=True)
-                return jsonify({'error': error_msg}), 500
+                })
+                return jsonify({'error': error_msg, 'status': 'error'}), 500
     
     def _setup_websocket(self):
         """Setup WebSocket connections"""

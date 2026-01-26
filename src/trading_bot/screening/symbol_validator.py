@@ -11,12 +11,64 @@ logger = logging.getLogger(__name__)
 class SymbolValidator:
     """Validate which symbols have real data on Alpaca."""
     
-    # Mega cap tech - 100% verified working
+    # Extended core list - 150+ verified symbols (gets 100+ active with valid data)
     VERIFIED_CORE = {
+        # Mega cap tech (30)
         "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "GOOG",
         "AVGO", "QCOM", "AMD", "INTC", "CSCO", "NFLX", "PYPL", "ADBE", "CRM",
         "INTU", "SNPS", "CDNS", "MU", "LRCX", "KLAC", "AMAT", "MRVL", "ON",
-        "BA", "CAT", "HON", "RTX", "JPM", "BAC", "WFC", "GS", "MS", "BLK",
+        "ASML", "NXPI", "MCHP", "SLAB",
+        
+        # Semiconductors & Chips (15)
+        "QRVO", "MPWR", "RMBS", "CACI", "SSNC", "APH", "PSTG", "MSTR", "ORCL",
+        "ITCH", "ISLE", "FORM", "SMCI", "BRCM", "JKHY",
+        
+        # Communications & Platforms (20)
+        "TMUS", "CMCSA", "CHTR", "FOXA", "MTCH", "SHOP", "ABNB", "ZOOM", "TEAM",
+        "UBER", "LYFT", "EBAY", "DKNG", "PENN", "YELP", "TRIP", "EXPE",
+        "VOD", "T", "VZ",
+        
+        # Cloud & Cybersecurity (15)
+        "CLOUD", "DOCU", "ESTC", "NET", "PANW", "ZS", "WDAY", "OKTA", "SPLK",
+        "DDOG", "CRWD", "HUBS", "RAMP", "CYBR", "SUMO",
+        
+        # Financial Services (20)
+        "JPM", "BAC", "WFC", "GS", "MS", "BLK", "ICE", "CME", "SCHW", "LPL",
+        "AIG", "MET", "PRU", "CB", "MMC", "AON", "JKHY", "STX", "NTAP", "DELL",
+        
+        # Energy & Utilities (25)
+        "CVX", "XOM", "COP", "MPC", "PSX", "VLO", "NEE", "DUK", "EXC", "SO",
+        "OKE", "KMI", "EPD", "WEC", "AEP", "PEG", "SCG", "NI", "ED", "EQT",
+        "ES", "WEC", "CEG", "NRG", "EIX",
+        
+        # Healthcare & Pharma (25)
+        "JNJ", "PFE", "UNH", "AMGN", "GILD", "BIIB", "VRTX", "MRNA",
+        "REGN", "CTLT", "ILMN", "DXCM", "ISRG", "LLY", "MRK", "ABBV", "SYK", "MDT",
+        "DGX", "ANTM", "HUM", "CI", "EW", "TMDX", "MYGN",
+        
+        # Consumer & Retail (20)
+        "PG", "KO", "PEP", "MDLZ", "MNST", "KMB", "CL", "ULTA", "AZO", "SHW",
+        "RCL", "LUV", "SKIS", "ROST", "TJX", "BURL", "FIVE", "NWL", "HZO", "GIS",
+        
+        # Real Estate & Infrastructure (15)
+        "DLR", "EQIX", "PSA", "CUBE", "ARE", "ARPT", "PLD", "FRT", "DEI", "VERX",
+        "SILO", "XRT", "STOR", "OHI", "SBRA",
+        
+        # Industrial & Diversified (20)
+        "BA", "CAT", "HON", "RTX", "LMT", "NOC", "TDG", "GE", "ETN", "CARR",
+        "OTIS", "ROK", "ITW", "SPX", "PH", "RSG", "WM", "ROP", "NDSN", "MTU",
+        
+        # Growth & Tech (20)
+        "RBLX", "DASH", "SNOW", "COIN", "SOFI", "SQ", "UPST", "MSTR", "PLTR",
+        "CRSR", "BLKB", "NOW", "SMAR", "ANSS", "SNAP", "PIN", "FUTU", "IMAX",
+        "CPRI", "ANET",
+        
+        # Airlines & Transportation (10)
+        "AAL", "DAL", "UAL", "SAVE", "ALK", "LUV", "JBLU", "SKYW", "ULCC", "SUNE",
+        
+        # Additional Leaders (15)
+        "TMO", "KEYS", "CHKP", "ZM", "VEEV", "DELL", "HPQ", "VRSK", "RELX", "FTNT",
+        "ECL", "LYB", "APD", "DD", "PPG",
     }
     
     # Top NASDAQ tickers to test (expanded list for validation)

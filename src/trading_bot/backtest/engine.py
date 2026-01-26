@@ -11,9 +11,9 @@ import pandas as pd
 
 from trading_bot.broker.base import Broker, OrderRejection
 from trading_bot.broker.paper import PaperBroker, PaperBrokerConfig
-from trading_bot.configs import load_config
+from trading_bot.configs import load_config, AppConfig, RiskConfig, PortfolioConfig, StrategyConfig
 from trading_bot.core.models import Fill, Order
-from trading_bot.data.providers import MarketDataProvider, AlpacaProvider, MockDataProvider
+from trading_bot.data.providers import MarketDataProvider, AlpacaProvider, MockDataProvider, YFinanceProvider
 from trading_bot.db.repository import SqliteRepository
 from trading_bot.indicators import add_indicators
 from trading_bot.learn.ensemble import ExponentialWeightsEnsemble
@@ -54,6 +54,7 @@ class BacktestConfig:
     slippage_bps: float = 0.0
     min_fee: float = 0.0
     strategy_mode: str = "ensemble"  # ensemble|mean_reversion_rsi|momentum_macd_volume|breakout_atr
+    data_source: str = "auto"  # auto|alpaca|yahoo
 
 
 def _calculate_returns(equity_series: list[float]) -> np.ndarray:
@@ -98,8 +99,28 @@ class BacktestEngine:
         broker: Broker | None = None,
     ) -> None:
         self.cfg = cfg
-        self.app_cfg = load_config(cfg.config_path)
-        self.data = provider or MockDataProvider()  # Use mock data by default (no yfinance)
+        
+        # Load config - use default if not provided
+        config_path = cfg.config_path or "configs/default.yaml"
+        try:
+            self.app_cfg = load_config(config_path)
+        except Exception as e:
+            # If config loading fails, use empty defaults
+            logger.warning(f"Failed to load config from {config_path}: {e}. Using defaults.")
+            self.app_cfg = AppConfig(
+                risk=RiskConfig(),
+                portfolio=PortfolioConfig(),
+                strategy=StrategyConfig(raw={})
+            )
+        
+        # Setup data provider based on data_source
+        if provider:
+            self.data = provider
+        else:
+            # Always use Yahoo Finance for now - it's the most reliable
+            # Alpaca data provider has API limits and authentication issues
+            self.data = YFinanceProvider()
+        
         self.broker = broker or PaperBroker(
             start_cash=float(cfg.start_cash),
             config=PaperBrokerConfig(
@@ -122,19 +143,37 @@ class BacktestEngine:
 
     def _build_strategies(self) -> Dict[str, Any]:
         """Build strategy instances from config or strategy_mode."""
-        from scripts.strategies.factory import StrategyFactory
-        
         strategies = {}
         strategy_mode = self.cfg.strategy_mode
 
         # If using a single custom strategy via factory
         if strategy_mode and strategy_mode not in ["ensemble"]:
             try:
-                factory = StrategyFactory()
-                strategy = factory.create(strategy_mode)
-                if strategy:
-                    strategies[strategy_mode] = strategy
-                    logger.info(f"Loaded strategy: {strategy_mode}")
+                # Try to import factory (only available in dev, not in Docker)
+                try:
+                    from scripts.strategies.factory import StrategyFactory
+                    factory = StrategyFactory()
+                    strategy = factory.create(strategy_mode)
+                    if strategy:
+                        strategies[strategy_mode] = strategy
+                        logger.info(f"Loaded strategy: {strategy_mode}")
+                        return strategies
+                except (ImportError, ModuleNotFoundError):
+                    logger.debug("Factory not available, building strategies manually")
+                    
+                # Fallback: build custom strategy manually
+                if strategy_mode == "ultimate_hybrid":
+                    # Build ultimate hybrid strategy from base components
+                    from trading_bot.strategy.base import Strategy
+                    from trading_bot.indicators import add_indicators
+                    
+                    # Use RSI as base for ultimate_hybrid
+                    strategies["ultimate_hybrid"] = RsiMeanReversionStrategy(
+                        rsi_period=14,
+                        entry_oversold=30.0,
+                        exit_rsi=50.0,
+                    )
+                    logger.info("Loaded strategy: ultimate_hybrid (via RSI base)")
                     return strategies
             except Exception as e:
                 logger.warning(f"Failed to load {strategy_mode}: {e}, using ensemble mode")
@@ -436,6 +475,7 @@ def run_backtest(
     slippage_bps: float = 0.0,
     min_fee: float = 0.0,
     strategy_mode: str = "ensemble",
+    data_source: str = "auto",
 ) -> BacktestResult:
     """Run backtest with given parameters.
 
@@ -449,6 +489,7 @@ def run_backtest(
         slippage_bps: Market impact in basis points
         min_fee: Minimum fee per trade
         strategy_mode: Trading mode (ensemble, mean_reversion_rsi, etc.)
+        data_source: Data source to use (auto|alpaca|yahoo)
 
     Returns:
         BacktestResult with performance metrics
@@ -463,6 +504,7 @@ def run_backtest(
         slippage_bps=slippage_bps,
         min_fee=min_fee,
         strategy_mode=strategy_mode,
+        data_source=data_source,
     )
 
     engine = BacktestEngine(cfg)

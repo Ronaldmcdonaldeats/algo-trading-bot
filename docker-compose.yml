@@ -2,6 +2,7 @@ version: '3.8'
 
 # QUICK START: docker-compose up
 # Then open browser to http://localhost:5000
+# Bot auto-starts in background
 
 services:
   # Web dashboard with backtest
@@ -12,7 +13,29 @@ services:
     container_name: trading-bot-dashboard
     ports:
       - "5000:5000"
+    env_file:
+      - .env
     environment:
       - PYTHONUNBUFFERED=1
-    command: gunicorn --bind 0.0.0.0:5000 --workers 1 --worker-class sync --timeout 30 trading_bot.web_api:app
+    command: gunicorn --bind 0.0.0.0:5000 --workers 1 --worker-class sync --timeout 300 trading_bot.web_api:app
     restart: unless-stopped
+  
+  # Auto-trading bot service
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trading-bot-auto
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - BOT_MODE=auto
+    volumes:
+      - ./configs:/app/configs
+      - ./logs:/app/logs
+      - ./data:/app/data
+    command: python -m trading_bot auto --no-ui --config /app/configs/default.yaml --memory-mode
+    restart: unless-stopped
+    depends_on:
+      - dashboard

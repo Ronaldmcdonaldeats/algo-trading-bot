@@ -316,6 +316,7 @@ def run_live_paper_trading(
             max_positions=min(50, len(symbols)),  # Can hold up to 50 positions or number of symbols
             max_portfolio_drawdown_pct=0.1,  # 10% max drawdown limit
             volatility_adjustment=True,  # Skip extremely volatile stocks
+            starting_equity=100_000.0,  # Initialize peak_equity properly
         )
         
         # Initialize portfolio optimizer for position sizing
@@ -373,6 +374,9 @@ def run_live_paper_trading(
                 )
                 last_data_fetch = now
                 print(f"[DEBUG] Data refreshed: shape {df_all.shape}")
+                print(f"[DEBUG] Column type: {type(df_all.columns)}, Is MultiIndex: {isinstance(df_all.columns, pd.MultiIndex)}")
+                if len(df_all.columns) > 0:
+                    print(f"[DEBUG] Sample columns: {list(df_all.columns[:5])} ... {list(df_all.columns[-5:])}")
             else:
                 time_since_fetch = (now - last_data_fetch).total_seconds()
                 print(f"[LIVE] Using cached data ({data_cache_ttl_seconds - time_since_fetch:.0f}s until refresh)")
@@ -391,15 +395,47 @@ def run_live_paper_trading(
             
             print(f"[PORTFOLIO] Cash: ${portfolio.cash:,.2f} | Equity: ${current_equity:,.2f} | P&L: {pnl:+,.2f} ({pnl_pct:+.2f}%)")
             
+            # Sync portfolio positions with PositionManager (for exit tracking)
+            # On first iteration, load all existing positions from Alpaca
+            if iteration == 1:
+                print("[STARTUP] Loading existing positions from Alpaca...")
+                existing_count = 0
+                for symbol, pos in portfolio.positions.items():
+                    if pos.qty > 0:
+                        pos_manager.open_position(symbol, pos.qty, pos.avg_price)
+                        advanced_risk.position_rotator.add_position(symbol)  # Track for rotation
+                        existing_count += 1
+                if existing_count > 0:
+                    print(f"[STARTUP] Loaded {existing_count} existing position(s) from Alpaca")
+            
+            # Sync portfolio positions with PositionManager (for exit tracking)
+            for symbol, pos in portfolio.positions.items():
+                if pos.qty > 0:  # Only track long positions
+                    # Update or add position in manager
+                    existing = pos_manager.get_position(symbol)
+                    if not existing or existing.qty == 0:
+                        # New position from Alpaca - open it in PositionManager
+                        pos_manager.open_position(symbol, pos.qty, pos.avg_price)
+            
             # Extract current prices for exit checks
             symbol_prices = {}
             for symbol in symbols:
                 try:
+                    # Try MultiIndex tuple format first
                     col_tuple = ('Close', symbol)
                     if col_tuple in df_all.columns:
                         symbol_prices[symbol] = float(df_all[col_tuple].iloc[-1])
-                except:
-                    pass
+                    else:
+                        # Try string format like "('Close', 'AAPL')"
+                        str_col = f"('Close', '{symbol}')"
+                        if str_col in df_all.columns:
+                            symbol_prices[symbol] = float(df_all[str_col].iloc[-1])
+                        else:
+                            # Try simple column name
+                            if 'Close' in df_all.columns:
+                                symbol_prices[symbol] = float(df_all['Close'].iloc[-1])
+                except Exception as e:
+                    pass  # Skip if price not available
             
             # Check for exits (stop-loss, take-profit, trailing stops)
             closed_positions = pos_manager.execute_exits(symbol_prices)
@@ -419,17 +455,48 @@ def run_live_paper_trading(
                 for symbol in symbols:
                     try:
                         # Extract data for this symbol
-                        # Columns are stored as tuples like ('Open', 'AAPL'), ('Close', 'AAPL'), etc.
+                        # Columns can be stored as tuples like ('Open', 'AAPL'), ('Close', 'AAPL'), etc.
+                        # OR as simple strings if single symbol
+                        # OR as string representations of tuples like "('Open', 'AAPL')"
                         symbol_data = {}
-                        for col_name in ['Open', 'High', 'Low', 'Close', 'Volume']:
-                            col_tuple = (col_name, symbol)
-                            if col_tuple in df_all.columns:
-                                symbol_data[col_name] = df_all[col_tuple]
-                            else:
-                                pass  # Skip missing columns
+                        
+                        # First try MultiIndex tuple format
+                        if isinstance(df_all.columns, pd.MultiIndex):
+                            for col_name in ['Open', 'High', 'Low', 'Close', 'Volume']:
+                                col_tuple = (col_name, symbol)
+                                if col_tuple in df_all.columns:
+                                    symbol_data[col_name] = df_all[col_tuple]
+                        
+                        # Try Index with string representations of tuples: "('Open', 'CEG')"
+                        if not symbol_data and not isinstance(df_all.columns, pd.MultiIndex):
+                            for col_name in ['Open', 'High', 'Low', 'Close', 'Volume']:
+                                # Try exact string format: "('Open', 'AAPL')"
+                                str_col = f"('{col_name}', '{symbol}')"
+                                if str_col in df_all.columns:
+                                    symbol_data[col_name] = df_all[str_col]
+                                    continue
+                                
+                                # If not found, try all columns that might match this symbol
+                                for col in df_all.columns:
+                                    if isinstance(col, str) and symbol in col and col_name in col:
+                                        symbol_data[col_name] = df_all[col]
+                                        break
+                        
+                        # Try simple column names (single symbol case)
+                        if not symbol_data:
+                            for col_name in ['Open', 'High', 'Low', 'Close', 'Volume']:
+                                if col_name in df_all.columns:
+                                    symbol_data[col_name] = df_all[col_name]
                         
                         if not symbol_data or 'Close' not in symbol_data:
-                            print(f"[WARN] {symbol} missing required OHLCV data, skipping")
+                            # Try string column names like 'Close_AAPL'
+                            for col_name in ['Open', 'High', 'Low', 'Close', 'Volume']:
+                                alt_col = f"{col_name}_{symbol}"
+                                if alt_col in df_all.columns:
+                                    symbol_data[col_name] = df_all[alt_col]
+                        
+                        if not symbol_data or 'Close' not in symbol_data:
+                            logger.debug(f"{symbol} missing required OHLCV data, skipping")
                             continue
                         
                         # Create DataFrame from extracted data
@@ -445,7 +512,9 @@ def run_live_paper_trading(
                             continue
                         
                         # Generate signals from multiple strategies (ensemble approach)
-                        symbol_signals_list = []
+                        rsi_signal = 0
+                        macd_signal = 0
+                        strategies_voted = 0
                         
                         # Strategy 1: RSI Mean Reversion
                         try:
@@ -456,7 +525,9 @@ def run_live_paper_trading(
                                 rsi_oversold=config.strategy.raw.get("rsi_oversold", 30),
                             )
                             if rsi_sig is not None and not rsi_sig.empty:
-                                symbol_signals_list.append(rsi_sig)
+                                if 'signal' in rsi_sig.columns:
+                                    rsi_signal = int(rsi_sig['signal'].iloc[-1])
+                                    strategies_voted += 1
                         except Exception as e:
                             logger.debug(f"RSI signal failed for {symbol}: {e}")
                         
@@ -464,30 +535,64 @@ def run_live_paper_trading(
                         try:
                             macd_sig = generate_macd_signals(symbol_df, fast_period=12, slow_period=26)
                             if macd_sig is not None and not macd_sig.empty:
-                                symbol_signals_list.append(macd_sig)
+                                if 'signal' in macd_sig.columns:
+                                    macd_signal = int(macd_sig['signal'].iloc[-1])
+                                    strategies_voted += 1
                         except Exception as e:
                             logger.debug(f"MACD signal failed for {symbol}: {e}")
                         
-                        # Combine signals (consensus approach - require at least 1 agreement)
-                        if symbol_signals_list:
-                            combined_sig = None
-                            
-                            for sig_df in symbol_signals_list:
-                                if 'signal' in sig_df.columns and sig_df['signal'].iloc[0] != 0:
-                                    if combined_sig is None:
-                                        combined_sig = sig_df.iloc[0:1].copy()
-                                        combined_sig["symbol"] = symbol
-                                        combined_sig["strategies"] = 1
-                                    else:
-                                        # Multiple strategies agree - increase confidence
-                                        combined_sig["strategies"] = combined_sig.get("strategies", 1) + 1
-                            
-                            if combined_sig is not None:
-                                # Add current price to signal
+                        # Combine signals: require majority consensus (both agree = 2/2 votes for signal=1)
+                        consensus_signal = 0
+                        if strategies_voted >= 2:
+                            # Require both strategies to signal 1 (BUY) for consensus
+                            if rsi_signal == 1 and macd_signal == 1:
+                                consensus_signal = 1
+                            elif rsi_signal == -1 and macd_signal == -1:
+                                consensus_signal = -1
+                        elif strategies_voted == 1:
+                            # Single strategy voting - use if strong signal
+                            if rsi_signal == 1 or macd_signal == 1:
+                                consensus_signal = 1  
+                            elif rsi_signal == -1 or macd_signal == -1:
+                                consensus_signal = -1
+                        
+                        if consensus_signal != 0:
+                                # Get current price - try multiple formats
+                                current_price = None
+                                
+                                # Try MultiIndex format: ('Close', symbol)
                                 if ("Close", symbol) in df_all.columns:
-                                    combined_sig["price"] = float(df_all[("Close", symbol)].iloc[-1])
-                                combined_sig = combined_sig.set_index("symbol", append=True)
-                                all_signals.append(combined_sig)
+                                    current_price = float(df_all[("Close", symbol)].iloc[-1])
+                                
+                                # Try string tuple format: "('Close', 'SYMBOL')"
+                                if current_price is None:
+                                    str_col = f"('Close', '{symbol}')"
+                                    if str_col in df_all.columns:
+                                        current_price = float(df_all[str_col].iloc[-1])
+                                
+                                # Try simple format: 'Close_SYMBOL'
+                                if current_price is None:
+                                    simple_col = f"Close_{symbol}"
+                                    if simple_col in df_all.columns:
+                                        current_price = float(df_all[simple_col].iloc[-1])
+                                
+                                # Fallback: use last value from symbol_df if available
+                                if current_price is None and "Close" in symbol_df.columns:
+                                    current_price = float(symbol_df["Close"].iloc[-1])
+                                
+                                # Only add to signals if we have a price
+                                if current_price is not None:
+                                    sig_row = pd.DataFrame({
+                                        'signal': [consensus_signal],
+                                        'price': [current_price],
+                                        'rsi_signal': [rsi_signal],
+                                        'macd_signal': [macd_signal],
+                                        'strategies': [strategies_voted],
+                                        'symbol': [symbol]
+                                    })
+                                    sig_row = sig_row.set_index('symbol', append=True)
+                                    all_signals.append(sig_row)
+                                    print(f"[SIGNAL] {symbol}: consensus={consensus_signal:+d} (RSI={rsi_signal:+d}, MACD={macd_signal:+d}) @ ${current_price:.2f}")
                             
                     except Exception as sym_e:
                         print(f"[WARN] Failed to process {symbol}: {sym_e}")
@@ -511,52 +616,105 @@ def run_live_paper_trading(
                 
                 for idx, row in latest_signals.iterrows():
                     symbol = idx[1] if isinstance(idx, tuple) else idx  # Extract symbol from MultiIndex
+                    signal_val = int(row.get("signal", 0))
                     
                     # Get current price from signal row (added during generation)
-                    if "price" in row.index:
-                        current_price = float(row["price"])
-                    else:
-                        print(f"[WARN] {symbol} missing price data for orders")
-                        continue
+                    try:
+                        if "price" in row.index or pd.notna(row.get("price")):
+                            current_price = float(row["price"]) if "price" in row.index else float(row.get("price", np.nan))
+                        else:
+                            # Try to get price from df_all directly
+                            if ("Close", symbol) in df_all.columns:
+                                current_price = float(df_all[("Close", symbol)].iloc[-1])
+                            elif f"('Close', '{symbol}')" in df_all.columns:
+                                current_price = float(df_all[f"('Close', '{symbol}')"].iloc[-1])
+                            elif f"Close_{symbol}" in df_all.columns:
+                                current_price = float(df_all[f"Close_{symbol}"].iloc[-1])
+                            else:
+                                continue  # Skip if no price found
+                    except (KeyError, ValueError, TypeError):
+                        continue  # Skip if price extraction fails
                     
-                    if row.get("signal", 0) == 1 and not pos_manager.get_position(symbol):
+                    if signal_val == 1 and not pos_manager.get_position(symbol):
                         # BUY signal - check if we can trade
                         if not pos_manager.can_trade():
                             print(f"[RISK] Cannot trade {symbol}: daily loss limit exceeded")
                             continue
                         
                         # Check volatility filter
-                        symbol_df = pd.DataFrame({
-                            'Close': [float(df_all[("Close", symbol)].iloc[i]) 
-                                     for i in range(min(20, len(df_all)))]
-                        })
-                        symbol_volatility = optimizer.calculate_volatility(symbol_df['Close'])
-                        
-                        if not pos_manager.can_trade_volatility(symbol, symbol_volatility, portfolio.equity):
-                            print(f"[RISK] {symbol} volatility {symbol_volatility:.1%} exceeds limits")
+                        try:
+                            # Try MultiIndex format first
+                            symbol_close = []
+                            if ("Close", symbol) in df_all.columns:
+                                symbol_close = [float(df_all[("Close", symbol)].iloc[i]) for i in range(min(20, len(df_all)))]
+                            # Try string tuple format
+                            elif f"('Close', '{symbol}')" in df_all.columns:
+                                symbol_close = [float(df_all[f"('Close', '{symbol}')"].iloc[i]) for i in range(min(20, len(df_all)))]
+                            # Try simple format
+                            elif f"Close_{symbol}" in df_all.columns:
+                                symbol_close = [float(df_all[f"Close_{symbol}"].iloc[i]) for i in range(min(20, len(df_all)))]
+                            
+                            if symbol_close:
+                                symbol_df = pd.DataFrame({'Close': symbol_close})
+                                symbol_volatility = optimizer.calculate_volatility(symbol_df['Close'])
+                                
+                                if not pos_manager.can_trade_volatility(symbol, symbol_volatility, portfolio.equity):
+                                    print(f"[RISK] {symbol} volatility {symbol_volatility:.1%} exceeds limits")
+                                    continue
+                        except Exception as vol_e:
+                            logger.debug(f"Volatility check failed for {symbol}: {vol_e}")
                             continue
                         
                         qty = max(1, int(portfolio.cash * 0.1 / current_price))  # 10% of cash
                         
                         # Calculate dynamic stops using ATR and volatility regime
-                        symbol_df_copy = pd.DataFrame({
-                            'High': [float(df_all[("High", symbol)].iloc[i]) for i in range(min(20, len(df_all)))],
-                            'Low': [float(df_all[("Low", symbol)].iloc[i]) for i in range(min(20, len(df_all)))],
-                            'Close': [float(df_all[("Close", symbol)].iloc[i]) for i in range(min(20, len(df_all)))],
-                        })
+                        try:
+                            symbol_high = []
+                            symbol_low = []
+                            
+                            # Try MultiIndex format
+                            if ("High", symbol) in df_all.columns and ("Low", symbol) in df_all.columns:
+                                symbol_high = [float(df_all[("High", symbol)].iloc[i]) for i in range(min(20, len(df_all)))]
+                                symbol_low = [float(df_all[("Low", symbol)].iloc[i]) for i in range(min(20, len(df_all)))]
+                            # Try string tuple format
+                            elif f"('High', '{symbol}')" in df_all.columns and f"('Low', '{symbol}')" in df_all.columns:
+                                symbol_high = [float(df_all[f"('High', '{symbol}')"].iloc[i]) for i in range(min(20, len(df_all)))]
+                                symbol_low = [float(df_all[f"('Low', '{symbol}')"].iloc[i]) for i in range(min(20, len(df_all)))]
+                            # Try simple format
+                            elif f"High_{symbol}" in df_all.columns and f"Low_{symbol}" in df_all.columns:
+                                symbol_high = [float(df_all[f"High_{symbol}"].iloc[i]) for i in range(min(20, len(df_all)))]
+                                symbol_low = [float(df_all[f"Low_{symbol}"].iloc[i]) for i in range(min(20, len(df_all)))]
+                            
+                            if symbol_high and symbol_low:
+                                symbol_df_copy = pd.DataFrame({
+                                    'High': symbol_high,
+                                    'Low': symbol_low,
+                                    'Close': symbol_close if symbol_close else [current_price] * len(symbol_high),
+                                })
+                            else:
+                                symbol_df_copy = None
+                        except Exception as atr_e:
+                            logger.debug(f"ATR extraction failed for {symbol}: {atr_e}")
+                            symbol_df_copy = None
                         
                         # Calculate comprehensive volatility metrics
-                        vol_metrics = VolatilityRegime.calculate_volatility_metrics(
-                            close_prices=symbol_df_copy['Close'],
-                            high_prices=symbol_df_copy['High'],
-                            low_prices=symbol_df_copy['Low'],
-                            period=14
-                        )
-                        vol_regime = vol_metrics['volatility_regime']
-                        
-                        # Calculate ATR-based stops
-                        atr = DynamicStops.calculate_atr(symbol_df_copy['High'], symbol_df_copy['Low'], symbol_df_copy['Close']).iloc[-1]
-                        stop_loss, take_profit = DynamicStops.get_volatility_adjusted_stops(current_price, atr)
+                        if symbol_df_copy is not None:
+                            vol_metrics = VolatilityRegime.calculate_volatility_metrics(
+                                close_prices=symbol_df_copy['Close'],
+                                high_prices=symbol_df_copy['High'],
+                                low_prices=symbol_df_copy['Low'],
+                                period=14
+                            )
+                            vol_regime = vol_metrics['volatility_regime']
+                            
+                            # Calculate ATR-based stops
+                            atr = DynamicStops.calculate_atr(symbol_df_copy['High'], symbol_df_copy['Low'], symbol_df_copy['Close']).iloc[-1]
+                            stop_loss, take_profit = DynamicStops.get_volatility_adjusted_stops(current_price, atr)
+                        else:
+                            # Fallback to simple fixed stops
+                            vol_regime = 'MEDIUM'
+                            stop_loss = current_price * 0.98  # 2% stop loss
+                            take_profit = current_price * 1.05  # 5% take profit
                         
                         # Apply regime-based adjustments to stops
                         stop_adjustment = VolatilityRegime.get_stop_loss_adjustment(vol_regime)
@@ -627,7 +785,13 @@ def run_live_paper_trading(
                         
                         # Place order using smart limit order logic for better execution
                         df_symbol = df_all[[col for col in df_all.columns if col[1] == symbol]] if symbol in df_all.columns.get_level_values(1) else None
-                        submit_smart_order(broker, symbol, "BUY", adjusted_qty, current_price, df_symbol)
+                        try:
+                            order_result = submit_smart_order(broker, symbol, "BUY", adjusted_qty, current_price, df_symbol)
+                            print(f"[ORDER] Submitted BUY order for {symbol}: {order_result}")
+                        except Exception as e:
+                            print(f"[ERROR] Failed to submit order for {symbol}: {e}")
+                            import traceback
+                            traceback.print_exc()
                         total_trades += 1
                         # Track which strategies contributed to this signal
                         strategy_names = []
@@ -648,11 +812,11 @@ def run_live_paper_trading(
                             total_trades += 1
                             
                             # Record trade for advanced risk tracking (Phase 13)
-                            pnl_pct = (pnl / (position.qty * position.avg_price)) if position.avg_price > 0 else 0
+                            pnl_pct = (pnl / (position.qty * position.entry_price)) if position.entry_price > 0 else 0
                             trade_result = TradeResult(
                                 symbol=symbol,
                                 side="SELL",
-                                entry_price=position.avg_price,
+                                entry_price=position.entry_price,
                                 exit_price=current_price,
                                 qty=position.qty,
                                 pnl=pnl,
@@ -665,7 +829,7 @@ def run_live_paper_trading(
                             trade_stats = TradeStats(
                                 symbol=symbol,
                                 side="SELL",
-                                entry_price=position.avg_price,
+                                entry_price=position.entry_price,
                                 exit_price=current_price,
                                 qty=position.qty,
                                 pnl=pnl,
@@ -681,7 +845,7 @@ def run_live_paper_trading(
                             notifications.notify_trade_exit(
                                 symbol=symbol,
                                 qty=position.qty,
-                                entry_price=position.avg_price,
+                                entry_price=position.entry_price,
                                 exit_price=current_price,
                                 pnl=pnl,
                                 pnl_pct=pnl_pct
@@ -696,7 +860,9 @@ def run_live_paper_trading(
                 traceback.print_exc()
             
             # Check portfolio drawdown and halt if needed
-            current_equity = portfolio.equity
+            # REFRESH equity right before check since orders may have been placed
+            account_info = broker.get_account_info()
+            current_equity = account_info['equity']
             drawdown_status = pos_manager.check_portfolio_drawdown(current_equity)
             
             if drawdown_status['halt_trading']:

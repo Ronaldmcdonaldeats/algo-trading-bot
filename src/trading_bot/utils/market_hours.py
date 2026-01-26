@@ -120,9 +120,12 @@ class MarketHours:
             open_dt = dt.replace(hour=9, minute=30, second=0, microsecond=0)
             open_dt = open_dt + __import__('datetime').timedelta(days=days_ahead)
         else:
-            # Market is closed during weekday, open at 9:30 AM tomorrow
+            # Market is closed during weekday
+            # Check if market opens today (before 9:30 AM)
             open_dt = dt.replace(hour=9, minute=30, second=0, microsecond=0)
-            open_dt = open_dt + __import__('datetime').timedelta(days=1)
+            if open_dt <= dt:
+                # Already past 9:30 AM today, so next open is tomorrow
+                open_dt = open_dt + __import__('datetime').timedelta(days=1)
         
         delta = (open_dt - dt).total_seconds() / 60
         return int(delta)
