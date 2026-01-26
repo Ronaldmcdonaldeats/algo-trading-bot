@@ -1,7 +1,9 @@
 risk:
-  max_risk_per_trade: 0.02
+  max_risk_per_trade: 0.05  # Increased from 0.02 (5% risk per trade)
   stop_loss_pct: 0.02
   take_profit_pct: 0.03
+  max_concurrent_positions: 50  # Allow up to 50 positions (all symbols)
+  max_sector_concentration: 0.30  # Max 30% in one sector
 
 portfolio:
   target_sector_count: 5

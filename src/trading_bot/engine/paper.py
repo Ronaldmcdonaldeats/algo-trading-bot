@@ -254,15 +254,15 @@ class PaperEngine:
         )
         self.position_monitoring_enabled = True
         
-        # Risk-Adjusted Position Sizer (Phase 25)
+        # Risk-Adjusted Position Sizer (Phase 25) - SCALED UP
         self.risk_sizer = RiskAdjustedSizer(
-            base_risk_pct=0.01,  # 1% risk per trade
-            max_position_pct=0.15,  # Max 15% of portfolio per trade
+            base_risk_pct=0.02,  # 2% risk per trade (increased from 1%)
+            max_position_pct=0.25,  # Max 25% of portfolio per trade (increased from 15%)
             min_position_pct=0.001,  # Min 0.1% of portfolio per trade
             volatility_scale=1.0,  # Scale of volatility impact
             drawdown_scale=1.0,  # Scale of drawdown impact
-            win_streak_boost=1.2,  # Up to 20% boost on hot streak
-            loss_streak_reduction=0.7,  # Down to 70% on cold streak
+            win_streak_boost=1.3,  # Up to 30% boost on hot streak (increased from 20%)
+            loss_streak_reduction=0.8,  # Down to 80% on cold streak (less reduction)
             hot_streak_min=3,  # 3+ consecutive wins for boost
             cold_streak_min=2,  # 2+ consecutive losses for reduction
         )
@@ -894,15 +894,15 @@ class PaperEngine:
                     max_risk=float(self.app_cfg.risk.max_risk_per_trade),
                 )
                 
-                # Regime-aware position sizing: adjust for market conditions
+                # Regime-aware position sizing: adjust for market conditions (scaled up)
                 regime = regime_by_symbol.get(sym, {}).get("regime", "unknown")
                 regime_multiplier = 1.0
                 if regime in ["trending_up", "trending_down"]:
-                    regime_multiplier = 1.2  # 20% larger in trending markets
+                    regime_multiplier = 1.5  # 50% larger in trending markets (increased from 1.2)
                 elif regime == "ranging":
-                    regime_multiplier = 0.8  # 20% smaller in ranging (chop)
+                    regime_multiplier = 1.0  # Normal sizing in ranging (increased from 0.8)
                 elif regime == "volatile":
-                    regime_multiplier = 0.7  # 30% smaller in volatile (protect capital)
+                    regime_multiplier = 0.9  # Only 10% smaller in volatile (increased from 0.7)
                 
                 shares = int(shares * regime_multiplier)
                 shares = min(shares, int(self.broker.portfolio().cash // px))
