@@ -433,12 +433,29 @@ class TradingBotAPI:
         logger.info("[Trading Loop] Starting background trading loop")
         
         try:
-            # Configure symbols and parameters
-            symbols = ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN', 'NVDA', 'META', 'NFLX', 'AMD', 'CRM']
+            # Configure symbols and parameters - 50+ liquid stocks across sectors
+            symbols = [
+                # Tech Giants
+                'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'AVGO', 'NFLX', 'CRM',
+                # Cloud/Software
+                'ADBE', 'CSCO', 'INTC', 'AMD', 'QUALCOMM', 'AMAT', 'LRCX', 'SNPS', 'CDNS', 'MU',
+                # Financial Tech
+                'PYPL', 'SQ', 'COIN', 'HOOD', 'AXP', 'V', 'MA', 'JPM', 'BAC', 'GS',
+                # Healthcare/Biotech
+                'JNJ', 'UNH', 'PFIZER', 'MRNA', 'GILD', 'VRTX', 'CRSP', 'ILMN', 'DXCM', 'ELV',
+                # Consumer/Retail
+                'AMZN', 'TSLA', 'WMT', 'TGT', 'ULTA', 'NKE', 'RH', 'LOW', 'HD', 'COST',
+                # Energy/Utilities
+                'XOM', 'CVX', 'COP', 'SLB', 'EOG', 'MPC', 'PSX', 'VLO', 'NEE', 'DUK'
+            ]
+            # Remove duplicates while preserving order
+            symbols = list(dict.fromkeys(symbols))
+            symbols = symbols[:50]  # Limit to 50
+            
             config_path = "configs/default.yaml"
             db_path = "trading_bot.db"
             
-            logger.info(f"[Trading Loop] Configuration loaded. Symbols: {symbols}")
+            logger.info(f"[Trading Loop] Configuration loaded. Symbols ({len(symbols)}): {symbols}")
             logger.info(f"[Trading Loop] Config path: {config_path}, DB path: {db_path}")
             
             # Create PaperEngineConfig
@@ -451,7 +468,7 @@ class TradingBotAPI:
                 start_cash=100000.0,
                 sleep_seconds=30,  # Check every 30 seconds
                 iterations=0,  # Run forever
-                strategy_mode='ensemble',
+                strategy_mode='ultimate_hybrid',
                 enable_learning=True,
                 tune_weekly=True,
                 commission_bps=1.0,
