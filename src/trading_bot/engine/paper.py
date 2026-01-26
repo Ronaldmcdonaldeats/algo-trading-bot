@@ -4,7 +4,7 @@ import json
 import time
 import uuid
 from collections.abc import Iterator
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -796,10 +796,10 @@ class PaperEngine:
                     if not ml_agrees and dec.confidence > 0.6:
                         # ML disagrees with high-confidence ensemble signal
                         # Reduce confidence as a caution
-                        dec.confidence *= 0.7
+                        dec = replace(dec, confidence=dec.confidence * 0.7)
                     elif ml_agrees:
                         # ML agrees: boost confidence
-                        dec.confidence = min(1.0, dec.confidence * 1.1)
+                        dec = replace(dec, confidence=min(1.0, dec.confidence * 1.1))
                     
                     # Add ML explanation
                     if "ml" not in dec.explanations:
@@ -862,15 +862,14 @@ class PaperEngine:
                 # For strong signals, use MTF as a boost
                 if dec.confidence < 0.6 and not mtf_analysis.is_confirmed:
                     # Weak signal and not confirmed = skip
-                    dec.confidence = 0.0
-                    dec.signal = 0
+                    dec = replace(dec, confidence=0.0, signal=0)
                     confirmed_signal = False
                 elif mtf_analysis.is_confirmed:
                     # MTF confirmed: boost confidence
-                    dec.confidence = min(1.0, dec.confidence * (1.0 + mtf_analysis.alignment_strength * 0.2))
+                    dec = replace(dec, confidence=min(1.0, dec.confidence * (1.0 + mtf_analysis.alignment_strength * 0.2)))
                 elif mtf_analysis.correlation_warning:
                     # Too many correlated signals: reduce confidence
-                    dec.confidence *= 0.8
+                    dec = replace(dec, confidence=dec.confidence * 0.8)
 
             decisions[sym] = dec
             signals[sym] = int(dec.signal)
