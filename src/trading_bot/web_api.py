@@ -482,13 +482,15 @@ class TradingBotAPI:
                     for fill in update.fills:
                         logger.info(f"[Trade] FILL: {fill.symbol} {fill.quantity} @ {fill.price}")
                 
-                if update.orders:
-                    for order in update.orders:
-                        logger.info(f"[Order] {order.symbol}: {order.qty} @ {order.limit_price if order.limit_price else 'market'}")
+                if update.rejections:
+                    for rejection in update.rejections:
+                        logger.warning(f"[Order Rejected] {rejection.order_id}: {rejection.reason}")
                 
                 # Log key metrics every 10 iterations
                 if iteration % 10 == 0:
-                    logger.info(f"[Trading Loop] Iteration {iteration} | Equity: ${update.cash:.2f} | Positions: {len(update.positions)}")
+                    portfolio_value = update.portfolio.equity if update.portfolio else 0
+                    num_positions = len(update.portfolio.positions) if update.portfolio and update.portfolio.positions else 0
+                    logger.info(f"[Trading Loop] Iteration {iteration} | Equity: ${portfolio_value:.2f} | Positions: {num_positions} | Signals: {len(update.signals) if hasattr(update, 'signals') else 0}")
                     
         except Exception as e:
             logger.error(f"[Trading Loop] Error in trading loop: {e}", exc_info=True)
