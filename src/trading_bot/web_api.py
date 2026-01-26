@@ -14,6 +14,10 @@ import logging
 import os
 from collections import deque
 import time
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from trading_bot.integrated_bot import IntegratedTradingBot
 from trading_bot.trading.trade_journal import TradeJournal
