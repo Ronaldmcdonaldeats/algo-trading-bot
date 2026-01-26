@@ -64,8 +64,7 @@ try:
             for fill in update.fills:
                 logger.info(f"    - {fill.symbol}: {fill.quantity} @ ${fill.price}")
         
-        portfolio_value = update.portfolio.equity if update.portfolio else 0
-        logger.info(f"  Portfolio Value: ${portfolio_value:.2f}")
+        logger.info(f"  Current P&L: ${update.current_pnl:.2f}")
         logger.info(f"  Sharpe Ratio: {update.sharpe_ratio:.4f}")
         logger.info(f"  Max Drawdown: {update.max_drawdown_pct:.2f}%")
         logger.info(f"  Win Rate: {update.win_rate:.2f}")
