@@ -20,8 +20,9 @@ from trading_bot.trading.trade_journal import TradeJournal
 from trading_bot.risk.drawdown_recovery import DrawdownRecoveryManager
 from trading_bot.learn.auto_tuning import AutoTuningSystem
 from trading_bot.options.strategies import GreeksCalculator, OptionType, IncomeStrategy
-from trading_bot.engine.paper import PaperEngine, PaperEngineConfig
+from trading_bot.engine.paper import PaperEngineConfig, run_paper_engine
 from trading_bot.config import load_config
+from trading_bot.data.providers import AlpacaProvider
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -428,50 +429,74 @@ class TradingBotAPI:
         logger.info("[Trading Loop] Starting background trading loop")
         
         try:
-            # Try to initialize PaperEngine for live trading
+            # Load configuration
             try:
-                config = load_config()
-                engine_config = PaperEngineConfig(
-                    config_path="configs/default.yaml",
-                    db_path="trade_bot.db",
-                    symbols=config.get('symbols', ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN']),
-                    period="6mo",
-                    interval="1d",
-                    start_cash=config.get('starting_equity', 100000),
-                    sleep_seconds=30,  # Check every 30 seconds
-                    iterations=0  # Run forever
-                )
-                
-                engine = PaperEngine(config=engine_config)
-                logger.info("[Trading Loop] PaperEngine initialized successfully")
-                
-                # Run the engine's main loop
-                for _ in engine.run():
-                    if not self.trading_active:
-                        logger.info("[Trading Loop] Trading loop stopped by user")
-                        break
-                    time.sleep(1)  # Small delay between iterations
-                    
+                app_config = load_config()
             except Exception as e:
-                logger.warning(f"[Trading Loop] PaperEngine initialization failed: {e}")
-                logger.info("[Trading Loop] Falling back to simple trading loop")
+                logger.error(f"[Trading Loop] Failed to load config: {e}")
+                app_config = {}
+            
+            # Configure symbols and parameters
+            symbols = app_config.get('symbols', ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN', 'NVDA', 'META', 'NFLX'])
+            config_path = app_config.get('config_path', 'configs/default.yaml')
+            
+            logger.info(f"[Trading Loop] Configuration loaded. Symbols: {symbols}")
+            
+            # Create PaperEngineConfig
+            engine_config = PaperEngineConfig(
+                config_path=config_path,
+                db_path="trading_bot.db",
+                symbols=symbols,
+                period="6mo",
+                interval="1d",
+                start_cash=float(app_config.get('starting_equity', 100000)),
+                sleep_seconds=30,  # Check every 30 seconds
+                iterations=0,  # Run forever
+                strategy_mode='ensemble',
+                enable_learning=True,
+                tune_weekly=True,
+                commission_bps=1.0,
+                slippage_bps=0.5,
+                min_fee=0.0,
+                learning_eta=0.3,
+                memory_mode=False,
+            )
+            
+            logger.info("[Trading Loop] PaperEngineConfig created successfully")
+            logger.info(f"[Trading Loop] Starting trading loop with {len(symbols)} symbols")
+            
+            # Initialize Alpaca data provider for live data
+            try:
+                provider = AlpacaProvider()
+                logger.info("[Trading Loop] Using AlpacaProvider for market data")
+            except Exception as e:
+                logger.warning(f"[Trading Loop] AlpacaProvider failed, falling back to mock data: {e}")
+                provider = None
+            
+            # Run the paper engine
+            iteration = 0
+            for update in run_paper_engine(cfg=engine_config, provider=provider):
+                iteration += 1
                 
-                # Fallback: Simple trading loop that checks is_running flag
-                iteration = 0
-                while self.trading_active:
-                    if self.is_running:
-                        iteration += 1
-                        logger.info(f"[Trading Loop] Iteration {iteration} - Bot is running")
-                        # In a real scenario, here we would:
-                        # 1. Fetch market data
-                        # 2. Generate trading signals
-                        # 3. Execute trades
-                        # For now, just log that the loop is active
-                    
-                    time.sleep(30)  # Check every 30 seconds
+                if not self.trading_active:
+                    logger.info("[Trading Loop] Trading loop stopped by user")
+                    break
+                
+                # Log trading activity
+                if update.fills:
+                    for fill in update.fills:
+                        logger.info(f"[Trade] FILL: {fill.symbol} {fill.quantity} @ {fill.price}")
+                
+                if update.orders:
+                    for order in update.orders:
+                        logger.info(f"[Order] {order.symbol}: {order.qty} @ {order.limit_price if order.limit_price else 'market'}")
+                
+                # Log key metrics every 10 iterations
+                if iteration % 10 == 0:
+                    logger.info(f"[Trading Loop] Iteration {iteration} | Equity: ${update.cash:.2f} | Positions: {len(update.positions)}")
                     
         except Exception as e:
-            logger.error(f"[Trading Loop] Unexpected error: {e}", exc_info=True)
+            logger.error(f"[Trading Loop] Error in trading loop: {e}", exc_info=True)
         finally:
             logger.info("[Trading Loop] Trading loop ended")
     
