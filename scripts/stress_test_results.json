@@ -1,0 +1,70 @@
+{
+  "NORMAL MARKET": {
+    "BUY & HOLD (Baseline)": {
+      "return": 781.3854860631567,
+      "max_drawdown": -65.7767928831639,
+      "avg_drawdown": -48.35582718842706
+    },
+    "Simple Momentum": {
+      "return": 650.09730319106,
+      "max_drawdown": -65.76820575569744,
+      "avg_drawdown": -34.97269166489075
+    },
+    "Volatility-Aware": {
+      "return": 775.2578231691691,
+      "max_drawdown": -73.67783205768748,
+      "avg_drawdown": -34.94995987565509
+    }
+  },
+  "GRADUAL DECLINE (-30%)": {
+    "BUY & HOLD (Baseline)": {
+      "return": 781.3854860631567,
+      "max_drawdown": -65.7767928831639,
+      "avg_drawdown": -48.35582718842706
+    },
+    "Simple Momentum": {
+      "return": 641.715001610624,
+      "max_drawdown": -65.76820575569744,
+      "avg_drawdown": -34.97269166489075
+    },
+    "Volatility-Aware": {
+      "return": 704.2346398657112,
+      "max_drawdown": -73.67783205768748,
+      "avg_drawdown": -34.94995987565509
+    }
+  },
+  "SUDDEN CRASH (-20%)": {
+    "BUY & HOLD (Baseline)": {
+      "return": 781.3854860631567,
+      "max_drawdown": -65.7767928831639,
+      "avg_drawdown": -48.35582718842706
+    },
+    "Simple Momentum": {
+      "return": 789.2287468923302,
+      "max_drawdown": -65.76820575569744,
+      "avg_drawdown": -34.97269166489075
+    },
+    "Volatility-Aware": {
+      "return": 923.1931528547791,
+      "max_drawdown": -73.67783205768748,
+      "avg_drawdown": -34.94995987565509
+    }
+  },
+  "HIGH VOLATILITY + BAD NEWS": {
+    "BUY & HOLD (Baseline)": {
+      "return": 648.1416807324811,
+      "max_drawdown": -65.7767928831639,
+      "avg_drawdown": -48.35582718842706
+    },
+    "Simple Momentum": {
+      "return": -84.71144899218619,
+      "max_drawdown": -97.99953051250803,
+      "avg_drawdown": -85.63769569511365
+    },
+    "Volatility-Aware": {
+      "return": -73.51859507054785,
+      "max_drawdown": -98.09244515767745,
+      "avg_drawdown": -74.53887238804512
+    }
+  }
+}

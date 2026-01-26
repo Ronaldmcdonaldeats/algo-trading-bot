@@ -121,9 +121,25 @@ class BacktestEngine:
         )
 
     def _build_strategies(self) -> Dict[str, Any]:
-        """Build strategy instances from config."""
+        """Build strategy instances from config or strategy_mode."""
+        from scripts.strategies.factory import StrategyFactory
+        
         strategies = {}
+        strategy_mode = self.cfg.strategy_mode
 
+        # If using a single custom strategy via factory
+        if strategy_mode and strategy_mode not in ["ensemble"]:
+            try:
+                factory = StrategyFactory()
+                strategy = factory.create(strategy_mode)
+                if strategy:
+                    strategies[strategy_mode] = strategy
+                    logger.info(f"Loaded strategy: {strategy_mode}")
+                    return strategies
+            except Exception as e:
+                logger.warning(f"Failed to load {strategy_mode}: {e}, using ensemble mode")
+
+        # Default ensemble mode with multiple strategies
         rsi_params = self.app_cfg.strategy.raw.get("mean_reversion_rsi", {})
         strategies["mean_reversion_rsi"] = RsiMeanReversionStrategy(
             rsi_period=int(rsi_params.get("rsi_period", 14)),

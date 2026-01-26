@@ -183,8 +183,8 @@ def build_parser() -> argparse.ArgumentParser:
     bt.add_argument("--min-fee", type=float, default=0.0)
     bt.add_argument(
         "--strategy",
-        default="ensemble",
-        choices=["ensemble", "mean_reversion_rsi", "momentum_macd_volume", "breakout_atr"],
+        default="ultimate_hybrid",
+        choices=["ensemble", "mean_reversion_rsi", "momentum_macd_volume", "breakout_atr", "ultimate_hybrid"],
         help="Trading strategy to backtest"
     )
 

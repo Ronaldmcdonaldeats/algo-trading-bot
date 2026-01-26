@@ -1,0 +1,104 @@
+{
+  "adaptive_ma": {
+    "return": -0.3130561905607259,
+    "outperform": -0.41405619056072596,
+    "beats_sp": 0,
+    "sharpe": -4.877900147675268
+  },
+  "breakout": {
+    "return": 0.0,
+    "outperform": -0.101,
+    "beats_sp": 0,
+    "sharpe": -10.0
+  },
+  "composite_quality": {
+    "return": 0.10680632262996478,
+    "outperform": 0.0058063226299647774,
+    "beats_sp": 4,
+    "sharpe": 1.619675030368279
+  },
+  "enhanced_ensemble": {
+    "return": 0.18574882177133242,
+    "outperform": 0.08474882177133242,
+    "beats_sp": 7,
+    "sharpe": 4.13648154008303
+  },
+  "hybrid": {
+    "return": 0.10619346467075588,
+    "outperform": 0.005193464670755876,
+    "beats_sp": 3,
+    "sharpe": 1.8584437417328452
+  },
+  "ichimoku": {
+    "return": -0.20443546024194784,
+    "outperform": -0.30543546024194784,
+    "beats_sp": 0,
+    "sharpe": -2.545051186796514
+  },
+  "macd": {
+    "return": 0.0,
+    "outperform": -0.101,
+    "beats_sp": 0,
+    "sharpe": -10.0
+  },
+  "mean_reversion": {
+    "return": 1.832553264456045,
+    "outperform": 1.731553264456045,
+    "beats_sp": 8,
+    "sharpe": 6.063753478934523
+  },
+  "momentum": {
+    "return": 8.389661557917302,
+    "outperform": 8.288661557917301,
+    "beats_sp": 8,
+    "sharpe": 3.430872736294195
+  },
+  "risk_adjusted_trend": {
+    "return": 0.2174034645962526,
+    "outperform": 0.11640346459625259,
+    "beats_sp": 7,
+    "sharpe": 4.171409753196767
+  },
+  "rsi": {
+    "return": 1.1740640933730753,
+    "outperform": 1.0730640933730753,
+    "beats_sp": 8,
+    "sharpe": 4.124883892222561
+  },
+  "stochastic": {
+    "return": -0.7241197412334657,
+    "outperform": -0.8251197412334657,
+    "beats_sp": 0,
+    "sharpe": -33.71590948685696
+  },
+  "support_resistance": {
+    "return": -0.1858958283673295,
+    "outperform": -0.2868958283673295,
+    "beats_sp": 0,
+    "sharpe": -5.540999993170995
+  },
+  "trend_following": {
+    "return": 0.03857037697270613,
+    "outperform": -0.06242962302729388,
+    "beats_sp": 1,
+    "sharpe": 0.6103867766638104
+  },
+  "ultra_ensemble": {
+    "return": 0.15460040353797552,
+    "outperform": 0.053600403537975516,
+    "beats_sp": 6,
+    "sharpe": 2.1523083207135274
+  },
+  "volatility": {
+    "return": 1.2705968419326907,
+    "outperform": 1.1695968419326908,
+    "beats_sp": 8,
+    "sharpe": 8.16537060492091
+  },
+  "volatility_adaptive": {
+    "return": 0.3759058905500832,
+    "outperform": 0.2749058905500832,
+    "beats_sp": 7,
+    "sharpe": 4.105051534694586
+  }
+}

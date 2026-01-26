@@ -14,7 +14,15 @@ from .implementations import (
     AdaptiveMovingAverageStrategy,
     CompositeQualityStrategy,
     VolatilityAdaptiveStrategy,
-    EnhancedEnsembleStrategy
+    EnhancedEnsembleStrategy,
+    BreakoutStrategy,
+    MacdStrategy,
+    StochasticStrategy,
+    SupportResistanceStrategy,
+    IchimokuStrategy,
+    PremiumHybridStrategy,
+    SmartHybridStrategy,
+    UltimateHybridStrategy
 )
 
 
@@ -34,6 +42,14 @@ class StrategyFactory:
         'composite_quality': CompositeQualityStrategy,
         'volatility_adaptive': VolatilityAdaptiveStrategy,
         'enhanced_ensemble': EnhancedEnsembleStrategy,
+        'breakout': BreakoutStrategy,
+        'macd': MacdStrategy,
+        'stochastic': StochasticStrategy,
+        'support_resistance': SupportResistanceStrategy,
+        'ichimoku': IchimokuStrategy,
+        'premium_hybrid': PremiumHybridStrategy,
+        'smart_hybrid': SmartHybridStrategy,
+        'ultimate_hybrid': UltimateHybridStrategy,
     }
     
     @classmethod

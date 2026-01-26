@@ -1,0 +1,34 @@
+{
+  "volatility_adaptive": {
+    "strategy": "volatility_adaptive",
+    "avg_return": 0.0,
+    "outperformance": -0.101,
+    "beats_spy": 0,
+    "symbol_count": 35,
+    "status": "OK"
+  },
+  "enhanced_ensemble": {
+    "strategy": "enhanced_ensemble",
+    "avg_return": 0.0,
+    "outperformance": -0.101,
+    "beats_spy": 0,
+    "symbol_count": 35,
+    "status": "OK"
+  },
+  "premium_hybrid": {
+    "strategy": "premium_hybrid",
+    "avg_return": 0.0,
+    "outperformance": -0.101,
+    "beats_spy": 0,
+    "symbol_count": 35,
+    "status": "OK"
+  },
+  "smart_hybrid": {
+    "strategy": "smart_hybrid",
+    "avg_return": 0.0,
+    "outperformance": -0.101,
+    "beats_spy": 0,
+    "symbol_count": 35,
+    "status": "OK"
+  }
+}

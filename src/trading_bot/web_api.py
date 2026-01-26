@@ -37,13 +37,18 @@ class WebSocketLogHandler(logging.Handler):
             log_entry = self.format(record)
             log_level = record.levelname.lower()
             self.logs.append({'message': log_entry, 'level': log_level})
-            self.socketio.emit('log', {
-                'message': log_entry,
-                'level': log_level,
-                'timestamp': datetime.now().isoformat()
-            }, broadcast=True)
+            # Only emit if we have an active app context
+            try:
+                self.socketio.emit('log', {
+                    'message': log_entry,
+                    'level': log_level,
+                    'timestamp': datetime.now().isoformat()
+                }, broadcast=True, skip_sid=True)
+            except (RuntimeError, Exception):
+                # App context not available, skip websocket emit
+                pass
         except Exception:
-            self.handleError(record)
+            pass
 
 
 class TradingBotAPI:
@@ -153,14 +158,23 @@ class TradingBotAPI:
                 result = self.bot.auto_tuner.optimize_parameters(
                     bounds=data.get('bounds', {})
                 )
+                # Extract score - handle various return types
+                score = None
+                if result and hasattr(result, 'score'):
+                    score_val = result.score() if callable(result.score) else result.score
+                    score = float(score_val) if score_val is not None else None
+                elif isinstance(result, dict) and 'score' in result:
+                    score = float(result['score']) if result['score'] is not None else None
+                
                 return jsonify({
                     'status': 'success',
                     'result': {
-                        'params': result.params,
-                        'score': result.score()
+                        'params': result.params if hasattr(result, 'params') else {},
+                        'score': score
                     }
                 })
             except Exception as e:
+                logger.error(f"Optimization error: {e}")
                 return jsonify({'status': 'error', 'message': str(e)}), 400
         
         @self.app.route('/api/options/covered-calls', methods=['GET'])
@@ -229,6 +243,66 @@ class TradingBotAPI:
             self.is_running = False
             self.socketio.emit('bot_status', {'status': 'stopped'}, broadcast=True)
             return jsonify({'status': 'stopped'})
+        
+        @self.app.route('/api/backtest', methods=['POST'])
+        def run_backtest():
+            """Run backtest with provided parameters"""
+            try:
+                from trading_bot.backtest.engine import run_backtest
+                
+                data = request.get_json()
+                symbols = data.get('symbols', 'AAPL,MSFT,GOOGL').split(',')
+                symbols = [s.strip().upper() for s in symbols if s.strip()]
+                period = data.get('period', '1y')
+                strategy = data.get('strategy', 'ultimate_hybrid')
+                start_cash = float(data.get('start_cash', 100000))
+                
+                if not symbols:
+                    return jsonify({'error': 'No symbols provided'}), 400
+                
+                logger.info(f"[BACKTEST] Starting backtest: {symbols}, {period}, strategy={strategy}")
+                self.socketio.emit('backtest_status', {
+                    'status': 'running',
+                    'message': f'Backtesting {len(symbols)} symbols with {strategy}...'
+                }, broadcast=True)
+                
+                result = run_backtest(
+                    config_path=None,
+                    symbols=symbols,
+                    period=period,
+                    strategy_mode=strategy,
+                    start_cash=start_cash,
+                )
+                
+                backtest_data = {
+                    'total_return': result.total_return,
+                    'sharpe': result.sharpe,
+                    'max_drawdown': result.max_drawdown,
+                    'win_rate': result.win_rate,
+                    'num_trades': result.num_trades,
+                    'avg_win': result.avg_win,
+                    'avg_loss': result.avg_loss,
+                    'profit_factor': result.profit_factor,
+                    'calmar': result.calmar,
+                    'final_equity': result.final_equity,
+                }
+                
+                self.socketio.emit('backtest_complete', {
+                    'status': 'completed',
+                    'results': backtest_data
+                }, broadcast=True)
+                
+                logger.info(f"[BACKTEST] Complete: {result.total_return:.2f}% return")
+                return jsonify({'status': 'success', 'results': backtest_data})
+            
+            except Exception as e:
+                error_msg = f"Backtest failed: {str(e)}"
+                logger.error(f"[BACKTEST] {error_msg}")
+                self.socketio.emit('backtest_error', {
+                    'status': 'error',
+                    'message': error_msg
+                }, broadcast=True)
+                return jsonify({'error': error_msg}), 500
     
     def _setup_websocket(self):
         """Setup WebSocket connections"""
@@ -270,3 +344,9 @@ def create_app(config_path=None):
     """Factory function to create the Flask app"""
     api = TradingBotAPI(config_path=config_path)
     return api.app, api.socketio, api.bot
+
+
+# Create the app instance for gunicorn
+api_instance = TradingBotAPI()
+app = api_instance.app
+socketio = api_instance.socketio

@@ -46,4 +46,4 @@ HEALTHCHECK --interval=10s --timeout=3s --retries=2 --start-period=5s \
     CMD curl -f http://localhost:5000/health || exit 1
 
 # Production WSGI server command - optimized for startup
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--worker-class", "sync", "--timeout", "30", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "warning"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--worker-class", "sync", "--timeout", "30", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "warning", "trading_bot.web_api:app"]

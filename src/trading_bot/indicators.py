@@ -61,7 +61,7 @@ try:
     
     _rsi_numba_fn = _rsi_numba_impl
     _sma_numba_fn = _sma_numba_impl
-    logger.info("✓ Numba JIT compilation enabled for indicators (50-100x faster)")
+    logger.info("[OK] Numba JIT compilation enabled for indicators (50-100x faster)")
     
 except ImportError:
     logger.debug("Numba not available. Run: pip install numba")
