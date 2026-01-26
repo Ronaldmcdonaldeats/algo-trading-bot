@@ -454,10 +454,11 @@ class TradingBotAPI:
             db_path = "trading_bot.db"
             
             # Load config to get live_trading setting
-            from trading_bot.configs import load_config
-            app_config = load_config(config_path)
-            live_trading = app_config.get('trading', {}).get('live_trading', False)
-            paper_mode = app_config.get('trading', {}).get('paper_mode', True)
+            import yaml
+            from pathlib import Path
+            config_yaml = yaml.safe_load(Path(config_path).read_text())
+            live_trading = config_yaml.get('trading', {}).get('live_trading', False)
+            paper_mode = config_yaml.get('trading', {}).get('paper_mode', True)
             
             # Clean up database to avoid conflicts
             try:
