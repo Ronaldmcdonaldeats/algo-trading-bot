@@ -9,7 +9,12 @@ from .implementations import (
     RSIStrategy,
     MomentumStrategy,
     VolatilityStrategy,
-    HybridStrategy
+    HybridStrategy,
+    RiskAdjustedTrendStrategy,
+    AdaptiveMovingAverageStrategy,
+    CompositeQualityStrategy,
+    VolatilityAdaptiveStrategy,
+    EnhancedEnsembleStrategy
 )
 
 
@@ -24,6 +29,11 @@ class StrategyFactory:
         'momentum': MomentumStrategy,
         'volatility': VolatilityStrategy,
         'hybrid': HybridStrategy,
+        'risk_adjusted_trend': RiskAdjustedTrendStrategy,
+        'adaptive_ma': AdaptiveMovingAverageStrategy,
+        'composite_quality': CompositeQualityStrategy,
+        'volatility_adaptive': VolatilityAdaptiveStrategy,
+        'enhanced_ensemble': EnhancedEnsembleStrategy,
     }
     
     @classmethod
