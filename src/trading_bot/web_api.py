@@ -535,7 +535,40 @@ class TradingBotAPI:
                     logger.info(f"[Trading Loop] Iteration {iteration} | Equity: ${portfolio_value:.2f} | Positions: {num_positions} | Signals: {len(update.signals) if hasattr(update, 'signals') else 0}")
                     
         except Exception as e:
-            logger.error(f"[Trading Loop] Error in trading loop: {e}", exc_info=True)
+            error_msg = str(e)
+            # If Alpaca data fetch failed, retry with MockDataProvider
+            if "No data returned from Alpaca" in error_msg and isinstance(provider, AlpacaProvider):
+                logger.warning(f"[Trading Loop] AlpacaProvider failed: {error_msg}. Retrying with MockDataProvider...")
+                provider = MockDataProvider()
+                
+                # Retry the trading loop with MockDataProvider
+                iteration = 0
+                try:
+                    for update in run_paper_engine(cfg=engine_config, provider=provider):
+                        iteration += 1
+                        
+                        if not self.trading_active:
+                            logger.info("[Trading Loop] Trading loop stopped by user")
+                            break
+                        
+                        # Log trading activity
+                        if update.fills:
+                            for fill in update.fills:
+                                logger.info(f"[Trade] FILL: {fill.symbol} {fill.quantity} @ {fill.price}")
+                        
+                        if update.rejections:
+                            for rejection in update.rejections:
+                                logger.warning(f"[Order Rejected] {rejection.order_id}: {rejection.reason}")
+                        
+                        # Log key metrics every 10 iterations
+                        if iteration % 10 == 0:
+                            portfolio_value = update.portfolio.equity if update.portfolio else 0
+                            num_positions = len(update.portfolio.positions) if update.portfolio and update.portfolio.positions else 0
+                            logger.info(f"[Trading Loop] Iteration {iteration} | Equity: ${portfolio_value:.2f} | Positions: {num_positions} | Signals: {len(update.signals) if hasattr(update, 'signals') else 0}")
+                except Exception as retry_error:
+                    logger.error(f"[Trading Loop] Error in fallback trading loop: {retry_error}", exc_info=True)
+            else:
+                logger.error(f"[Trading Loop] Error in trading loop: {e}", exc_info=True)
         finally:
             logger.info("[Trading Loop] Trading loop ended")
     
