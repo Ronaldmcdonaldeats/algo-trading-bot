@@ -1069,10 +1069,13 @@ class PaperEngine:
                   f"Vol: {metrics.portfolio_volatility:.4f}", flush=True)
         
         # Print Momentum Scaling Status (Phase 20)
-        if self.momentum_scaling_enabled:
-            avg_momentum = np.mean([self.momentum_scaler.momentum_strength.get(sym, 0.5) for sym in prices.keys()])
-            strong_momentum = sum(1 for sym in prices.keys() if self.momentum_scaler.momentum_strength.get(sym, 0.5) > 0.7)
-            print(f"   [MOMENTUM] Avg strength: {avg_momentum:.2f} | Strong momentum: {strong_momentum} symbols", flush=True)
+        if self.momentum_scaling_enabled and hasattr(self.momentum_scaler, 'metrics') and self.momentum_scaler.metrics:
+            momentum_values = [self.momentum_scaler.metrics.get(sym, None) for sym in prices.keys()]
+            momentum_values = [m.momentum_strength for m in momentum_values if m is not None]
+            if momentum_values:
+                avg_momentum = np.mean(momentum_values)
+                strong_momentum = sum(1 for m in momentum_values if m > 0.7)
+                print(f"   [MOMENTUM] Avg strength: {avg_momentum:.2f} | Strong momentum: {strong_momentum} symbols", flush=True)
         
         # Print Options Hedging Status (Phase 21)
         if self.hedging_enabled:
