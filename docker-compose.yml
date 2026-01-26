@@ -20,7 +20,7 @@ services:
     command: gunicorn --bind 0.0.0.0:5000 --workers 1 --worker-class sync --timeout 300 trading_bot.web_api:app
     restart: unless-stopped
   
-  # Auto-trading bot service
+  # Auto-trading bot service (uses web_api with PaperEngine for live Alpaca trading)
   bot:
     build:
       context: .
@@ -30,12 +30,12 @@ services:
       - .env
     environment:
       - PYTHONUNBUFFERED=1
-      - BOT_MODE=auto
+      - BOT_MODE=web_api
     volumes:
       - ./configs:/app/configs
       - ./logs:/app/logs
       - ./data:/app/data
-    command: python -m trading_bot auto --no-ui --config /app/configs/default.yaml --memory-mode
+    command: gunicorn --bind 0.0.0.0:5001 --workers 1 --worker-class sync --timeout 300 trading_bot.web_api:app
     restart: unless-stopped
     depends_on:
       - dashboard
