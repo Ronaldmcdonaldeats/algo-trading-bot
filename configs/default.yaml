@@ -1,6 +1,6 @@
 trading:
   live_trading: true  # Set to true for live trading on Alpaca, false for paper trading
-  paper_mode: false   # Paper trading mode on Alpaca (practice with real data, fake money)
+  paper_mode: true    # Paper trading mode on Alpaca (practice with real data, fake money)
 
 risk:
   max_risk_per_trade: 0.05  # Increased from 0.02 (5% risk per trade)
