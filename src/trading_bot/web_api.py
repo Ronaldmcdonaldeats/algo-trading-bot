@@ -468,6 +468,15 @@ class TradingBotAPI:
                 logger.warning(f"[Trading Loop] AlpacaProvider failed, falling back to mock data: {e}")
                 provider = None
             
+            # Clean up database to avoid conflicts
+            try:
+                import os
+                if os.path.exists(db_path):
+                    os.remove(db_path)
+                    logger.info(f"[Trading Loop] Cleaned up existing database: {db_path}")
+            except Exception as e:
+                logger.warning(f"[Trading Loop] Could not clean database: {e}")
+            
             # Run the paper engine
             iteration = 0
             for update in run_paper_engine(cfg=engine_config, provider=provider):
