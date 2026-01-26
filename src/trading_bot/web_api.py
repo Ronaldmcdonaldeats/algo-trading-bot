@@ -21,7 +21,7 @@ from trading_bot.risk.drawdown_recovery import DrawdownRecoveryManager
 from trading_bot.learn.auto_tuning import AutoTuningSystem
 from trading_bot.options.strategies import GreeksCalculator, OptionType, IncomeStrategy
 from trading_bot.engine.paper import PaperEngineConfig, run_paper_engine
-from trading_bot.config import load_config
+from trading_bot.configs.config import load_config
 from trading_bot.data.providers import AlpacaProvider
 
 # Setup logging
@@ -429,27 +429,22 @@ class TradingBotAPI:
         logger.info("[Trading Loop] Starting background trading loop")
         
         try:
-            # Load configuration
-            try:
-                app_config = load_config()
-            except Exception as e:
-                logger.error(f"[Trading Loop] Failed to load config: {e}")
-                app_config = {}
-            
             # Configure symbols and parameters
-            symbols = app_config.get('symbols', ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN', 'NVDA', 'META', 'NFLX'])
-            config_path = app_config.get('config_path', 'configs/default.yaml')
+            symbols = ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN', 'NVDA', 'META', 'NFLX', 'AMD', 'CRM']
+            config_path = "configs/default.yaml"
+            db_path = "trading_bot.db"
             
             logger.info(f"[Trading Loop] Configuration loaded. Symbols: {symbols}")
+            logger.info(f"[Trading Loop] Config path: {config_path}, DB path: {db_path}")
             
             # Create PaperEngineConfig
             engine_config = PaperEngineConfig(
                 config_path=config_path,
-                db_path="trading_bot.db",
+                db_path=db_path,
                 symbols=symbols,
                 period="6mo",
                 interval="1d",
-                start_cash=float(app_config.get('starting_equity', 100000)),
+                start_cash=100000.0,
                 sleep_seconds=30,  # Check every 30 seconds
                 iterations=0,  # Run forever
                 strategy_mode='ensemble',
