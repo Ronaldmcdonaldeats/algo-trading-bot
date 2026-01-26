@@ -1088,7 +1088,8 @@ class PaperEngine:
         if self.entry_filtering_enabled:
             valid_rate = self.entry_filter.get_validation_rate()
             valid_rate_pct = valid_rate * 100 if valid_rate > 0 else 0
-            print(f"   [FILTER] Validation rate: {valid_rate_pct:.1f}% | Trades filtered: {self.entry_filter.filtered_count}", 
+            total_rejected = sum(self.entry_filter.stats[k] for k in self.entry_filter.stats if k.startswith('rejected_'))
+            print(f"   [FILTER] Validation rate: {valid_rate_pct:.1f}% | Trades filtered: {total_rejected}", 
                   flush=True)
         
         # Phase 24: Print Position Monitor Status
