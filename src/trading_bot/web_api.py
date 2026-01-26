@@ -490,10 +490,15 @@ class TradingBotAPI:
             logger.info("[Trading Loop] PaperEngineConfig created successfully")
             logger.info(f"[Trading Loop] Starting trading loop with {len(symbols)} symbols")
             
-            # Initialize data provider - prefer MockDataProvider for local testing
-            # (Real Alpaca works better on production with live market hours)
-            provider = MockDataProvider()
-            logger.info("[Trading Loop] Using MockDataProvider for synthetic market data (realistic test patterns)")
+            # Initialize Alpaca data provider for real market data
+            provider = None
+            try:
+                provider = AlpacaProvider()
+                logger.info("[Trading Loop] Using AlpacaProvider for real Alpaca market data")
+            except Exception as e:
+                logger.warning(f"[Trading Loop] AlpacaProvider failed: {e}. Falling back to MockDataProvider.")
+                provider = MockDataProvider()
+                logger.info("[Trading Loop] Using MockDataProvider for synthetic market data")
             
             # Run the paper engine
             iteration = 0
