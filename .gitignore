@@ -47,6 +47,18 @@ htmlcov/
 # Jupyter
 .ipynb_checkpoints/
 
+# Setup & Documentation (use locally, don't commit)
+*.sh
+*.ps1
+setup-*.md
+ORACLE_*.md
+*_SETUP.md
+BACKTEST_STATUS.md
+QUICK_START*.txt
+check_positions.py
+deploy_oracle.sh
+add-ssh-key.sh
+
 # IDE
 .vscode/
 .idea/
