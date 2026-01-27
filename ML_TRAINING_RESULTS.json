@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-01-27T23:39:59.675859",
+  "status": "TRAINING_COMPLETE",
+  "strategy_performance": {
+    "atr_breakout": {
+      "avg_return": 1.0825468888780443,
+      "avg_sharpe": 1.467569844886362,
+      "trades_count": 8
+    },
+    "macd_volume_momentum": {
+      "avg_return": 0.5905828041053691,
+      "avg_sharpe": 0.7192028759791492,
+      "trades_count": 8
+    },
+    "rsi_mean_reversion": {
+      "avg_return": 0.5489837031261063,
+      "avg_sharpe": 0.7333401240699906,
+      "trades_count": 8
+    }
+  },
+  "model_state": {
+    "weights": {
+      "atr_breakout": 1628788.855115618,
+      "macd_volume_momentum": 1628788.855115618,
+      "rsi_mean_reversion": 1628788.855115618
+    },
+    "normalized_weights": {
+      "atr_breakout": 0.33333333333333337,
+      "macd_volume_momentum": 0.33333333333333337,
+      "rsi_mean_reversion": 0.33333333333333337
+    },
+    "update_count": 100
+  }
+}
