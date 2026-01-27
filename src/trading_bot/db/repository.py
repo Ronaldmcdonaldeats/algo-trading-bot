@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional
 
 from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import Session
+from sqlalchemy.pool import StaticPool
 
 from trading_bot.core.models import Fill, Order, Portfolio
 from trading_bot.db.models import (
@@ -38,18 +39,35 @@ RECOMMENDED_INDEXES = [
     "CREATE INDEX IF NOT EXISTS idx_position_symbol ON position_snapshots(symbol);",
 ]
 
+# BUG FIX #3: Global singleton engine to prevent SQLite deadlock (database locked 10-30s pauses)
+# Each call to create_engine() creates a new connection pool, causing contention and timeouts.
+# Singleton pattern with one persistent connection resolves this.
+_ENGINE_SINGLETON = None
+
 
 @dataclass(frozen=True)
 class SqliteRepository:
     db_path: Path = Path("data/trades.sqlite")
 
     def _engine(self):
-        # OPTIMIZATION: Connection pooling for repeated writes
-        return create_engine(
-            f"sqlite:///{self.db_path}",
-            poolclass=None,  # SQLite uses in-thread pooling
-            connect_args={"timeout": 10.0, "check_same_thread": False},
-        )
+        """BUG FIX #3: Return singleton engine instance to prevent SQLite deadlock.
+        
+        Root cause: Each call to create_engine() created a new connection pool, causing:
+        - Multiple concurrent connections competing for SQLite's single writer lock
+        - 10-30 second pauses on database writes
+        - "database is locked" errors
+        
+        Fix: Create engine once, reuse across all repository operations.
+        """
+        global _ENGINE_SINGLETON
+        if _ENGINE_SINGLETON is None:
+            _ENGINE_SINGLETON = create_engine(
+                f"sqlite:///{self.db_path}",
+                poolclass=StaticPool,  # BUG FIX #3: StaticPool ensures single connection per thread
+                connect_args={"timeout": 30.0, "check_same_thread": False},  # BUG FIX #3: Extended timeout
+                echo=False,
+            )
+        return _ENGINE_SINGLETON
 
     def init_db(self) -> None:
         engine = self._engine()

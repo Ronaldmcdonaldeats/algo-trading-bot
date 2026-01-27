@@ -207,29 +207,41 @@ class PaperEngine:
             ensemble=self.ensemble,
             min_trades_for_analysis=5,
         )
-        self.trade_history: list[dict] = []  # Track trades for analysis
+        # BUG FIX #4: Unbounded memory - use deque with maxlen instead of unbounded list
+        from collections import deque
+        self.trade_history: deque = deque(maxlen=10000)  # Keep only last 10k trades
         self.equity_history: list[float] = [float(cfg.start_cash)]
 
         # For learning updates
         self._prev_prices: Optional[Dict[str, float]] = None
         self._prev_signals_by_symbol: Dict[str, Dict[str, int]] = {}
         
-        # Signal confirmation: track consecutive bars with same signal (for 2-bar confirmation)
+        # BUG FIX #5: Signal confirmation - added tracking for per-iteration exits
         self._signal_confirmation: Dict[str, int] = {}  # symbol -> count of consecutive bars with signal=1
+        self._exited_this_iteration: set[str] = set()  # Symbols that exited this iteration (prevents order spam)
         
-        # Multi-level profit taking: track entry price and bars held for time-based exits
+        # BUG FIX #6: Position tracking - atomic access via helper methods
         self._position_entry_bars: Dict[str, int] = {}  # symbol -> entry iteration
         self._position_entry_prices: Dict[str, float] = {}  # symbol -> entry price
         
         # Phase 21: Options hedging - track which positions have hedges
         self._hedged_positions: set[str] = set()  # Symbols with active hedges
         
-        # ML Signal Manager (Phase 16)
-        from trading_bot.learn.ml_signals import MLSignalManager
-        self.ml_manager = MLSignalManager()
-        self.ml_enabled = True  # Can be toggled via config
+        # BUG FIX #7: ML Signal Manager - safe initialization with error handling
+        self.ml_manager = None
+        self.ml_enabled = False
         self._ml_trained_symbols: set[str] = set()
+        self._ml_training_attempts: Dict[str, int] = {}  # Track retry count per symbol
         self._ohlcv_cache: Dict[str, pd.DataFrame] = {}  # Cache OHLCV for ML training
+        try:
+            from trading_bot.learn.ml_signals import MLSignalManager
+            self.ml_manager = MLSignalManager()
+            self.ml_enabled = True
+            logger.info("[ML] MLSignalManager initialized successfully")
+        except ImportError as e:
+            logger.warning(f"[ML] MLSignalManager not available (ImportError): {e}")
+        except Exception as e:
+            logger.error(f"[ML] Failed to initialize MLSignalManager: {e}", exc_info=True)
         
         # Position Autocorrection (Phase 17)
         self.position_autocorrector = PositionAutocorrector(
@@ -372,7 +384,48 @@ class PaperEngine:
         
         return sharpe, max_dd, win_rate, num_trades, current_pnl
 
+    def _record_position_entry(self, sym: str, px: float, iteration: int) -> None:
+        """BUG FIX #6: Atomically record position entry in both tracking dicts."""
+        self._position_entry_bars[sym] = iteration
+        self._position_entry_prices[sym] = float(px)
+
+    def _clear_position_entry(self, sym: str) -> None:
+        """BUG FIX #6: Atomically clear position entry from both tracking dicts."""
+        self._position_entry_bars.pop(sym, None)
+        self._position_entry_prices.pop(sym, None)
+
+    def _get_position_entry_bars(self, sym: str) -> int:
+        """BUG FIX #2: Safely get entry bar count, fallback if missing."""
+        if sym in self._position_entry_bars:
+            return self._position_entry_bars[sym]
+        logger.warning(f"[TRACK] Position {sym} missing from entry bar tracking dict")
+        return self.iteration  # Safe fallback: assume just entered
+
     def step(self, *, now: datetime | None = None) -> PaperEngineUpdate:
+        """Execute one trading iteration (one bar per symbol).
+        
+        This method processes one bar for each configured symbol and:
+        1. Fetches latest OHLCV data
+        2. Evaluates all trading strategies
+        3. Checks stop-loss, take-profit, and time-based exits
+        4. Records all state to database
+        
+        BUG FIX #10: Iteration Concept Documentation
+        - iteration: Increments by 1 each time step() is called
+        - Example: step() called 252 times = one full year of daily bars (252 trading days)
+        - Used for: Position duration tracking, ML training cutoff, performance evaluation
+        - In backtest_range(): Called once per date in the date_range
+        - Callers should understand iteration ~= number of bars processed, not seconds/minutes
+        
+        Args:
+            now: Override timestamp for this bar (useful for testing)
+            
+        Returns:
+            PaperEngineUpdate with orders, fills, portfolio snapshot, and metrics
+        """
+        # BUG FIX #5: Reset per-iteration exit tracking at start of step
+        self._exited_this_iteration.clear()
+        
         self.iteration += 1
         ts = now or datetime.utcnow()
 
@@ -463,6 +516,8 @@ class PaperEngine:
                 )
 
         # 3) Adaptive learning: market regime detection + strategy analysis
+        # BUG FIX #1: Initialize regime_by_symbol from adaptive_decision
+        regime_by_symbol: Dict[str, Dict] = {}
         if self.enable_learning:
             equity_series = pd.Series(self.equity_history) if self.equity_history else None
             adaptive_decision = self.adaptive_controller.step(
@@ -472,6 +527,14 @@ class PaperEngine:
                 equity_series=equity_series,
                 now=ts,
             )
+            
+            # BUG FIX #1: Extract regime data from adaptive_decision
+            if hasattr(adaptive_decision, 'regime_by_symbol'):
+                regime_by_symbol = adaptive_decision.regime_by_symbol
+            else:
+                # Fallback: use primary regime for all symbols
+                primary_regime = adaptive_decision.regime.value if hasattr(adaptive_decision, 'regime') else "unknown"
+                regime_by_symbol = {sym: {"regime": primary_regime} for sym in self.cfg.symbols}
             
             # Apply regime-adjusted weights
             # Blend them gently into the ensemble
@@ -540,11 +603,8 @@ class PaperEngine:
                                 rejections.append(res)
                             else:
                                 fills.append(res)
-                                # Clear entry tracking
-                                if correction.symbol in self._position_entry_bars:
-                                    del self._position_entry_bars[correction.symbol]
-                                if correction.symbol in self._position_entry_prices:
-                                    del self._position_entry_prices[correction.symbol]
+                                # BUG FIX #6: Use atomic clear method
+                                self._clear_position_entry(correction.symbol)
                         
                         elif correction.action_type == "add_stop" and pos.qty > 0:
                             if correction.stop_loss:
@@ -582,7 +642,8 @@ class PaperEngine:
             pos = self.broker.portfolio().get_position(sym)
             if pos.qty > 0 and sym in self._position_entry_prices:
                 entry_price = self._position_entry_prices[sym]
-                bars_held = self.iteration - self._position_entry_bars[sym]
+                # BUG FIX #2: Use safe getter to prevent KeyError
+                bars_held = self.iteration - self._get_position_entry_bars(sym)
                 profit_pct = (px - entry_price) / entry_price if entry_price > 0 else 0
                 
                 # Phase 21: Options Hedging - Protect profitable positions with puts/collars
@@ -622,30 +683,33 @@ class PaperEngine:
                         print(f"   [HEDGE] {sym}: Failed to create hedge - {e}", flush=True)
                 
                 # Multi-level take profit: exit 50% at +1.5% profit, 25% at +3%, close 25% at +5%
-                take_profits = [
-                    (0.50, 0.015),  # 50% position at 1.5% profit
-                    (0.25, 0.030),  # 25% position at 3% profit (of remaining)
-                    (0.25, 0.050),  # 25% position at 5% profit (of remaining)
-                ]
-                
-                for qty_pct, profit_threshold in take_profits:
-                    if profit_pct >= profit_threshold and pos.qty > 0:
-                        shares_to_exit = max(1, int(pos.qty * qty_pct))
-                        order = Order(
-                            id=uuid.uuid4().hex,
-                            ts=ts,
-                            symbol=sym,
-                            side="SELL",
-                            qty=shares_to_exit,
-                            type="MARKET",
-                            tag=f"partial_tp:{profit_pct:.1%}",
-                        )
-                        res = self.broker.submit_order(order)
-                        if not isinstance(res, OrderRejection):
-                            fills.append(res)
-                            self.repo.log_order_filled(order)
-                            self.repo.log_fill(res)
-                            pos = self.broker.portfolio().get_position(sym)  # Refresh
+                # BUG FIX #8: Prevent order spam - only one exit per symbol per iteration
+                if sym not in self._exited_this_iteration:
+                    take_profits = [
+                        (0.50, 0.015),  # 50% position at 1.5% profit
+                        (0.25, 0.030),  # 25% position at 3% profit (of remaining)
+                        (0.25, 0.050),  # 25% position at 5% profit (of remaining)
+                    ]
+                    
+                    for qty_pct, profit_threshold in take_profits:
+                        if profit_pct >= profit_threshold and pos.qty > 0:
+                            shares_to_exit = max(1, int(pos.qty * qty_pct))
+                            order = Order(
+                                id=uuid.uuid4().hex,
+                                ts=ts,
+                                symbol=sym,
+                                side="SELL",
+                                qty=shares_to_exit,
+                                type="MARKET",
+                                tag=f"partial_tp:{profit_pct:.1%}",
+                            )
+                            res = self.broker.submit_order(order)
+                            if not isinstance(res, OrderRejection):
+                                fills.append(res)
+                                self.repo.log_order_filled(order)
+                                self.repo.log_fill(res)
+                                pos = self.broker.portfolio().get_position(sym)  # Refresh
+                            break  # BUG FIX #8: Only one profit level per iteration
                 
                 # Time-based exit: close after 20 bars if no strong profit
                 if bars_held > 20 and profit_pct < 0.01 and pos.qty > 0:
@@ -663,8 +727,10 @@ class PaperEngine:
                         fills.append(res)
                         self.repo.log_order_filled(order)
                         self.repo.log_fill(res)
-                        del self._position_entry_bars[sym]
-                        del self._position_entry_prices[sym]
+                        # BUG FIX #6: Use atomic clear method
+                        self._clear_position_entry(sym)
+                        # BUG FIX #5: Mark as exited this iteration
+                        self._exited_this_iteration.add(sym)
 
             # Risk exits (stop-loss and take-profit)
             pos = self.broker.portfolio().get_position(sym)
@@ -901,6 +967,8 @@ class PaperEngine:
                 ohlcv = ohlcv_by_symbol[sym]
                 returns = ohlcv['Close'].pct_change().dropna()
                 volatility = float(returns.std()) if len(returns) > 0 else 0.02
+                # BUG FIX #9: Add volatility floor to prevent division issues
+                volatility = max(volatility, 0.001)  # Floor at 0.1% minimum volatility
                 
                 # Adjust stop-loss based on volatility (scale 0.5x to 2.0x)
                 vol_adjusted_sl_pct = self.app_cfg.risk.stop_loss_pct * (0.5 + volatility / 0.03)
@@ -1061,6 +1129,13 @@ class PaperEngine:
                     fills.append(res)
                     self.repo.log_order_filled(order)
                     self.repo.log_fill(res)
+                    
+                    # BUG FIX #5: Reset signal confirmation when exiting
+                    self._signal_confirmation[sym] = 0
+                    # BUG FIX #6: Clear position tracking
+                    self._clear_position_entry(sym)
+                    # BUG FIX #5: Mark as exited this iteration
+                    self._exited_this_iteration.add(sym)
                     
                     # Phase 24: Remove position from monitor when closed
                     if self.position_monitoring_enabled and sym in self.position_monitor.positions:
