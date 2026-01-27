@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import numpy as np
+import threading
 
 import pandas as pd
 from ta.momentum import RSIIndicator
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 # OPTIMIZATION: Cache computed indicators to avoid recalculation
 _indicator_cache: dict[str, pd.DataFrame] = {}
+_cache_lock = threading.Lock()  # Thread-safe access to cache
 _cache_max_size = 50  # Prevent unbounded memory growth
 
 # PRIORITY 1: Numba JIT compilation for 50-100x faster indicators
@@ -83,14 +85,17 @@ def add_indicators(
     
     # OPTIMIZATION: Hash last 50 rows to create cache key (25% smaller cache)
     # Skip expensive indicator calculation if we've computed this exact data before
+    cache_key = None
     try:
         df_tail = df.tail(50).to_string()
         cache_key = hashlib.sha256(df_tail.encode()).hexdigest()
         
-        if cache_key in _indicator_cache:
-            # Return cached result
-            return _indicator_cache[cache_key]
-    except:
+        with _cache_lock:
+            if cache_key in _indicator_cache:
+                # Return cached result
+                return _indicator_cache[cache_key]
+    except Exception as e:
+        logger.debug(f"Cache key generation failed: {e}")
         cache_key = None
 
     out = df.copy()
@@ -106,12 +111,13 @@ def add_indicators(
     out["sma_fast"] = SMAIndicator(close=close, window=sma_fast).sma_indicator()
     out["sma_slow"] = SMAIndicator(close=close, window=sma_slow).sma_indicator()
 
-    # OPTIMIZATION: Cache computed result for next identical OHLCV data
+    # OPTIMIZATION: Cache computed result for next identical OHLCV data (thread-safe)
     if cache_key is not None:
-        if len(_indicator_cache) >= _cache_max_size:
-            # Simple FIFO eviction when cache is full
-            oldest_key = next(iter(_indicator_cache))
-            del _indicator_cache[oldest_key]
-        _indicator_cache[cache_key] = out
+        with _cache_lock:
+            if len(_indicator_cache) >= _cache_max_size:
+                # Simple FIFO eviction when cache is full
+                oldest_key = next(iter(_indicator_cache))
+                del _indicator_cache[oldest_key]
+            _indicator_cache[cache_key] = out
 
     return out

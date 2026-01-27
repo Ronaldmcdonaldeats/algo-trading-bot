@@ -14,7 +14,9 @@ import logging
 import os
 from collections import deque
 import time
+import secrets
 from dotenv import load_dotenv
+from pydantic import BaseModel, ValidationError, validator
 
 # Load environment variables from .env file
 load_dotenv()
@@ -31,6 +33,71 @@ from trading_bot.data.providers import AlpacaProvider, MockDataProvider
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+# Pydantic validation models for API endpoints
+class TradeRequest(BaseModel):
+    """Validate trade recording request"""
+    symbol: str
+    entry_price: float
+    exit_price: float
+    quantity: int
+    side: str
+    strategy: str
+    tags: list = []
+    
+    @validator('symbol')
+    def symbol_valid(cls, v):
+        if not v or len(v) > 10 or not v.isalpha():
+            raise ValueError('Invalid symbol')
+        return v.upper()
+    
+    @validator('entry_price', 'exit_price')
+    def price_positive(cls, v):
+        if v <= 0:
+            raise ValueError('Price must be positive')
+        return float(v)
+    
+    @validator('quantity')
+    def qty_positive(cls, v):
+        if v <= 0:
+            raise ValueError('Quantity must be positive')
+        return int(v)
+    
+    @validator('side')
+    def side_valid(cls, v):
+        if v.upper() not in ['BUY', 'SELL']:
+            raise ValueError('Side must be BUY or SELL')
+        return v.upper()
+
+
+class GreeksRequest(BaseModel):
+    """Validate Greeks calculation request"""
+    spot_price: float
+    strike_price: float
+    time_to_expiration: float
+    option_type: str
+    risk_free_rate: float = 0.05
+    volatility: float = 0.20
+    
+    @validator('spot_price', 'strike_price')
+    def price_positive(cls, v):
+        if v <= 0:
+            raise ValueError('Price must be positive')
+        return float(v)
+    
+    @validator('time_to_expiration')
+    def tte_positive(cls, v):
+        if v <= 0:
+            raise ValueError('Time to expiration must be positive')
+        return float(v)
+    
+    @validator('option_type')
+    def option_type_valid(cls, v):
+        if v.lower() not in ['call', 'put']:
+            raise ValueError('Option type must be call or put')
+        return v.lower()
+
 
 # Log handler for websocket
 class WebSocketLogHandler(logging.Handler):
@@ -52,11 +119,13 @@ class WebSocketLogHandler(logging.Handler):
                     'level': log_level,
                     'timestamp': datetime.now().isoformat()
                 })
-            except (RuntimeError, Exception):
+            except RuntimeError:
                 # App context not available, skip websocket emit
                 pass
-        except Exception:
-            pass
+            except Exception as e:
+                logger.warning(f"Failed to emit log via websocket: {e}")
+        except Exception as e:
+            logger.error(f"WebSocket log handler error: {e}", exc_info=True)
 
 
 class TradingBotAPI:
@@ -66,8 +135,11 @@ class TradingBotAPI:
         # Setup Flask app with templates directory
         template_dir = os.path.join(os.path.dirname(__file__), 'templates')
         self.app = Flask(__name__, template_folder=template_dir)
-        self.app.config['SECRET_KEY'] = 'trading-bot-secret'
-        self.socketio = SocketIO(self.app, cors_allowed_origins="*")
+        # Use secure secret key from environment or generate one
+        self.app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', secrets.token_hex(32))
+        # Restrict CORS to specific origins (set via environment or default to localhost)
+        allowed_origins = os.getenv('CORS_ORIGINS', 'http://localhost:5000,http://localhost:3000').split(',')
+        self.socketio = SocketIO(self.app, cors_allowed_origins=allowed_origins)
         
         # Keep IntegratedTradingBot for backward compatibility with API endpoints
         self.bot = None  # Will be populated if needed, but _trading_loop takes priority
@@ -114,19 +186,24 @@ class TradingBotAPI:
         @self.app.route('/api/trade', methods=['POST'])
         def record_trade():
             """Record a new trade"""
-            data = request.json
             try:
+                data = request.json or {}
+                trade_req = TradeRequest(**data)
                 self.bot.record_trade(
-                    symbol=data['symbol'],
-                    entry_price=float(data['entry_price']),
-                    exit_price=float(data['exit_price']),
-                    quantity=int(data['quantity']),
-                    side=data['side'],
-                    strategy=data['strategy'],
-                    tags=data.get('tags', [])
+                    symbol=trade_req.symbol,
+                    entry_price=trade_req.entry_price,
+                    exit_price=trade_req.exit_price,
+                    quantity=trade_req.quantity,
+                    side=trade_req.side,
+                    strategy=trade_req.strategy,
+                    tags=trade_req.tags
                 )
                 return jsonify({'status': 'success', 'equity': self.bot.current_equity})
+            except ValidationError as e:
+                logger.warning(f"Trade validation error: {e}")
+                return jsonify({'status': 'error', 'message': f'Invalid request: {str(e)}'}), 400
             except Exception as e:
+                logger.error(f"Trade recording error: {e}", exc_info=True)
                 return jsonify({'status': 'error', 'message': str(e)}), 400
         
         @self.app.route('/api/journal/analytics', methods=['GET'])
@@ -201,15 +278,16 @@ class TradingBotAPI:
         @self.app.route('/api/options/greeks', methods=['POST'])
         def calculate_greeks():
             """Calculate option Greeks"""
-            data = request.json
             try:
+                data = request.json or {}
+                greeks_req = GreeksRequest(**data)
                 greeks = GreeksCalculator.calculate_greeks(
-                    S=float(data['spot_price']),
-                    K=float(data['strike_price']),
-                    T=float(data['time_to_expiration']),
-                    r=float(data.get('risk_free_rate', 0.05)),
-                    sigma=float(data.get('volatility', 0.20)),
-                    option_type=OptionType.CALL if data['option_type'] == 'call' else OptionType.PUT
+                    S=greeks_req.spot_price,
+                    K=greeks_req.strike_price,
+                    T=greeks_req.time_to_expiration,
+                    r=greeks_req.risk_free_rate,
+                    sigma=greeks_req.volatility,
+                    option_type=OptionType.CALL if greeks_req.option_type == 'call' else OptionType.PUT
                 )
                 return jsonify({
                     'delta': greeks.delta,
@@ -218,7 +296,11 @@ class TradingBotAPI:
                     'theta': greeks.theta,
                     'rho': greeks.rho
                 })
+            except ValidationError as e:
+                logger.warning(f"Greeks validation error: {e}")
+                return jsonify({'status': 'error', 'message': f'Invalid request: {str(e)}'}), 400
             except Exception as e:
+                logger.error(f"Greeks calculation error: {e}", exc_info=True)
                 return jsonify({'status': 'error', 'message': str(e)}), 400
         
         @self.app.route('/api/report/daily', methods=['GET'])
