@@ -169,7 +169,7 @@ def main():
     
     # Run continuous evolution
     engine = ContinuousEvolutionEngine(
-        evolution_cycles=5,
+        evolution_cycles=10,  # Increased from 5 to 10
         generations_per_cycle=10,
     )
     
