@@ -530,7 +530,7 @@ class TradingBotAPI:
                 
                 # Log key metrics every 10 iterations
                 if iteration % 10 == 0:
-                    portfolio_value = float(update.portfolio.equity) if update.portfolio else 0.0
+                    portfolio_value = float(update.portfolio.equity(prices)) if update.portfolio else 0.0
                     num_positions = len(update.portfolio.positions) if update.portfolio and update.portfolio.positions else 0
                     logger.info(f"[Trading Loop] Iteration {iteration} | Equity: ${portfolio_value:.2f} | Positions: {num_positions} | Signals: {len(update.signals) if hasattr(update, 'signals') else 0}")
                     
@@ -562,7 +562,7 @@ class TradingBotAPI:
                         
                         # Log key metrics every 10 iterations
                         if iteration % 10 == 0:
-                            portfolio_value = float(update.portfolio.equity) if update.portfolio else 0.0
+                            portfolio_value = float(update.portfolio.equity(prices)) if update.portfolio else 0.0
                             num_positions = len(update.portfolio.positions) if update.portfolio and update.portfolio.positions else 0
                             logger.info(f"[Trading Loop] Iteration {iteration} | Equity: ${portfolio_value:.2f} | Positions: {num_positions} | Signals: {len(update.signals) if hasattr(update, 'signals') else 0}")
                 except Exception as retry_error:

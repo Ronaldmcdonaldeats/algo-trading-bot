@@ -74,6 +74,21 @@ class Portfolio:
         return float(mv)
 
     def equity(self, prices: Mapping[str, float]) -> float:
+        """
+        Calculate total portfolio equity (cash + market value of all positions).
+        
+        Args:
+            prices: Mapping of symbol to current price. Required to calculate position market values.
+                    Missing symbols are ignored.
+        
+        Returns:
+            Total equity (float): cash + sum of (position_qty * current_price) for all positions.
+        
+        Example:
+            >>> portfolio = Portfolio(cash=10000)
+            >>> prices = {'AAPL': 150.0, 'MSFT': 300.0}
+            >>> equity = portfolio.equity(prices)
+        """
         return float(self.cash) + self.market_value(prices)
 
     def unrealized_pnl(self, prices: Mapping[str, float]) -> float:

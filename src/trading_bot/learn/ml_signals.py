@@ -61,7 +61,7 @@ class MLFeatureEngine:
         Calculate all ML features from OHLCV data
         
         Args:
-            df: DataFrame with OHLC columns, index=timestamp
+            df: DataFrame with lowercase ohlcv columns (open, high, low, close, volume)
             
         Returns:
             DataFrame with original OHLC + calculated features
