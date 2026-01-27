@@ -1,0 +1,190 @@
+{
+  "timestamp": "2026-01-27T23:42:59.747254",
+  "champion": {
+    "indicator": "rsi",
+    "param1": 0.04744820264509336,
+    "param2": 0.4622117798073865,
+    "param3": 0.6916305345561834,
+    "logic": "crossover",
+    "fitness": 0.5721409524874401,
+    "avg_return": 0.08677546452330967,
+    "avg_sharpe": 0.9947350685404037,
+    "win_rate": 0.49404761904761907,
+    "generation": 10
+  },
+  "all_generations": [
+    {
+      "generation": 1,
+      "best_fitness": 0.537836806250972,
+      "avg_fitness": 0.4477422481317236,
+      "best_strategy": {
+        "indicator": "sma",
+        "param1": 0.06600640248851175,
+        "param2": 0.7390668304636777,
+        "param3": 0.8957862588967491,
+        "logic": "breakout",
+        "fitness": 0.537836806250972,
+        "avg_return": 0.2863765056682229,
+        "avg_sharpe": 0.7622501125667389,
+        "win_rate": 0.49007936507936506,
+        "generation": 1
+      }
+    },
+    {
+      "generation": 2,
+      "best_fitness": 0.5714139222725244,
+      "avg_fitness": 0.44959122973496674,
+      "best_strategy": {
+        "indicator": "bollinger",
+        "param1": 0.13738934168018999,
+        "param2": 0.7065414449266044,
+        "param3": 0.4820817424629364,
+        "logic": "reversal",
+        "fitness": 0.5714139222725244,
+        "avg_return": 0.10512652062026896,
+        "avg_sharpe": 0.9806422961684903,
+        "win_rate": 0.49206349206349204,
+        "generation": 2
+      }
+    },
+    {
+      "generation": 3,
+      "best_fitness": 0.5495969780157834,
+      "avg_fitness": 0.42301579791184996,
+      "best_strategy": {
+        "indicator": "bollinger",
+        "param1": 0.20223563661608612,
+        "param2": 0.16728043004458493,
+        "param3": 0.6475089738866057,
+        "logic": "reversal",
+        "fitness": 0.5495969780157834,
+        "avg_return": 0.22923961000456167,
+        "avg_sharpe": 0.8345032137265137,
+        "win_rate": 0.49007936507936506,
+        "generation": 3
+      }
+    },
+    {
+      "generation": 4,
+      "best_fitness": 0.5915853222872176,
+      "avg_fitness": 0.4351621695082467,
+      "best_strategy": {
+        "indicator": "bollinger",
+        "param1": 0.20223563661608612,
+        "param2": 0.16728043004458493,
+        "param3": 0.6475089738866057,
+        "logic": "reversal",
+        "fitness": 0.5915853222872176,
+        "avg_return": 0.20963617100960616,
+        "avg_sharpe": 0.9541766536513155,
+        "win_rate": 0.49007936507936506,
+        "generation": 4
+      }
+    },
+    {
+      "generation": 5,
+      "best_fitness": 0.6387624120942169,
+      "avg_fitness": 0.4368341593405242,
+      "best_strategy": {
+        "indicator": "macd",
+        "param1": 0.6931295430019433,
+        "param2": 0.155123859576494,
+        "param3": 0.7210880522806395,
+        "logic": "breakout",
+        "fitness": 0.6387624120942169,
+        "avg_return": 0.0494353875414949,
+        "avg_sharpe": 1.1892937752937067,
+        "win_rate": 0.49404761904761907,
+        "generation": 5
+      }
+    },
+    {
+      "generation": 6,
+      "best_fitness": 0.6180714169715601,
+      "avg_fitness": 0.4395801576331654,
+      "best_strategy": {
+        "indicator": "rsi",
+        "param1": 0.7944464068946329,
+        "param2": 0.27329111538938594,
+        "param3": 0.605178166286724,
+        "logic": "mean_reversion",
+        "fitness": 0.6180714169715601,
+        "avg_return": 0.06135616912125024,
+        "avg_sharpe": 1.1256495108260578,
+        "win_rate": 0.498015873015873,
+        "generation": 6
+      }
+    },
+    {
+      "generation": 7,
+      "best_fitness": 0.5392665281679655,
+      "avg_fitness": 0.45530206986264876,
+      "best_strategy": {
+        "indicator": "macd",
+        "param1": 0.428004898872899,
+        "param2": 0.2192173392636262,
+        "param3": 0.6492630569436714,
+        "logic": "breakout",
+        "fitness": 0.5392665281679655,
+        "avg_return": 0.19819106904187403,
+        "avg_sharpe": 0.8319634948289845,
+        "win_rate": 0.49007936507936506,
+        "generation": 7
+      }
+    },
+    {
+      "generation": 8,
+      "best_fitness": 0.5495336652365994,
+      "avg_fitness": 0.4644676497829723,
+      "best_strategy": {
+        "indicator": "macd",
+        "param1": 0.8111556106615776,
+        "param2": 0.6400680894599573,
+        "param3": 0.5264759559419614,
+        "logic": "breakout",
+        "fitness": 0.5495336652365994,
+        "avg_return": 0.21730548352931567,
+        "avg_sharpe": 0.8432955266349879,
+        "win_rate": 0.49007936507936506,
+        "generation": 8
+      }
+    },
+    {
+      "generation": 9,
+      "best_fitness": 0.5545366290095886,
+      "avg_fitness": 0.4453827410183992,
+      "best_strategy": {
+        "indicator": "bollinger",
+        "param1": 0.4732729998662315,
+        "param2": 0.3061859219461459,
+        "param3": 0.8910446633449378,
+        "logic": "mean_reversion",
+        "fitness": 0.5545366290095886,
+        "avg_return": 0.1484529139537253,
+        "avg_sharpe": 0.9074423632491537,
+        "win_rate": 0.49007936507936506,
+        "generation": 9
+      }
+    },
+    {
+      "generation": 10,
+      "best_fitness": 0.5721409524874401,
+      "avg_fitness": 0.4583643638520594,
+      "best_strategy": {
+        "indicator": "rsi",
+        "param1": 0.04744820264509336,
+        "param2": 0.4622117798073865,
+        "param3": 0.6916305345561834,
+        "logic": "crossover",
+        "fitness": 0.5721409524874401,
+        "avg_return": 0.08677546452330967,
+        "avg_sharpe": 0.9947350685404037,
+        "win_rate": 0.49404761904761907,
+        "generation": 10
+      }
+    }
+  ],
+  "population_size": 20,
+  "generations": 10,
+  "total_strategies_tested": 200
+}

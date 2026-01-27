@@ -1,0 +1,162 @@
+{
+  "timestamp": "2026-01-27T23:44:13.871662",
+  "total_cycles": 5,
+  "generations_per_cycle": 10,
+  "total_strategies_tested": 1000,
+  "overall_champion": {
+    "indicator": "rsi",
+    "param1": 0.34269391713829395,
+    "param2": 0.10503553442902246,
+    "param3": 0.3917008054550459,
+    "logic": "mean_reversion",
+    "fitness": 0.4722327592752389,
+    "avg_return": 0.024013404766890917,
+    "avg_sharpe": 0.7801313684224529,
+    "win_rate": 0.5099206349206349,
+    "generation": 10
+  },
+  "all_champions": [
+    {
+      "indicator": "bollinger",
+      "param1": 0.5596412481881449,
+      "param2": 0.9846912577503716,
+      "param3": 0.5162902577024868,
+      "logic": "reversal",
+      "fitness": 0.26560709945910105,
+      "avg_return": 0.023141922100832237,
+      "avg_sharpe": 0.24933987850069986,
+      "win_rate": 0.5297619047619048,
+      "generation": 10
+    },
+    {
+      "indicator": "macd",
+      "param1": 0.11853919829926002,
+      "param2": 0.9655536936127463,
+      "param3": 0.6437525695710895,
+      "logic": "breakout",
+      "fitness": 0.2891196119547616,
+      "avg_return": 0.0177138852429906,
+      "avg_sharpe": 0.3121921873832325,
+      "win_rate": 0.5297619047619048,
+      "generation": 10
+    },
+    {
+      "indicator": "macd",
+      "param1": 0.2663184961101752,
+      "param2": 0.8254835160989169,
+      "param3": 0.6818611234835364,
+      "logic": "mean_reversion",
+      "fitness": 0.21348505178673588,
+      "avg_return": 0.007427054781651904,
+      "avg_sharpe": 0.15165424314250553,
+      "win_rate": 0.501984126984127,
+      "generation": 10
+    },
+    {
+      "indicator": "bollinger",
+      "param1": 0.4688468724254224,
+      "param2": 0.3056750112135021,
+      "param3": 0.7776628890374953,
+      "logic": "momentum",
+      "fitness": 0.41650166583516574,
+      "avg_return": 0.029341477045039824,
+      "avg_sharpe": 0.6174623425184201,
+      "win_rate": 0.5357142857142857,
+      "generation": 10
+    },
+    {
+      "indicator": "rsi",
+      "param1": 0.34269391713829395,
+      "param2": 0.10503553442902246,
+      "param3": 0.3917008054550459,
+      "logic": "mean_reversion",
+      "fitness": 0.4722327592752389,
+      "avg_return": 0.024013404766890917,
+      "avg_sharpe": 0.7801313684224529,
+      "win_rate": 0.5099206349206349,
+      "generation": 10
+    }
+  ],
+  "evolution_log": [
+    {
+      "cycle": 1,
+      "champion": {
+        "indicator": "bollinger",
+        "param1": 0.5596412481881449,
+        "param2": 0.9846912577503716,
+        "param3": 0.5162902577024868,
+        "logic": "reversal",
+        "fitness": 0.26560709945910105,
+        "avg_return": 0.023141922100832237,
+        "avg_sharpe": 0.24933987850069986,
+        "win_rate": 0.5297619047619048,
+        "generation": 10
+      },
+      "timestamp": "2026-01-27T23:44:13.370582"
+    },
+    {
+      "cycle": 2,
+      "champion": {
+        "indicator": "macd",
+        "param1": 0.11853919829926002,
+        "param2": 0.9655536936127463,
+        "param3": 0.6437525695710895,
+        "logic": "breakout",
+        "fitness": 0.2891196119547616,
+        "avg_return": 0.0177138852429906,
+        "avg_sharpe": 0.3121921873832325,
+        "win_rate": 0.5297619047619048,
+        "generation": 10
+      },
+      "timestamp": "2026-01-27T23:44:13.494828"
+    },
+    {
+      "cycle": 3,
+      "champion": {
+        "indicator": "macd",
+        "param1": 0.2663184961101752,
+        "param2": 0.8254835160989169,
+        "param3": 0.6818611234835364,
+        "logic": "mean_reversion",
+        "fitness": 0.21348505178673588,
+        "avg_return": 0.007427054781651904,
+        "avg_sharpe": 0.15165424314250553,
+        "win_rate": 0.501984126984127,
+        "generation": 10
+      },
+      "timestamp": "2026-01-27T23:44:13.614511"
+    },
+    {
+      "cycle": 4,
+      "champion": {
+        "indicator": "bollinger",
+        "param1": 0.4688468724254224,
+        "param2": 0.3056750112135021,
+        "param3": 0.7776628890374953,
+        "logic": "momentum",
+        "fitness": 0.41650166583516574,
+        "avg_return": 0.029341477045039824,
+        "avg_sharpe": 0.6174623425184201,
+        "win_rate": 0.5357142857142857,
+        "generation": 10
+      },
+      "timestamp": "2026-01-27T23:44:13.737144"
+    },
+    {
+      "cycle": 5,
+      "champion": {
+        "indicator": "rsi",
+        "param1": 0.34269391713829395,
+        "param2": 0.10503553442902246,
+        "param3": 0.3917008054550459,
+        "logic": "mean_reversion",
+        "fitness": 0.4722327592752389,
+        "avg_return": 0.024013404766890917,
+        "avg_sharpe": 0.7801313684224529,
+        "win_rate": 0.5099206349206349,
+        "generation": 10
+      },
+      "timestamp": "2026-01-27T23:44:13.868536"
+    }
+  ]
+}
