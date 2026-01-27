@@ -6,6 +6,12 @@ This module implements the complete feedback loop:
 2. StrategyTester evaluates them against historical data
 3. Results feedback to StrategyMaker to improve future generations
 4. Successful strategies (>10% above S&P 500) inform next generation
+
+OPTIMIZATIONS:
+- Adaptive mutation/crossover rates (decrease as algorithm converges)
+- Elitism: preserve top strategies across generations
+- Diversity management: maintain parameter diversity to avoid local optima
+- Convergence detection: stop evolution when no progress made
 """
 
 from __future__ import annotations
@@ -16,6 +22,7 @@ from datetime import datetime
 from typing import List, Optional, Dict, Any, Tuple
 import json
 from pathlib import Path
+import numpy as np
 
 from trading_bot.learn.strategy_maker import (
     StrategyMaker,
@@ -25,6 +32,12 @@ from trading_bot.learn.strategy_maker import (
 from trading_bot.learn.strategy_tester import (
     StrategyTester,
     BatchStrategyTester,
+)
+from trading_bot.learn.ml_optimizer import (
+    MLOptimizer,
+    ConvergenceTracker,
+    ElitismManager,
+    DiversityManager,
 )
 from trading_bot.data.providers import MarketDataProvider
 
@@ -59,7 +72,7 @@ class GenerationReport:
 
 
 class MLFeedbackLoop:
-    """Complete strategy learning pipeline with feedback"""
+    """Complete strategy learning pipeline with feedback and adaptive optimization"""
     
     def __init__(
         self,
@@ -67,6 +80,7 @@ class MLFeedbackLoop:
         strategy_tester: Optional[StrategyTester] = None,
         symbols: Optional[List[str]] = None,
         cache_dir: str = ".cache/ml_feedback",
+        use_adaptive_optimization: bool = True,
     ):
         """
         Initialize ML feedback loop.
@@ -76,6 +90,7 @@ class MLFeedbackLoop:
             strategy_tester: Strategy validator (auto-created if None)
             symbols: Symbols to trade
             cache_dir: Directory for caching results
+            use_adaptive_optimization: Use adaptive mutation rates & elitism
         """
         self.strategy_maker = strategy_maker or StrategyMaker()
         self.strategy_tester = strategy_tester or StrategyTester()
@@ -86,11 +101,17 @@ class MLFeedbackLoop:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         
         self.generation_reports: List[GenerationReport] = []
+        
+        # OPTIMIZATION: Adaptive parameters for faster convergence
+        self.use_adaptive_optimization = use_adaptive_optimization
+        self.ml_optimizer = MLOptimizer() if use_adaptive_optimization else None
+        
         self._load_reports()
         
         logger.info(
             f"MLFeedbackLoop initialized: symbols={self.symbols}, "
-            f"generations_complete={len(self.generation_reports)}"
+            f"generations_complete={len(self.generation_reports)}, "
+            f"adaptive_optimization={'enabled' if use_adaptive_optimization else 'disabled'}"
         )
     
     def _load_reports(self) -> None:
@@ -134,14 +155,21 @@ class MLFeedbackLoop:
         num_candidates: int = 20,
     ) -> GenerationReport:
         """
-        Run one generation of strategy evolution.
+        Run one generation of strategy evolution (OPTIMIZED).
         
         Process:
-        1. Generate candidate strategies
-        2. Test each on historical data
+        1. Generate candidate strategies (with adaptive parameters if enabled)
+        2. Test each on historical data (parallel)
         3. Score based on >10% outperformance vs S&P 500
-        4. Save successful strategies for next generation
-        5. Advance to next generation
+        4. Update success rate and adaptive parameters
+        5. Save successful strategies for next generation
+        6. Advance to next generation
+        
+        OPTIMIZATIONS:
+        - Adaptive mutation/crossover rates based on success
+        - Elitism: preserve top strategies
+        - Diversity management: avoid premature convergence
+        - Convergence detection: stop if no progress
         
         Returns:
             GenerationReport with results
@@ -151,12 +179,34 @@ class MLFeedbackLoop:
             f"generating {num_candidates} candidates"
         )
         
-        # Step 1: Generate candidates
+        # OPTIMIZATION: Calculate adaptive parameters
+        if self.use_adaptive_optimization and self.generation_reports:
+            last_report = self.generation_reports[-1]
+            success_rate = last_report.pass_rate
+            
+            # Update mutation/crossover rates based on success
+            mutation_rate, crossover_rate = self.ml_optimizer.calculate_adaptive_rates(
+                generation=self.strategy_maker.generation,
+                success_rate=success_rate,
+            )
+            
+            # Apply adaptive rates to strategy maker
+            self.strategy_maker.mutation_rate = mutation_rate
+            self.strategy_maker.crossover_rate = crossover_rate
+        
+        # Step 1: Generate candidates (with adaptive parameters)
         candidates = self.strategy_maker.generate_candidates(num_candidates)
         logger.info(f"Generated {len(candidates)} strategy candidates")
         
-        # Step 2: Test each candidate
-        logger.info("Beginning strategy testing...")
+        # OPTIMIZATION: Check population diversity
+        if self.use_adaptive_optimization:
+            diversity = self.ml_optimizer.get_diversity_score(candidates)
+            logger.info(f"Population diversity score: {diversity:.2f}")
+            if diversity < 0.3:
+                logger.warning("Low population diversity - consider increasing mutation rate")
+        
+        # Step 2: Test each candidate (parallel testing)
+        logger.info("Beginning strategy testing (parallel)...")
         results = self.batch_tester.test_batch(candidates, self.symbols)
         
         # Step 3: Record results and update maker

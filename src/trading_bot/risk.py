@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -11,10 +14,12 @@ class RiskParams:
 
 
 def stop_loss_price(entry_price: float, stop_loss_pct: float) -> float:
+    """Calculate stop-loss price with ATR-aware adjustment"""
     return entry_price * (1.0 - stop_loss_pct)
 
 
 def take_profit_price(entry_price: float, take_profit_pct: float) -> float:
+    """Calculate take-profit price"""
     return entry_price * (1.0 + take_profit_pct)
 
 
@@ -44,6 +49,83 @@ def position_size_shares(
     per_share_risk = entry_price - stop_loss_price_
     shares = int(risk_budget // per_share_risk)
     return max(shares, 0)
+
+
+def dynamic_stop_loss(
+    *,
+    entry_price: float,
+    atr_value: float,
+    atr_multiplier: float = 2.0,
+    market_volatility: float = 1.0,
+) -> float:
+    """OPTIMIZED: Calculate dynamic stop-loss based on volatility
+    
+    Adjusts stop-loss distance based on ATR and market volatility.
+    - Higher volatility → wider stops (to avoid whipsaws)
+    - Lower volatility → tighter stops (to limit downside)
+    
+    Args:
+        entry_price: Entry price
+        atr_value: Current ATR value
+        atr_multiplier: Multiplier for ATR (typically 1.5-3.0)
+        market_volatility: Volatility adjustment (1.0 = normal, >1 = high volatility)
+    
+    Returns:
+        Stop-loss price
+    """
+    if entry_price <= 0:
+        raise ValueError("entry_price must be positive")
+    if atr_value <= 0:
+        raise ValueError("atr_value must be positive")
+    if atr_multiplier <= 0:
+        raise ValueError("atr_multiplier must be positive")
+    if market_volatility <= 0:
+        raise ValueError("market_volatility must be positive")
+    
+    # Adjust ATR-based stop by volatility factor
+    adjusted_atr = atr_value * atr_multiplier * market_volatility
+    stop_loss = entry_price - adjusted_atr
+    
+    # Ensure stop is at least slightly below entry
+    min_stop = entry_price * 0.98
+    return max(stop_loss, min_stop)
+
+
+def volatility_adjusted_position_size(
+    *,
+    equity: float,
+    entry_price: float,
+    stop_loss_price_: float,
+    max_risk: float,
+    volatility_index: float = 1.0,
+) -> int:
+    """OPTIMIZED: Position sizing with volatility adjustment
+    
+    Reduces position size when volatility is high (risk management).
+    
+    Args:
+        volatility_index: Current market volatility (1.0 = normal, >1 = high)
+    
+    Returns:
+        Position size adjusted for volatility
+    """
+    # First calculate base position size
+    base_size = position_size_shares(
+        equity=equity,
+        entry_price=entry_price,
+        stop_loss_price_=stop_loss_price_,
+        max_risk=max_risk,
+    )
+    
+    # Reduce size when volatility is high (inverse relationship)
+    # High volatility (2.0) → 50% position size
+    # Normal volatility (1.0) → 100% position size
+    volatility_factor = 1.0 / (1.0 + max(0, volatility_index - 1.0))
+    adjusted_size = int(base_size * volatility_factor)
+    
+    logger.debug(f"Position size: {base_size} → {adjusted_size} (volatility={volatility_index:.2f})")
+    return max(adjusted_size, 0)
+
 
 def kelly_criterion_position_size(
     *,

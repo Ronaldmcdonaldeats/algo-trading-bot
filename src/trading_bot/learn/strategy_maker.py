@@ -6,6 +6,11 @@ This module creates new trading strategies by:
 2. Combining winning indicators and thresholds
 3. Applying mutations and crossovers to create variations
 4. Feeding results back to the bot for continuous improvement
+
+OPTIMIZATIONS:
+- Centralized parameter definitions (parameter_utils.py) - single source of truth
+- Reduced code duplication: mutate, crossover, random generation
+- Improved parameter space management with ParameterOps utility class
 """
 
 from __future__ import annotations
@@ -18,6 +23,8 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
 import numpy as np
+
+from trading_bot.learn.parameter_utils import ParameterOps, ParameterSpace
 
 logger = logging.getLogger(__name__)
 
@@ -176,56 +183,16 @@ class StrategyMaker:
             logger.error(f"Failed to save strategy history: {e}")
     
     def _generate_random_parameters(self) -> Dict[str, float]:
-        """Generate random strategy parameters"""
-        return {
-            "rsi_period": random.choice([7, 14, 21]),
-            "rsi_buy": float(random.randint(20, 40)),
-            "rsi_sell": float(random.randint(60, 80)),
-            "macd_fast": float(random.choice([8, 12, 13])),
-            "macd_slow": float(random.choice([17, 26, 27])),
-            "macd_signal": float(random.choice([5, 9, 11])),
-            "atr_period": float(random.choice([10, 14, 20])),
-            "atr_multiplier": float(random.uniform(1.5, 3.0)),
-            "momentum_period": float(random.choice([10, 20, 30])),
-            "volatility_threshold": float(random.uniform(0.01, 0.05)),
-            "position_size_pct": float(random.uniform(0.02, 0.10)),
-        }
+        """OPTIMIZED: Generate random parameters using centralized ParameterOps"""
+        return ParameterOps.generate_random()
     
     def _mutate_parameters(self, params: Dict[str, float]) -> Dict[str, float]:
-        """Mutate strategy parameters randomly"""
-        mutated = params.copy()
-        
-        for key in mutated:
-            if random.random() < 0.3:  # 30% chance to mutate each param
-                if "period" in key or "fast" in key or "slow" in key:
-                    # Discrete period values
-                    mutated[key] = float(random.choice(
-                        [int(mutated[key]) - 1, int(mutated[key]), int(mutated[key]) + 1]
-                    ))
-                elif "threshold" in key or "multiplier" in key or "size" in key:
-                    # Continuous values - add small random change
-                    change = mutated[key] * random.uniform(-0.2, 0.2)
-                    mutated[key] = max(0.001, mutated[key] + change)
-                elif "buy" in key:
-                    # RSI buy threshold (20-40)
-                    mutated[key] = max(20.0, min(40.0, mutated[key] + random.uniform(-5, 5)))
-                elif "sell" in key:
-                    # RSI sell threshold (60-80)
-                    mutated[key] = max(60.0, min(80.0, mutated[key] + random.uniform(-5, 5)))
-        
-        return mutated
+        """OPTIMIZED: Mutate parameters using centralized ParameterOps"""
+        return ParameterOps.mutate(params, mutation_rate=self.mutation_rate)
     
     def _crossover_parameters(self, params1: Dict[str, float], params2: Dict[str, float]) -> Dict[str, float]:
-        """Combine parameters from two strategies"""
-        offspring = {}
-        
-        for key in params1:
-            if random.random() < 0.5:
-                offspring[key] = params1[key]
-            else:
-                offspring[key] = params2.get(key, params1[key])
-        
-        return offspring
+        """OPTIMIZED: Crossover parameters using centralized ParameterOps"""
+        return ParameterOps.crossover(params1, params2)
     
     def generate_candidates(self, num_candidates: int = 10) -> List[StrategyCandidate]:
         """
