@@ -49,7 +49,8 @@ class TestVectorizedMetrics:
         assert isinstance(metrics, dict)
         assert 'total_return' in metrics
         assert 'max_return' in metrics
-        assert metrics['total_return'] == pytest.approx(expected_total_return, abs=0.001)
+        assert metrics['total_return'] == pytest.approx(expected_total_return * 100, abs=0.1)
+        assert metrics['max_return'] == expected_max_return
     
     def test_calculate_metrics_handles_edge_cases(self):
         """Test vectorized metrics with minimal data"""
@@ -61,22 +62,26 @@ class TestVectorizedMetrics:
         
         metrics = tester._calculate_metrics_vectorized(equity_curve, trades)
         
-        assert metrics['total_return'] == pytest.approx(0.01, abs=0.001)
-        assert metrics['max_return'] > 0
+        # Result is in percentage (1.0, not 0.01)
+        assert metrics['total_return'] == pytest.approx(1.0, abs=0.01)
+        assert metrics['max_return'] == 10100.0
     
     def test_benchmark_return_vectorized_calculation(self):
         """Test S&P 500 benchmark calculation is vectorized"""
         tester = StrategyTester()
         
-        # Create mock price data
-        prices = np.array([100, 102, 101, 103, 105], dtype=np.float64)
+        # Create mock price data as DataFrame
+        ohlcv = pd.DataFrame({
+            'close': [100, 102, 101, 103, 105],
+            tester.benchmark_symbol: [100, 102, 101, 103, 105],
+        })
         
         # Vectorized calculation should work
-        with patch.object(tester, '_get_market_data', return_value=prices):
-            result = tester._get_benchmark_return_vectorized('SPY', '2024-01-01', '2024-01-05')
-            
-            # Result should be a float
-            assert isinstance(result, (float, np.floating))
+        result = tester._get_benchmark_return_vectorized(ohlcv)
+        
+        # Result should be a float (5% gain: 105 vs 100)
+        assert isinstance(result, (float, np.floating))
+        assert result == pytest.approx(5.0, abs=0.1)
 
 
 class TestDataCaching:

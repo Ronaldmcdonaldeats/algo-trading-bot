@@ -359,6 +359,7 @@ class StrategyTester:
         if len(equity_curve) < 2:
             return {
                 "total_return": 0.0,
+                "max_return": 0.0,
                 "sharpe": 0.0,
                 "max_drawdown": 0.0,
                 "win_rate": 0.0,
@@ -368,6 +369,9 @@ class StrategyTester:
         
         # Total return (vectorized)
         total_return = ((equity[-1] - equity[0]) / equity[0]) * 100.0
+        
+        # Max return (peak equity)
+        max_return = float(np.max(equity))
         
         # Returns (vectorized)
         returns = np.diff(equity) / equity[:-1]
@@ -387,6 +391,7 @@ class StrategyTester:
         
         return {
             "total_return": float(total_return),
+            "max_return": float(max_return),
             "sharpe": float(sharpe),
             "max_drawdown": float(max_drawdown),
             "win_rate": float(win_rate),
