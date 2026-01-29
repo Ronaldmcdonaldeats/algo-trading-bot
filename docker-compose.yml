@@ -41,7 +41,7 @@ services:
       retries: 5
     restart: unless-stopped
 
-  # Core API Service - Strategy execution, trade management, backtest engine
+  # Core API Service - Health checks, status monitoring
   api:
     build:
       context: .
@@ -56,18 +56,20 @@ services:
       DB_URL: postgresql://trading_user:${DB_PASSWORD:-changeme}@postgres:5432/trading_bot
       REDIS_URL: redis://redis:6379/0
       MODE: paper  # paper or live
+      DEPLOYMENT_ENV: production
+      STRATEGY: gen364
     volumes:
       - ./config:/app/config
       - ./logs:/app/logs
       - ./data:/app/data
       - ./backups:/app/backups
-    command: gunicorn --bind 0.0.0.0:5001 --workers 2 --worker-class sync --timeout 300 --error-logfile - --access-logfile - trading_bot.web_api:app
+    command: gunicorn --bind 0.0.0.0:5001 --workers 2 --worker-class sync --timeout 300 --error-logfile - --access-logfile - trading_bot.health_api:app
     depends_on:
       - postgres
       - redis
     restart: unless-stopped
 
-  # Web Dashboard - Real-time monitoring, P&L tracking, charts
+  # Web Dashboard - Health & status monitoring
   dashboard:
     build:
       context: .
@@ -81,9 +83,11 @@ services:
       API_URL: http://api:5001
       REDIS_URL: redis://redis:6379/0
       DB_URL: postgresql://trading_user:${DB_PASSWORD:-changeme}@postgres:5432/trading_bot
+      DEPLOYMENT_ENV: production
+      STRATEGY: gen364
     volumes:
       - ./logs:/app/logs
-    command: gunicorn --bind 0.0.0.0:5000 --workers 2 --worker-class sync --timeout 300 --error-logfile - --access-logfile - trading_bot.web_api:app
+    command: gunicorn --bind 0.0.0.0:5000 --workers 2 --worker-class sync --timeout 300 --error-logfile - --access-logfile - trading_bot.health_api:app
     depends_on:
       - api
       - postgres
