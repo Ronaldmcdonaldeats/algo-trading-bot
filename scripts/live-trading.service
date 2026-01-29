@@ -1,0 +1,38 @@
+[Unit]
+Description=24/7 Live Trading Bot Service
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/bot
+ExecStart=/bin/bash /home/ubuntu/bot/scripts/start_live_trading_24_7.sh
+
+# Restart policy: restart on failure, with exponential backoff
+Restart=always
+RestartSec=30
+
+# Environment setup
+Environment="HOME=/home/ubuntu"
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# Security hardening
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/home/ubuntu/bot /var/run/docker.sock
+
+# Resource limits
+MemoryLimit=4G
+CPUQuota=80%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=live-trading
+
+[Install]
+WantedBy=multi-user.target
