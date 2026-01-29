@@ -107,10 +107,15 @@ services:
       REDIS_URL: redis://redis:6379/0
       MODE: ${MODE:-paper}
       CONFIG_FILE: /app/config/evolved_strategy_gen364.yaml
+      APCA_API_KEY_ID: ${APCA_API_KEY_ID}
+      APCA_API_SECRET_KEY: ${APCA_API_SECRET_KEY}
+      APCA_API_BASE_URL: ${APCA_API_BASE_URL:-https://paper-api.alpaca.markets}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
     volumes:
       - ./config:/app/config
       - ./logs:/app/logs
       - ./data:/app/data
+      - ./scripts:/app/scripts
     command: python -u scripts/trading_engine_live.py
     depends_on:
       - postgres
