@@ -239,20 +239,32 @@ docker logs -f trading-bot-strategy
 
 ### PostgreSQL Database
 
+**Get credentials from .env file:**
+```bash
+# SSH to instance and check .env
+ssh -i "key" ubuntu@129.213.99.89
+cat ~/.env | grep POSTGRES
+# Look for: POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+```
+
 **Access from local machine (via SSH tunnel):**
 ```powershell
 # Terminal 1: Create tunnel
 ssh -i "key" -L 5432:localhost:5432 ubuntu@129.213.99.89
 
 # Terminal 2: Connect with psql (if installed)
-psql -h localhost -U trading_user -d trading_bot
-# Password: (check .env file)
+# Replace $USER, $PASS, $DB with values from .env
+psql -h localhost -U $POSTGRES_USER -d $POSTGRES_DB
+# Enter password when prompted (from POSTGRES_PASSWORD in .env)
 ```
 
 **Access from within instance:**
 ```bash
 ssh -i "key" ubuntu@129.213.99.89
-docker exec -it trading-bot-db psql -U trading_user -d trading_bot
+cd ~/bot
+# Load .env and connect
+set -a && source .env && set +a
+docker exec -it trading-bot-db psql -U $POSTGRES_USER -d $POSTGRES_DB
 ```
 
 ---
@@ -292,10 +304,18 @@ docker exec -it trading-bot-db psql -U trading_user -d trading_bot
    ```bash
    ssh -i "key" ubuntu@129.213.99.89
    cd ~/bot
+   
+   # Load environment variables from .env
+   set -a && source .env && set +a
+   
+   # Pull and rebuild with credentials
    git pull origin master  # Pull secure changes
    docker-compose down
    docker-compose build
    docker-compose up -d
+   
+   # Verify services with loaded credentials
+   docker-compose logs -f
    ```
 
 2. **Test Secure Access**
@@ -339,15 +359,27 @@ ssh -i "C:\Users\Ronald mcdonald\Downloads\ssh-key-2026-01-29.key" -L 5001:local
 
 # SSH to instance
 ssh -i "C:\Users\Ronald mcdonald\Downloads\ssh-key-2026-01-29.key" ubuntu@129.213.99.89
+```
+
+```bash
+# Once SSH'd in:
+
+# Load credentials and environment variables from .env
+set -a && source ~/.env && set +a
 
 # Update deployment
 git pull origin master
 docker-compose down
+docker-compose build
 docker-compose up -d
 
 # Check status
 docker ps
 docker logs trading-bot-strategy
+
+# Access database with credentials from .env
+set -a && source .env && set +a
+docker exec -it trading-bot-db psql -U $POSTGRES_USER -d $POSTGRES_DB
 ```
 
 ---
