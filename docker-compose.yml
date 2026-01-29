@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
       POSTGRES_DB: trading_bot
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"  # Only accessible locally (localhost)
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init.sql
@@ -30,7 +30,7 @@ services:
     image: redis:7-alpine
     container_name: trading-bot-cache
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"  # Only accessible locally (localhost)
     volumes:
       - redis_data:/data
     healthcheck:
@@ -47,7 +47,7 @@ services:
       dockerfile: Dockerfile
     container_name: trading-bot-api
     ports:
-      - "5001:5001"
+      - "127.0.0.1:5001:5001"  # Only accessible locally via SSH tunnel
     environment:
       PYTHONUNBUFFERED: "1"
       FLASK_ENV: production
@@ -75,7 +75,7 @@ services:
       dockerfile: Dockerfile
     container_name: trading-bot-dashboard
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"  # Only accessible locally via SSH tunnel
     environment:
       PYTHONUNBUFFERED: "1"
       FLASK_ENV: production
