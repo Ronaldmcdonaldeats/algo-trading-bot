@@ -23,6 +23,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Retry configuration for API requests
+MAX_RETRIES = 3
+BASE_RETRY_DELAY = 1  # seconds
+
 class AlpacaTrader:
     """Interface with Alpaca API for live paper trading"""
     
@@ -35,26 +39,71 @@ class AlpacaTrader:
             'APCA-API-SECRET-KEY': self.api_secret,
         }
         self.mode = os.getenv('MODE', 'paper')
+        self.consecutive_failures = 0
         logger.info(f"✓ Alpaca Trader initialized (Mode: {self.mode})")
+    
+    def _retry_request(self, method: str, url: str, **kwargs) -> Optional[requests.Response]:
+        """Execute request with exponential backoff retry logic"""
+        for attempt in range(MAX_RETRIES):
+            try:
+                if method == 'GET':
+                    resp = requests.get(url, **kwargs)
+                elif method == 'POST':
+                    resp = requests.post(url, **kwargs)
+                else:
+                    return None
+                
+                resp.raise_for_status()
+                self.consecutive_failures = 0  # Reset on success
+                return resp
+            
+            except requests.Timeout:
+                if attempt < MAX_RETRIES - 1:
+                    delay = BASE_RETRY_DELAY * (2 ** attempt)
+                    logger.warning(f"Request timeout, retrying in {delay}s (attempt {attempt + 1}/{MAX_RETRIES})")
+                    time.sleep(delay)
+                else:
+                    self.consecutive_failures += 1
+                    logger.error(f"Request timeout after {MAX_RETRIES} attempts")
+                    return None
+            
+            except requests.ConnectionError:
+                if attempt < MAX_RETRIES - 1:
+                    delay = BASE_RETRY_DELAY * (2 ** attempt)
+                    logger.warning(f"Connection error, retrying in {delay}s (attempt {attempt + 1}/{MAX_RETRIES})")
+                    time.sleep(delay)
+                else:
+                    self.consecutive_failures += 1
+                    logger.error(f"Connection failed after {MAX_RETRIES} attempts")
+                    return None
+            
+            except Exception as e:
+                self.consecutive_failures += 1
+                logger.error(f"Request failed: {type(e).__name__}")
+                return None
+        
+        return None
     
     def get_account(self) -> Dict:
         """Get account info"""
         try:
-            resp = requests.get(f"{self.base_url}/v2/account", headers=self.headers)
-            resp.raise_for_status()
-            return resp.json()
+            resp = self._retry_request('GET', f"{self.base_url}/v2/account", headers=self.headers, timeout=10)
+            if resp:
+                return resp.json()
+            return {}
         except Exception as e:
-            logger.error(f"✗ Failed to get account: {e}")
+            logger.error(f"✗ Failed to get account: {type(e).__name__}")
             return {}
     
     def get_positions(self) -> List[Dict]:
         """Get current positions"""
         try:
-            resp = requests.get(f"{self.base_url}/v2/positions", headers=self.headers)
-            resp.raise_for_status()
-            return resp.json()
+            resp = self._retry_request('GET', f"{self.base_url}/v2/positions", headers=self.headers, timeout=10)
+            if resp:
+                return resp.json()
+            return []
         except Exception as e:
-            logger.error(f"✗ Failed to get positions: {e}")
+            logger.error(f"✗ Failed to get positions: {type(e).__name__}")
             return []
     
     def submit_order(self, symbol: str, qty: int, side: str, order_type: str = 'market') -> Dict:
@@ -67,30 +116,33 @@ class AlpacaTrader:
                 'type': order_type,
                 'time_in_force': 'day',
             }
-            resp = requests.post(f"{self.base_url}/v2/orders", headers=self.headers, json=data)
-            resp.raise_for_status()
-            order = resp.json()
-            logger.info(f"✓ ORDER SUBMITTED: {side.upper()} {qty} {symbol} @ market")
-            return order
+            resp = self._retry_request('POST', f"{self.base_url}/v2/orders", headers=self.headers, json=data, timeout=10)
+            if resp:
+                order = resp.json()
+                logger.info(f"✓ ORDER SUBMITTED: {side.upper()} {qty} {symbol} @ market")
+                return order
+            return {}
         except Exception as e:
-            logger.error(f"✗ Failed to submit order: {e}")
+            logger.error(f"✗ Failed to submit order: {type(e).__name__}")
             return {}
     
     def get_bars(self, symbol: str, timeframe: str = '5min', limit: int = 100) -> pd.DataFrame:
         """Get historical bars (OHLCV data)"""
         try:
-            resp = requests.get(
+            resp = self._retry_request(
+                'GET',
                 f"{self.base_url}/v2/stocks/{symbol}/bars",
                 headers=self.headers,
-                params={'timeframe': timeframe, 'limit': limit}
+                params={'timeframe': timeframe, 'limit': limit},
+                timeout=10
             )
-            resp.raise_for_status()
-            data = resp.json()
-            if 'bars' in data:
-                return pd.DataFrame(data['bars'])
+            if resp:
+                data = resp.json()
+                if 'bars' in data:
+                    return pd.DataFrame(data['bars'])
             return pd.DataFrame()
         except Exception as e:
-            logger.error(f"✗ Failed to get bars for {symbol}: {e}")
+            logger.error(f"✗ Failed to get bars for {symbol}: {type(e).__name__}")
             return pd.DataFrame()
 
 
@@ -205,8 +257,10 @@ class DiscordNotifier:
             resp = requests.post(self.webhook_url, json=data, timeout=5)
             resp.raise_for_status()
             logger.debug(f"✓ Discord notification sent")
+        except requests.Timeout:
+            logger.error(f"✗ Discord notification failed: Webhook timeout (API unresponsive)")
         except Exception as e:
-            logger.error(f"✗ Discord notification failed: {e}")
+            logger.error(f"✗ Discord notification failed: {type(e).__name__}")
     
     def send_trade(self, action: str, symbol: str, qty: int, price: float, signal: float):
         """Notify of trade execution"""
@@ -267,6 +321,13 @@ class TradingEngine:
             now = datetime.now()
             
             try:
+                # Circuit breaker: stop if too many consecutive API failures
+                if self.alpaca.consecutive_failures >= 5:
+                    logger.error("⚠️ CIRCUIT BREAKER ACTIVATED: Too many API failures. Waiting 5 minutes before retry...")
+                    time.sleep(300)
+                    self.alpaca.consecutive_failures = 0
+                    continue
+                
                 # Check market status
                 market_open = self.is_market_open()
                 status = "🟢 OPEN" if market_open else "🔴 CLOSED"
@@ -332,7 +393,7 @@ class TradingEngine:
                                         self.discord.send_trade('SELL', symbol, qty, current_price, self.strategy.calculate_signal(df))
                     
                     except Exception as e:
-                        logger.error(f"Error processing {symbol}: {e}")
+                        logger.error(f"Error processing {symbol}: {type(e).__name__}")
                 
                 logger.info(f"✓ Trades executed: {trades_today} | Next check in 5 minutes")
                 time.sleep(300)  # Check every 5 minutes
@@ -341,7 +402,7 @@ class TradingEngine:
                 logger.info("\n✓ Trading engine stopped by user")
                 break
             except Exception as e:
-                logger.error(f"✗ Unexpected error: {e}")
+                logger.error(f"✗ Unexpected error: {type(e).__name__}")
                 time.sleep(30)
 
 
