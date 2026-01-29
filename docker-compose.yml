@@ -61,7 +61,7 @@ services:
       - ./logs:/app/logs
       - ./data:/app/data
       - ./backups:/app/backups
-    command: gunicorn --bind 0.0.0.0:5001 --workers 2 --worker-class sync --timeout 300 --error-logfile - --access-logfile - trading_bot.api:app
+    command: gunicorn --bind 0.0.0.0:5001 --workers 2 --worker-class sync --timeout 300 --error-logfile - --access-logfile - trading_bot.web_api:app
     depends_on:
       - postgres
       - redis
@@ -83,7 +83,7 @@ services:
       DB_URL: postgresql://trading_user:${DB_PASSWORD:-changeme}@postgres:5432/trading_bot
     volumes:
       - ./logs:/app/logs
-    command: gunicorn --bind 0.0.0.0:5000 --workers 2 --worker-class sync --timeout 300 --error-logfile - --access-logfile - trading_bot.dashboard:app
+    command: gunicorn --bind 0.0.0.0:5000 --workers 2 --worker-class sync --timeout 300 --error-logfile - --access-logfile - trading_bot.web_api:app
     depends_on:
       - api
       - postgres
