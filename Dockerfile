@@ -36,6 +36,8 @@ RUN python -m pip install --no-cache-dir --no-index --find-links /wheels \
 
 # Copy application code
 COPY src /app/src
+COPY scripts /app/scripts
+COPY config /app/config
 COPY pyproject.toml /app/
 
 # Install app
