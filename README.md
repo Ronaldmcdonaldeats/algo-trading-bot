@@ -1,60 +1,176 @@
-# Algo Trading Bot - Ultimate Hybrid Strategy
+# 🤖 Algo Trading Bot - 24/7 Automated Trading
 
-> Production-ready algorithmic trading bot with 426% backtest return (beats SPY by 10%+)
+> Fully automated trading bot running on Oracle Cloud with real-time Discord alerts
 
-## 🚀 Quick Start
+## ✨ Current Status
 
-### Docker (Recommended)
+**Status**: ✅ **LIVE** (24/7 trading active on Oracle Cloud)  
+**Strategy**: Gen 364 (Genetic Algorithm Evolved)  
+**Performance**: +7.32% backtest return, Sharpe Ratio 1.05  
+**Monitoring**: Discord webhooks + Alpaca dashboard  
+**Next Trading**: Thursday, January 30, 2026 @ 9:30 AM EST
+
+---
+
+## 🎯 Quick Start
+
+### Monitor Your Trading
+
+**1. Discord (Easiest)**
+- Check your Discord channel for real-time trade alerts
+- See every trade, profit/loss, and market events
+
+**2. Alpaca Dashboard**
+- Go to: https://app.alpaca.markets
+- View all orders and positions
+- Monitor P/L in real-time
+
+**3. View Logs (Technical)**
 ```bash
-docker-compose up -d
-# Dashboard: http://localhost:5000
-# Database: localhost:5432
+ssh -i "key" ubuntu@129.213.99.89
+tail -f ~/bot/logs/live_trading/live_trading_24_7.log
 ```
 
-### Local
-```bash
-pip install -e .
-python -m trading_bot paper --strategy ultimate_hybrid --symbols AAPL,MSFT,GOOGL
-```
+---
+
+## 📚 Documentation
+
+### **START HERE**: [COMPLETE_DEPLOYMENT_GUIDE.md](COMPLETE_DEPLOYMENT_GUIDE.md)
+
+Master documentation covering everything:
+- ✅ System overview & architecture
+- ✅ 24/7 live trading setup
+- ✅ Security configuration  
+- ✅ Discord integration
+- ✅ Monitoring & logging
+- ✅ Alpaca integration
+- ✅ Troubleshooting
+- ✅ Quick commands reference
 
 ---
 
 ## 📊 Features
 
-### Ultimate Hybrid Strategy
-- **12 Technical Indicators:** Multi-timeframe momentum, mean reversion, volatility detection
-- **Multi-timeframe Analysis:** 5/20/50/200 day moving averages
-- **Mean Reversion:** Bollinger Bands for overbought/oversold detection
-- **Volatility Adaptation:** Dynamic position sizing (0.5x - 1.6x) based on market conditions
-- **News Detection:** Gap anomaly and volatility spike detection
-- **Hysteresis:** Prevents whipsaws and false signals
-- **Works in All Markets:** Normal trends, crashes, and uncertain conditions
+### Gen 364 Strategy (Currently Live)
+- **Entry Threshold:** 0.7756
+- **Profit Target:** 12.87%
+- **Stop Loss:** 9.27%
+- **Backtest Return:** +7.32%
+- **Sharpe Ratio:** 1.05
 
-### Performance (26-year backtest)
-- **Total Return:** 426.36% ✅
-- **Annual Return:** ~20% (beats SPY's 10.1% by 10%)
-- **Max Drawdown:** -65.56% (controlled risk)
-- **Avg Drawdown:** -25.90%
+### Ultimate Hybrid Strategy (Backtested Alternative)
+- **26-year backtest:** 426.36% total return
+- **Annual return:** ~20% (beats SPY by 10%)
+- **12 Technical Indicators:** Multi-timeframe analysis
+- **Volatility Adaptation:** Dynamic position sizing
+- **Risk Management:** Stop loss & take profit controls
 
 ### Trading Modes
+- ✅ **24/7 Automated** - Runs continuously on Oracle Cloud
+- ✅ **Market Hours Aware** - Only trades 9:30 AM - 4:00 PM EST weekdays
 - ✅ **Paper Trading** - Backtest strategies with historical data
-- ✅ **Live Trading** - Execute real trades with API keys
-- ✅ **Multiple Strategies** - 20 strategies available (choose any)
-- ✅ **Portfolio Management** - Multi-asset support
-- ✅ **Real-time Dashboard** - Monitor signals, P&L, holdings
+- ✅ **Live Trading** - Execute real trades via Alpaca API
+- ✅ **Auto-Restart** - Recovers automatically from failures
 
 ### Monitoring
-- Real-time signal generation
-- Trade history and logging
+- Real-time Discord notifications
+- Alpaca dashboard integration
+- Trade history logging
+- PostgreSQL database
 - Performance analytics
 - Risk metrics tracking
-- Daily P&L dashboard
 
 ---
 
-## 📖 How to Use
+## 🏗️ Architecture
 
-### 1. Backtest a Strategy
+```
+Your Machine
+    ↓
+SSH Tunnel (Encrypted)
+    ↓
+Oracle Cloud Instance (129.213.99.89)
+    ├→ Systemd Service (live-trading.service)
+    ├→ Docker Containers
+    │   ├→ Dashboard (Flask, Port 5000)
+    │   ├→ API (REST, Port 5001)
+    │   ├→ Strategy Engine
+    │   ├→ PostgreSQL (Port 5432)
+    │   └→ Redis (Port 6379)
+    └→ Alpaca API Integration
+        ├→ Paper/Live Trading
+        ├→ Order Execution
+        └→ Market Data
+```
+
+---
+
+## 📖 How It Works
+
+### Daily Trading Cycle
+
+```
+9:30 AM EST   → Market Opens
+              → Bot detects opening
+              → Strategy begins analyzing
+              → First trades execute
+              → Discord notification sent
+
+Throughout    → Continuous trading
+day           → Positions updated in real-time
+              → P/L tracked
+              → All trades logged
+
+4:00 PM EST   → Market Closes
+              → Positions closed
+              → Daily P/L calculated
+              → Enters standby
+
+Next day      → Cycle repeats
+```
+
+---
+
+## 🔧 Setup & Usage
+
+### 1. Check If Bot Is Running
+```bash
+sudo systemctl status live-trading.service
+```
+
+### 2. View Live Logs
+```bash
+ssh -i "key" ubuntu@129.213.99.89
+tail -f ~/bot/logs/live_trading/live_trading_24_7.log
+```
+
+### 3. Access Services
+
+**Dashboard**
+```bash
+ssh -i "key" -L 5000:localhost:5000 ubuntu@129.213.99.89
+# Then: http://localhost:5000
+```
+
+**API**
+```bash
+ssh -i "key" -L 5001:localhost:5001 ubuntu@129.213.99.89
+# Then: http://localhost:5001
+```
+
+### 4. Manage Service
+```bash
+# Start
+sudo systemctl start live-trading.service
+
+# Stop
+sudo systemctl stop live-trading.service
+
+# Restart
+sudo systemctl restart live-trading.service
+```
+
+### 5. Backtest a Strategy
 ```bash
 python -m trading_bot backtest \
   --strategy ultimate_hybrid \
@@ -64,343 +180,94 @@ python -m trading_bot backtest \
   --end-date 2024-12-31
 ```
 
-### 2. Paper Trading (Simulate Live)
-```bash
-python -m trading_bot paper \
-  --strategy ultimate_hybrid \
-  --symbols AAPL,MSFT,GOOGL,AMZN,NVDA,META,TSLA \
-  --start-cash 100000
-```
+---
 
-### 3. Live Trading (Real Money)
-```bash
-# Set API keys in .env first
-python -m trading_bot live \
-  --strategy ultimate_hybrid \
-  --symbols AAPL,MSFT,GOOGL \
-  --start-cash 10000
-```
+## 🔐 Security
 
-### 4. Docker Deployment
-```bash
-# Start all services
-docker-compose up -d
-
-# View logs
-docker logs -f trading-bot-dashboard
-
-# Stop all services
-docker-compose down
-```
-
-### 5. List Available Strategies
-```bash
-python -m trading_bot list-strategies
-```
-
-Output shows 20 available strategies including:
-- ultimate_hybrid (recommended, 426% return)
-- ultra_ensemble
-- risk_adjusted_trend
-- volatility_adaptive
-- momentum_rsi
-- mean_reversion
-- ...and 14 more
+✅ All ports private (127.0.0.1 only)  
+✅ SSH encryption for all access  
+✅ No hardcoded credentials (.env file)  
+✅ Key-based authentication  
+✅ Full audit trail  
 
 ---
 
-## ⚙️ Configuration
+## 🧪 What's Tested & Working
 
-Edit `configs/default.yaml`:
-
-```yaml
-# Active strategy
-strategy: ultimate_hybrid
-
-# Risk management
-risk:
-  max_risk_per_trade: 0.10      # Max 10% of capital per trade
-  stop_loss_pct: 0.02            # 2% stop loss
-  take_profit_pct: 0.05          # 5% take profit
-
-# Portfolio
-portfolio:
-  target_sector_count: 5         # Max 5 sectors
-```
+✅ Discord webhook - 3 test messages delivered  
+✅ Alpaca API - Paper trading configured  
+✅ Market hours - EST timezone aware  
+✅ Auto-restart - Systemd service enabled  
+✅ Docker - 6 containers running  
+✅ Port security - All ports locked down  
+✅ SSH tunnels - Encrypted access verified  
 
 ---
 
-## 🐳 Docker Deployment
+## 📊 Performance
 
-### System Requirements
-- Docker & Docker Compose
-- 2GB RAM minimum
-- 1GB disk space
+**Gen 364 Strategy:**
+- Backtest Return: +7.32%
+- Sharpe Ratio: 1.05
+- Win Rate: ~60%
+- Profit Target: 12.87%
+- Stop Loss: 9.27%
 
-### Services
-```
-Flask Dashboard:  http://localhost:5000
-PostgreSQL DB:    localhost:5432
-```
-
-### Environment (.env)
-```env
-DB_USER=trading
-DB_PASSWORD=trading
-DB_NAME=trading
-
-# API credentials (for live trading only)
-ALPACA_API_KEY=your_key_here
-ALPACA_API_SECRET=your_secret_here
-```
-
-### Docker Commands
-```bash
-# Build
-docker build -t algo-trading-bot:latest .
-
-# Start
-docker-compose up -d
-
-# Logs
-docker logs -f trading-bot-dashboard
-
-# Stop
-docker-compose down
-
-# Restart
-docker-compose restart
-```
+**Ultimate Hybrid Strategy:**
+- 26-year total return: 426.36%
+- Annual return: ~20%
+- Max drawdown: -65.56%
 
 ---
 
-## 📂 Project Structure
+## 🚀 What Happens Next
 
-```
-algo-trading-bot/
-├── src/trading_bot/              # Main bot code
-│   ├── cli.py                    # Command line interface
-│   ├── engine/                   # Trading engine
-│   ├── strategy/                 # Strategy implementations
-│   ├── broker/                   # Broker integrations
-│   └── data/                     # Data providers
-├── scripts/
-│   └── strategies/
-│       ├── implementations.py    # All 20 strategies
-│       └── factory.py            # Strategy factory
-├── configs/
-│   └── default.yaml              # Configuration
-├── Dockerfile                    # Docker image
-├── docker-compose.yml            # Service orchestration
-└── README.md                     # This file
-```
+### Thursday, January 30, 2026 @ 9:30 AM EST
+
+1. Market opens
+2. Bot detects opening
+3. Strategy analyzes stocks
+4. First trade executes
+5. **Discord notification arrives**
+6. Trade appears on Alpaca dashboard
+7. Trading continues until 4:00 PM EST
+8. **Cycle repeats daily**
+
+**You don't need to do anything** — it runs automatically!
 
 ---
 
-## ⚠️ Warnings & Disclaimers
+## 📞 Quick Commands
 
-### Critical Warnings
-1. **Past Performance ≠ Future Results**
-   - Backtest results (426%) do NOT guarantee future returns
-   - Live markets may behave differently
-   - Slippage, commissions, and gaps can reduce returns
-
-2. **Live Trading Risks**
-   - Only trade with money you can afford to lose
-   - Start with paper trading for 1-3 months first
-   - Use small position sizes initially
-   - Monitor daily vs backtest baseline
-
-3. **Technical Risks**
-   - Network outages can cause missed signals
-   - API failures may delay executions
-   - Database issues could lose trade history
-   - Always maintain backups
-
-4. **Market Risks**
-   - Market crashes can exceed -65% drawdown
-   - Gaps during earnings can trigger unexpected losses
-   - Liquidity issues in small-cap stocks
-   - Sector rotations can bust diversification
-
-### Recommendations
-- ✅ **Validate First:** Run paper trading for 30+ days
-- ✅ **Start Small:** Begin with 1-2 positions
-- ✅ **Monitor Daily:** Check dashboard every day
-- ✅ **Use Stop Loss:** Never disable risk management
-- ✅ **Diversify:** Trade multiple stocks, not just one
-- ✅ **Backup Data:** Regular database backups
-- ✅ **Test Strategies:** Try backtest mode before paper trading
-
-### Not Responsible For
-- ❌ Losses from live trading
-- ❌ Server downtime
-- ❌ API failures
-- ❌ Poor market conditions
-- ❌ User configuration errors
-- ❌ Misuse of strategies
+| Command | Purpose |
+|---------|---------|
+| `sudo systemctl status live-trading.service` | Check if running |
+| `tail -f ~/bot/logs/live_trading/live_trading_24_7.log` | View logs |
+| `https://app.alpaca.markets` | View trades |
+| Discord channel | Get notifications |
 
 ---
 
-## 📄 License
+## ✅ Deployment Status
 
-MIT License
-
-```
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-```
+✅ Bot deployed on Oracle Cloud (129.213.99.89)  
+✅ 24/7 automated trading active  
+✅ Market hours detection working  
+✅ Discord notifications tested  
+✅ Alpaca integration configured  
+✅ All services healthy  
+✅ Auto-restart enabled  
+✅ Fully secured  
 
 ---
 
-## 🔧 Troubleshooting
+## 📝 License
 
-| Issue | Solution |
-|-------|----------|
-| Port 5000 in use | Change in docker-compose.yml: `"8000:5000"` |
-| Database error | `docker-compose down && docker-compose up -d` |
-| No signals | Check logs: `docker logs trading-bot-dashboard` |
-| API auth fails | Verify API keys in .env file |
-| Out of memory | Increase Docker memory or reduce symbols |
+MIT License - See LICENSE file
 
 ---
 
-## 🎯 Strategy Performance Summary
-
-| Strategy | Return | Max DD | Status |
-|----------|--------|--------|--------|
-| **Ultimate Hybrid** | **426.36%** | -65.56% | 🏆 **BEST** |
-| Ultra Ensemble | 421.52% | -70.49% | ✅ Good |
-| Risk Adjusted | 400.90% | -65.10% | ✅ Good |
-| Volatility Adaptive | 310.59% | -79.47% | ✅ Good |
-
-*Backtest: 26 years, 34 stocks, 6,540 trading days each*
-
----
-
-## 💡 Examples
-
-### Example 1: Backtest Ultimate Hybrid on AAPL
-```bash
-python -m trading_bot backtest \
-  --strategy ultimate_hybrid \
-  --symbols AAPL \
-  --start-date 2010-01-01 \
-  --end-date 2024-12-31
-```
-
-### Example 2: Paper Trade 5 Tech Stocks
-```bash
-python -m trading_bot paper \
-  --strategy ultimate_hybrid \
-  --symbols AAPL,MSFT,GOOGL,NVDA,META \
-  --start-cash 50000
-```
-
-### Example 3: Live Trade with Small Position
-```bash
-# 1. Set API keys in .env
-# 2. Run paper trading for validation
-# 3. When confident, start live:
-python -m trading_bot live \
-  --strategy ultimate_hybrid \
-  --symbols AAPL,MSFT,GOOGL \
-  --start-cash 5000
-```
-
-### Example 4: Docker with Custom Config
-```bash
-# Edit configs/default.yaml
-nano configs/default.yaml
-
-# Rebuild and start
-docker build -t algo-trading-bot:latest .
-docker-compose up -d
-```
-
----
-
-## 🚀 Deployment Checklist
-
-- [x] Ultimate Hybrid strategy implemented
-- [x] Tested on 34 stocks (26 years)
-- [x] Beats SPY target (20.1% annual)
-- [x] Docker configured
-- [x] Dashboard ready
-- [x] Paper trading enabled
-- [x] Live trading support
-- [x] Risk management active
-- [x] Monitoring dashboard
-- [x] Production ready
-
----
-
-## 📞 Support & Monitoring
-
-### Check Status
-```bash
-docker ps  # See running containers
-```
-
-### View Logs
-```bash
-docker logs -f trading-bot-dashboard
-```
-
-### Access Dashboard
-```
-http://localhost:5000
-```
-
-### Database Connection
-```
-Host: localhost
-Port: 5432
-User: trading
-Password: trading
-Database: trading
-```
-
----
-
-## 🎓 Next Steps
-
-1. **Test Locally:** `python -m trading_bot backtest --strategy ultimate_hybrid --symbols AAPL`
-2. **Start Docker:** `docker-compose up -d`
-3. **Access Dashboard:** http://localhost:5000
-4. **Paper Trade:** Run for 30+ days to validate
-5. **Go Live:** When confident, add API keys and trade small
-
----
-
-## 📊 Key Metrics
-
-**Backtest (26 years, 34 stocks):**
-- Annual Return: ~20%
-- Total Return: 426.36%
-- Max Drawdown: -65.56%
-- Win Rate: ~55%
-- Trades/Day: 0.5-1.0
-
-**Expected Live:**
-- Similar returns minus commissions/slippage
-- Monitor daily vs backtest
-- Validate 1-3 months before scaling
-
----
-
-**Status:** ✅ Production Ready  
-**Version:** 1.0  
-**Last Updated:** January 25, 2026  
-**Strategy:** Ultimate Hybrid  
+**Status:** 🟢 LIVE & OPERATIONAL  
+**Last Updated:** January 29, 2026  
+**Strategy:** Gen 364 (Evolved)  
+**Platform:** Oracle Cloud
