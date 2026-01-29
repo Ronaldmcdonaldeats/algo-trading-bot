@@ -1,70 +1,42 @@
-{
-  "NORMAL MARKET": {
-    "BUY & HOLD (Baseline)": {
-      "return": 781.3854860631567,
-      "max_drawdown": -65.7767928831639,
-      "avg_drawdown": -48.35582718842706
-    },
-    "Simple Momentum": {
-      "return": 650.09730319106,
-      "max_drawdown": -65.76820575569744,
-      "avg_drawdown": -34.97269166489075
-    },
-    "Volatility-Aware": {
-      "return": 775.2578231691691,
-      "max_drawdown": -73.67783205768748,
-      "avg_drawdown": -34.94995987565509
-    }
+[
+  {
+    "scenario": "Normal Market (Baseline)",
+    "final_equity": 101709.12914572383,
+    "total_return": 1.709129145723826,
+    "trades": 31,
+    "wins": 18,
+    "max_drawdown": -6.684331676899704
   },
-  "GRADUAL DECLINE (-30%)": {
-    "BUY & HOLD (Baseline)": {
-      "return": 781.3854860631567,
-      "max_drawdown": -65.7767928831639,
-      "avg_drawdown": -48.35582718842706
-    },
-    "Simple Momentum": {
-      "return": 641.715001610624,
-      "max_drawdown": -65.76820575569744,
-      "avg_drawdown": -34.97269166489075
-    },
-    "Volatility-Aware": {
-      "return": 704.2346398657112,
-      "max_drawdown": -73.67783205768748,
-      "avg_drawdown": -34.94995987565509
-    }
+  {
+    "scenario": "2008 Crisis Scenario (-50% crash)",
+    "final_equity": 101621.74325220783,
+    "total_return": 1.6217432522078308,
+    "trades": 31,
+    "wins": 18,
+    "max_drawdown": -6.677093281431736
   },
-  "SUDDEN CRASH (-20%)": {
-    "BUY & HOLD (Baseline)": {
-      "return": 781.3854860631567,
-      "max_drawdown": -65.7767928831639,
-      "avg_drawdown": -48.35582718842706
-    },
-    "Simple Momentum": {
-      "return": 789.2287468923302,
-      "max_drawdown": -65.76820575569744,
-      "avg_drawdown": -34.97269166489075
-    },
-    "Volatility-Aware": {
-      "return": 923.1931528547791,
-      "max_drawdown": -73.67783205768748,
-      "avg_drawdown": -34.94995987565509
-    }
+  {
+    "scenario": "COVID Crash (-30% decline)",
+    "final_equity": 101692.24122889631,
+    "total_return": 1.6922412288963098,
+    "trades": 31,
+    "wins": 18,
+    "max_drawdown": -6.72480468538811
   },
-  "HIGH VOLATILITY + BAD NEWS": {
-    "BUY & HOLD (Baseline)": {
-      "return": 648.1416807324811,
-      "max_drawdown": -65.7767928831639,
-      "avg_drawdown": -48.35582718842706
-    },
-    "Simple Momentum": {
-      "return": -84.71144899218619,
-      "max_drawdown": -97.99953051250803,
-      "avg_drawdown": -85.63769569511365
-    },
-    "Volatility-Aware": {
-      "return": -73.51859507054785,
-      "max_drawdown": -98.09244515767745,
-      "avg_drawdown": -74.53887238804512
-    }
+  {
+    "scenario": "Extreme Volatility (+20% volatility)",
+    "final_equity": 101709.12914572383,
+    "total_return": 1.709129145723826,
+    "trades": 31,
+    "wins": 18,
+    "max_drawdown": -6.684331676899704
+  },
+  {
+    "scenario": "Flash Crash Scenario (-20% shock)",
+    "final_equity": 101638.1850433464,
+    "total_return": 1.6381850433463987,
+    "trades": 31,
+    "wins": 18,
+    "max_drawdown": -6.642746812017984
   }
-}
+]

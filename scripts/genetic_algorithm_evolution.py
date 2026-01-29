@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 GENETIC ALGORITHM FOR STRATEGY EVOLUTION
 
@@ -16,10 +17,15 @@ Result: Strategies evolve over generations to find optimal trading rules
 import sys
 import json
 import random
+import os
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, List, Tuple, Optional
 from dataclasses import dataclass, asdict
+
+# Set UTF-8 encoding for output
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8')
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
@@ -294,7 +300,7 @@ def run_genetic_evolution():
     # Run genetic algorithm
     ga = GeneticAlgorithm(
         population_size=20,
-        generations=10,
+        generations=1000,
         mutation_rate=0.15,
         tournament_size=3,
     )

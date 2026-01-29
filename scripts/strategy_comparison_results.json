@@ -1,0 +1,62 @@
+[
+  {
+    "strategy": "Gen 364 (Evolved)",
+    "final_equity": 100000,
+    "total_return": 0.0,
+    "profit": 0,
+    "trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0,
+    "sharpe_ratio": 0,
+    "max_drawdown": 0.0
+  },
+  {
+    "strategy": "Buy & Hold All",
+    "final_equity": 113050.0467769996,
+    "total_return": 13.050046776999602,
+    "profit": 13050.046776999603,
+    "trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0,
+    "sharpe_ratio": 0.6524404438429613,
+    "max_drawdown": -49.80396753732793
+  },
+  {
+    "strategy": "Momentum (>5%)",
+    "final_equity": 104323.29325309965,
+    "total_return": 4.3232932530996475,
+    "profit": 4323.293253099648,
+    "trades": 166,
+    "wins": 80,
+    "losses": 86,
+    "win_rate": 48.19277108433735,
+    "sharpe_ratio": 0.9428418224588736,
+    "max_drawdown": -43.70846610690724
+  },
+  {
+    "strategy": "Mean Reversion (RSI<30)",
+    "final_equity": 102482.84373329747,
+    "total_return": 2.482843733297472,
+    "profit": 2482.8437332974718,
+    "trades": 266,
+    "wins": 105,
+    "losses": 161,
+    "win_rate": 39.473684210526315,
+    "sharpe_ratio": 0.9492859423553971,
+    "max_drawdown": -34.72293829886893
+  },
+  {
+    "strategy": "RSI-Only (RSI<35)",
+    "final_equity": 99185.34639335463,
+    "total_return": -0.81465360664537,
+    "profit": -814.65360664537,
+    "trades": 374,
+    "wins": 198,
+    "losses": 176,
+    "win_rate": 52.94117647058824,
+    "sharpe_ratio": 1.2359474444831253,
+    "max_drawdown": -47.09761560393923
+  }
+]

@@ -1,11 +1,74 @@
 version: '3.8'
 
-# QUICK START: docker-compose up
-# Then open browser to http://localhost:5000
-# Bot auto-starts in background
+# TRADING BOT DEPLOYMENT - MODULAR ARCHITECTURE
+# Quick Start: docker-compose up
+# Services: dashboard (5000), api (5001), postgres (5432), redis (6379)
 
 services:
-  # Web dashboard with backtest
+  # PostgreSQL Database - Trade journal, logs, performance metrics
+  postgres:
+    image: postgres:15-alpine
+    container_name: trading-bot-db
+    environment:
+      POSTGRES_USER: trading_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_DB: trading_bot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trading_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis Cache - Trade tracking, real-time metrics, session management
+  redis:
+    image: redis:7-alpine
+    container_name: trading-bot-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Core API Service - Strategy execution, trade management, backtest engine
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trading-bot-api
+    ports:
+      - "5001:5001"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      FLASK_ENV: production
+      LOG_LEVEL: INFO
+      DB_URL: postgresql://trading_user:${DB_PASSWORD:-changeme}@postgres:5432/trading_bot
+      REDIS_URL: redis://redis:6379/0
+      MODE: paper  # paper or live
+    volumes:
+      - ./config:/app/config
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./backups:/app/backups
+    command: gunicorn --bind 0.0.0.0:5001 --workers 2 --worker-class sync --timeout 300 --error-logfile - --access-logfile - trading_bot.api:app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Web Dashboard - Real-time monitoring, P&L tracking, charts
   dashboard:
     build:
       context: .
@@ -13,29 +76,70 @@ services:
     container_name: trading-bot-dashboard
     ports:
       - "5000:5000"
-    env_file:
-      - .env
     environment:
-      - PYTHONUNBUFFERED=1
-    command: gunicorn --bind 0.0.0.0:5000 --workers 1 --worker-class sync --timeout 300 trading_bot.web_api:app
+      PYTHONUNBUFFERED: "1"
+      FLASK_ENV: production
+      API_URL: http://api:5001
+      REDIS_URL: redis://redis:6379/0
+      DB_URL: postgresql://trading_user:${DB_PASSWORD:-changeme}@postgres:5432/trading_bot
+    volumes:
+      - ./logs:/app/logs
+    command: gunicorn --bind 0.0.0.0:5000 --workers 2 --worker-class sync --timeout 300 --error-logfile - --access-logfile - trading_bot.dashboard:app
+    depends_on:
+      - api
+      - postgres
+      - redis
     restart: unless-stopped
-  
-  # Auto-trading bot service (uses web_api with PaperEngine for live Alpaca trading)
-  bot:
+
+  # Strategy Service - Monitors markets, generates signals, executes trades
+  strategy:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: trading-bot-auto
-    env_file:
-      - .env
+    container_name: trading-bot-strategy
     environment:
-      - PYTHONUNBUFFERED=1
-      - BOT_MODE=web_api
+      PYTHONUNBUFFERED: "1"
+      LOG_LEVEL: INFO
+      DB_URL: postgresql://trading_user:${DB_PASSWORD:-changeme}@postgres:5432/trading_bot
+      REDIS_URL: redis://redis:6379/0
+      MODE: ${MODE:-paper}
+      CONFIG_FILE: /app/config/evolved_strategy_gen364.yaml
     volumes:
-      - ./configs:/app/configs
+      - ./config:/app/config
       - ./logs:/app/logs
       - ./data:/app/data
-    command: gunicorn --bind 0.0.0.0:5001 --workers 1 --worker-class sync --timeout 300 trading_bot.web_api:app
-    restart: unless-stopped
+    command: python -u scripts/trading_engine_live.py
     depends_on:
-      - dashboard
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Monitoring Service - Health checks, alerts, metrics collection
+  monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trading-bot-monitor
+    environment:
+      PYTHONUNBUFFERED: "1"
+      LOG_LEVEL: DEBUG
+      DB_URL: postgresql://trading_user:${DB_PASSWORD:-changeme}@postgres:5432/trading_bot
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./logs:/app/logs
+    command: python -u scripts/monitoring_service.py
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: trading-bot-network
+    driver: bridge

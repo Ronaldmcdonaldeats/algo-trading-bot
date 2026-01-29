@@ -1,0 +1,19 @@
+{
+  "name": "ML_Evolution_Backtest",
+  "symbols": [
+    "AAPL",
+    "MSFT",
+    "GOOGL",
+    "AMZN",
+    "NVDA"
+  ],
+  "start_cash": 100000.0,
+  "ending_equity": 100000.0,
+  "total_return": 0.0,
+  "sharpe_ratio": 0,
+  "max_drawdown": 0.0,
+  "win_rate": 0,
+  "trades": 0,
+  "sample_trades": [],
+  "timestamp": "2026-01-28T21:29:25.119322"
+}

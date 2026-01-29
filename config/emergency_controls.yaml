@@ -1,0 +1,20 @@
+alerts:
+  email_enabled: false
+  email_on_large_gain: true
+  email_on_large_loss: true
+  slack_enabled: false
+  sms_enabled: false
+emergency_actions:
+  auto_close_all_on_breach: false
+  manual_confirmation_required: true
+  reduce_position_size_on_stress: true
+kill_switches:
+  circuit_breaker_wait_hours: 24
+  enabled: true
+  max_consecutive_losses: 5
+  max_daily_loss_usd: 5000
+  max_drawdown_percent: 15
+monitoring:
+  health_check_interval_seconds: 60
+  heartbeat_timeout_seconds: 30
+  price_feed_timeout_seconds: 5

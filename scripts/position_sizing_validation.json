@@ -1,0 +1,412 @@
+{
+  "violations": {
+    "position_size_over_5pct": 0,
+    "concentration_over_17pct": 0,
+    "portfolio_risk_over_limit": 0
+  },
+  "max_positions_held": 0,
+  "max_position_concentration": 0,
+  "max_portfolio_risk": 0,
+  "daily_logs": [
+    {
+      "date": "2024-05-21",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-05-22",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-05-23",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-05-24",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-05-27",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-05-28",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-05-29",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-05-30",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-05-31",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-03",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-04",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-05",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-06",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-07",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-10",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-11",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-12",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-13",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-14",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-17",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-18",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-19",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-20",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-21",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-24",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-25",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-26",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-27",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-06-28",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-01",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-02",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-03",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-04",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-05",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-08",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-09",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-10",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-11",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-12",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-15",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-16",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-17",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-18",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-19",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-22",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-23",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-24",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-25",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-26",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    },
+    {
+      "date": "2024-07-29",
+      "portfolio_value": 100000,
+      "num_positions": 0,
+      "max_position_pct": 0.0,
+      "portfolio_risk_pct": 0.0,
+      "cash_available": 100000
+    }
+  ]
+}

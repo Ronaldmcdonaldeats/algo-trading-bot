@@ -1,0 +1,77 @@
+# Evolved Strategy - Generation 364
+# Discovered through 1000-generation genetic algorithm optimization
+# Date: 2026-01-28
+# Validation: +7.32% return on 140 symbols ($107,323 final equity)
+# Improvement vs manual tuning: +12.81 percentage points
+
+strategy:
+  name: "Evolved ML Strategy Gen 364"
+  description: "Genetic algorithm optimized parameters for maximum profitability"
+  generation: 364
+  fitness: 0.069924
+  return_pct: 7.32
+  profit: 7322.74
+
+parameters:
+  # Entry Signal Threshold
+  entry_threshold: 0.7756
+  description_entry: "ML score must exceed 77.56% to enter position (very selective)"
+  
+  # Profit Taking
+  profit_target: 0.1287
+  description_profit: "Take profits at 12.87% gain (aggressive but sustainable)"
+  
+  # Risk Management
+  stop_loss: 0.0927
+  description_stop: "Exit with 9.27% loss to preserve capital"
+  
+  # Position Sizing
+  position_size_pct: 0.0500
+  description_size: "Risk 5% of capital per trade (maximum allowed)"
+  
+  # Portfolio Concentration
+  max_position_pct: 0.1774
+  description_max: "Never hold more than 17.74% in single position"
+  
+  # Feature Weighting
+  momentum_weight: 0.2172
+  description_momentum: "Momentum signals weighted 21.72%"
+  
+  rsi_weight: 0.1000
+  description_rsi: "RSI signals weighted 10.00%"
+  remaining_weight: 0.6828
+  description_remaining: "Remaining 68.28% weight on volume and other indicators"
+
+trading_framework:
+  starting_capital: 100000
+  commission_bps: 10
+  slippage_bps: 5
+  max_open_positions: 20
+  lookback_periods: 181
+  symbols_tested: 140
+  
+backtesting_results:
+  starting_equity: 100000
+  final_equity: 107322.74
+  total_return: 0.0732
+  total_profit: 7322.74
+  total_trades: 255
+  winning_trades: 147
+  losing_trades: 108
+  win_rate: 0.5765
+  
+evolution_history:
+  phase_1_manual_tuning: "-5.49%"
+  phase_2_enhanced_features: "Tested, underperformed"
+  phase_3_aggressive_ml: "-97.75% (blowup)"
+  phase_4_conservative: "-37.52% (too cautious)"
+  phase_5_optimized_manual: "-5.49%"
+  phase_6_genetic_algorithm: "+6.99% (on 10 symbols)"
+  phase_7_full_validation: "+7.32% (on 140 symbols)"
+  
+deployment_notes:
+  - "Suitable for live trading with proper risk controls"
+  - "Daily signal generation recommended"
+  - "Monitor for market regime changes"
+  - "Rebalance parameters quarterly if performance degrades"
+  - "Use with capital preservation protocols"

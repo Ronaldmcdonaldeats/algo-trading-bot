@@ -1,0 +1,18 @@
+alerts:
+  correlation_alert: 0.8
+  large_position_alert_pct: 0.15
+  slippage_alert_bps: 20
+  volatility_alert_pct: 0.3
+dashboards:
+  charts:
+    daily_returns: true
+    drawdown_chart: true
+    equity_curve: true
+    position_map: true
+    win_rate_chart: true
+  refresh_interval_seconds: 5
+performance_tracking:
+  allowed_variance_pct: 5.0
+  monthly_review: true
+  reoptimization_interval_days: 30
+  target_return_pct: 7.0

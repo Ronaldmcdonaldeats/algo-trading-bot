@@ -1,0 +1,16 @@
+account_type: margin
+base_currency: USD
+broker: interactive_brokers
+commission_rate_pct: 0.001
+execution:
+  order_type: market
+  slippage_bps: 7
+  time_in_force: day
+market_data_source: live
+mode: paper
+trading_hours:
+  afterhours_end: '20:00'
+  market_close: '16:00'
+  market_open: 09:30
+  premarket_start: 04:00
+  timezone: US/Eastern

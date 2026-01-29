@@ -1,0 +1,172 @@
+{
+  "start_cash": 100000.0,
+  "ending_equity": 102229.66205402948,
+  "total_return": 0.022296620540294798,
+  "sharpe_ratio": 6.416141086416683,
+  "max_drawdown": -0.0015711462046837622,
+  "trades": 2426,
+  "buy_trades": 1253,
+  "sell_trades": 1173,
+  "sample_trades": [
+    {
+      "Date": "2024-06-17",
+      "Symbol": "LOW",
+      "Side": "BUY",
+      "Qty": 4,
+      "Price": 75.07765923126584,
+      "Confidence": 0.7
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "DLR",
+      "Side": "BUY",
+      "Qty": 3,
+      "Price": 106.80331181475566,
+      "Confidence": 1.0
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "LIN",
+      "Side": "BUY",
+      "Qty": 3,
+      "Price": 96.42942907298203,
+      "Confidence": 0.7
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "TMUS",
+      "Side": "BUY",
+      "Qty": 3,
+      "Price": 107.93931110687076,
+      "Confidence": 1.0
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "XOM",
+      "Side": "BUY",
+      "Qty": 2,
+      "Price": 117.83343042414127,
+      "Confidence": 1.0
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "GOOGL",
+      "Side": "BUY",
+      "Qty": 2,
+      "Price": 142.07779579424204,
+      "Confidence": 0.7
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "COP",
+      "Side": "BUY",
+      "Qty": 3,
+      "Price": 103.2543880730322,
+      "Confidence": 0.7
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "ABT",
+      "Side": "BUY",
+      "Qty": 2,
+      "Price": 131.33540700242935,
+      "Confidence": 0.7
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "BLK",
+      "Side": "BUY",
+      "Qty": 3,
+      "Price": 101.27904708624969,
+      "Confidence": 0.7
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "BA",
+      "Side": "BUY",
+      "Qty": 1,
+      "Price": 189.2136130334402,
+      "Confidence": 1.0
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "KMX",
+      "Side": "BUY",
+      "Qty": 3,
+      "Price": 113.39323382856038,
+      "Confidence": 1.0
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "WEC",
+      "Side": "BUY",
+      "Qty": 3,
+      "Price": 105.67672643205218,
+      "Confidence": 1.0
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "STT",
+      "Side": "BUY",
+      "Qty": 3,
+      "Price": 97.44527543087594,
+      "Confidence": 0.7
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "ACI",
+      "Side": "BUY",
+      "Qty": 3,
+      "Price": 101.04568788448407,
+      "Confidence": 0.8
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "FDX",
+      "Side": "BUY",
+      "Qty": 1,
+      "Price": 287.07361189892316,
+      "Confidence": 1.0
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "MCHP",
+      "Side": "BUY",
+      "Qty": 3,
+      "Price": 106.37243794080179,
+      "Confidence": 1.0
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "SKYW",
+      "Side": "BUY",
+      "Qty": 2,
+      "Price": 114.11515870086347,
+      "Confidence": 1.0
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "AVB",
+      "Side": "BUY",
+      "Qty": 3,
+      "Price": 99.6981555500364,
+      "Confidence": 1.0
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "USB",
+      "Side": "BUY",
+      "Qty": 3,
+      "Price": 110.48071617705095,
+      "Confidence": 0.7
+    },
+    {
+      "Date": "2024-06-17",
+      "Symbol": "OXY",
+      "Side": "BUY",
+      "Qty": 3,
+      "Price": 104.27066106015187,
+      "Confidence": 1.0
+    }
+  ]
+}

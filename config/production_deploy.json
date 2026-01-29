@@ -1,0 +1,106 @@
+{
+  "broker": {
+    "broker": "interactive_brokers",
+    "mode": "paper",
+    "account_type": "margin",
+    "base_currency": "USD",
+    "commission_rate_pct": 0.001,
+    "market_data_source": "live",
+    "trading_hours": {
+      "market_open": "09:30",
+      "market_close": "16:00",
+      "premarket_start": "04:00",
+      "afterhours_end": "20:00",
+      "timezone": "US/Eastern"
+    },
+    "execution": {
+      "order_type": "market",
+      "time_in_force": "day",
+      "slippage_bps": 7
+    }
+  },
+  "position_limits": {
+    "position_sizing": {
+      "per_trade_pct": 0.05,
+      "max_concentration_pct": 0.1774,
+      "max_positions": 20,
+      "max_sector_concentration": 0.3
+    },
+    "portfolio_limits": {
+      "max_leverage": 1.0,
+      "min_cash_pct": 0.05,
+      "max_equity_at_risk": 0.1
+    },
+    "daily_limits": {
+      "max_trades_per_day": 50,
+      "max_daily_loss_pct": 0.05,
+      "max_drawdown_pct": 0.1
+    },
+    "symbol_restrictions": {
+      "min_price": 1.0,
+      "min_daily_volume_usd": 500000,
+      "blacklist": [
+        "SPY",
+        "QQQ"
+      ],
+      "whitelist": []
+    }
+  },
+  "emergency_controls": {
+    "kill_switches": {
+      "enabled": true,
+      "max_consecutive_losses": 5,
+      "max_daily_loss_usd": 5000,
+      "max_drawdown_percent": 15,
+      "circuit_breaker_wait_hours": 24
+    },
+    "alerts": {
+      "email_enabled": false,
+      "email_on_large_loss": true,
+      "email_on_large_gain": true,
+      "sms_enabled": false,
+      "slack_enabled": false
+    },
+    "emergency_actions": {
+      "auto_close_all_on_breach": false,
+      "reduce_position_size_on_stress": true,
+      "manual_confirmation_required": true
+    },
+    "monitoring": {
+      "health_check_interval_seconds": 60,
+      "price_feed_timeout_seconds": 5,
+      "heartbeat_timeout_seconds": 30
+    }
+  },
+  "monitoring": {
+    "dashboards": {
+      "refresh_interval_seconds": 5,
+      "charts": {
+        "equity_curve": true,
+        "daily_returns": true,
+        "drawdown_chart": true,
+        "win_rate_chart": true,
+        "position_map": true
+      }
+    },
+    "alerts": {
+      "large_position_alert_pct": 0.15,
+      "correlation_alert": 0.8,
+      "volatility_alert_pct": 0.3,
+      "slippage_alert_bps": 20
+    },
+    "performance_tracking": {
+      "target_return_pct": 7.0,
+      "allowed_variance_pct": 5.0,
+      "monthly_review": true,
+      "reoptimization_interval_days": 30
+    }
+  },
+  "validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "timestamp": "2026-01-28T18:45:33.740143"
+  },
+  "exported_at": "2026-01-28T18:45:33.740143"
+}
